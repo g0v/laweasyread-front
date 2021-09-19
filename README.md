@@ -41,19 +41,6 @@
 4. 點選「載入為封裝項目」，尋找步驟一解壓縮後的檔案路徑。
 
 
-### 網站嵌入
-
-此版本尚不支援網站嵌入，不過 0.4 版的功能還可以運作（只是不會再更新）。請在您的網頁中加入以下的程式碼：
-
-```html
-<link rel="stylesheet" href="https://g0v.github.io/laweasyread-front/stylesheets/main.css" crossorigin="anonymous">
-<script src="https://g0v.github.io/laweasyread-front/dist/laweasyread.js" crossorigin="anonymous"></script>
-<script src="https://g0v.github.io/laweasyread-front/javascripts/embedded2.js" crossorigin="anonymous"></script>
-```
-
-示範頁面： https://g0v.github.io/laweasyread-front/demo/0.4.html
-
-
 ## 使用說明
 
 * 僅針對收錄於中華民國法務部的全國法規資料庫的法規。

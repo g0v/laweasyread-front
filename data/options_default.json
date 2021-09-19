@@ -2,7 +2,7 @@
     "updateDate": "",
     "remoteDate": "",
     "lastCheckUpdate": 0,
-    "autoParse": true,
+    "autoParse": false,
     "artNumberParserMethod": "hyphen",
     "enablePopup": true
 }

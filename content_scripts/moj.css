@@ -3,8 +3,5 @@
     width: auto !important;
     background-color: inherit !important;
     color: inherit !important;
-}
-
-.col-data .LER-stratum-0 {
-    margin-left: 3em !important;
+    margin-right: 0 !important;
 }
