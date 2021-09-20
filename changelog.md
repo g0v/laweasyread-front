@@ -2,6 +2,10 @@
 
 Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
 
+## 1.6.2
+2021-09-21
+* 全國法規資料庫介面中，將編章節及條號改為置頂，彈出視窗的條號亦同。
+
 ## 1.6.0
 2021-09-19
 * 因應「全國法規資料庫」改版，不再需要判斷「用換行字元排版」的情形。

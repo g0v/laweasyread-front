@@ -1,7 +1,57 @@
-/* 修正首頁的「熱門法規瀏覽」 */
+/**
+ * 修正首頁的「熱門法規瀏覽」
+ */
 .section-hot a span:not(:first-of-type) {
     width: auto !important;
     background-color: inherit !important;
     color: inherit !important;
     margin-right: 0 !important;
+}
+
+/**
+ * 將條號改為 sticky
+ */
+.law-content .row {
+    overflow: visible !important;
+}
+.col-no {
+    position: sticky;
+    background-color: #F9FBFB;
+    z-index: 1;
+    top: 0;
+}
+
+/**
+ * 編章節置頂 sticky
+ */
+.law-content .h3 {
+    background-color: #F9FBFB;
+    text-indent: 0 !important;
+    margin-left: 0 !important;
+    position: sticky;
+    border-bottom: 1px dashed #ccc;
+}
+.char-1 {
+    z-index: 6;
+}
+.char-2 {
+    z-index: 5;
+}
+.char-3 {
+    z-index: 4;
+}
+.char-4 {
+    z-index: 3;
+}
+.char-5 {
+    z-index: 2;
+}
+.char-6 {
+    z-index: 1;
+}
+
+@media (max-width: 991px) {
+    .law-content section > .h3 {
+        margin-left: 0 !important;
+    }
 }

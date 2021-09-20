@@ -128,8 +128,8 @@
     justify-content: space-between;
     position: sticky;
     top: 0;
-    left: 0;
     background-color: inherit;
+    z-index: 1;
 }
 .LER-modal-title {
     font-weight: bold;
@@ -155,6 +155,12 @@
 .LER-modal-body dt {
     width: auto;
     font-weight: bold;
+    position: sticky;
+    top: 40px;
+}
+.LER-modal-body dt a {
+    background-color: #fff;
+    border-radius: 0.3em;
 }
 .LER-modal-body dd {
     width: auto;
