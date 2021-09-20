@@ -18,11 +18,11 @@
   - [ ] 法條的引用與被引用情形
   - [ ] 修法理由？
 - [ ] 瀏覽器外掛
-  - [ ] 主流瀏覽器
+  - [x] 主流瀏覽器
     - [x] [Chrome](https://chrome.google.com/webstore/detail/iedodmlnmhobigohbkalkkjlbmdkjalj)
     - [x] [Firefox](https://addons.mozilla.org/zh-TW/firefox/addon/laweasyread/)
     - [x] Opera: 搭配 [Install Chrome Extensions](https://addons.opera.com/en/extensions/details/install-chrome-extensions/)
-    - [ ] Edge
+    - [x]] Edge: 2020年1月起改為 Chromium 核心後，即可直接在「 Chrome 線上應用程式商店」更新
   - [x] 常用站台排版
     - [x] 全國法規資料庫的排版
     - [x] 立法院法律系統的排版
@@ -74,12 +74,12 @@
 * 不符合中央法規標準法所定的格式：
   * 所得稅法第4條（第1項第16款第2段、第22款第3段）、第14條（第1項第9類第1款第2段）、第17條（第1項第2款第3目之6.(2)）
   * 土地法第2條
-* 多個條文引用，且條文引用包含「前段」、「但書」等字樣：
-  * 行政訴訟法第131條
+* 多個條文引用，且條文引用包含「前段」、「但書」等字樣
 * 條文中的算式：
-  * 全民健康保險藥物給付項目及支付標準第75條
+  * 全民健康保險藥物給付項目及支付標準 第75條
+  * 營利事業所得稅查核準則 第16條
 * 原始資料缺漏一些標點符號：
-  * 中央研究院組織法 第7條
+  * 中央研究院組織法 第7條第1款
 
 
 # License
