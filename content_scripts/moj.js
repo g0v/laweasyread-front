@@ -20,7 +20,7 @@ document.querySelectorAll(".law-reg-content .h3").forEach((h3Elem, index, list) 
     const section = document.createElement("section");
     while(h3Elem.nextElementSibling && h3Elem.nextElementSibling.className === "row")
         section.appendChild(h3Elem.nextElementSibling);
-    h3Elem.parentNode.replaceChild(section, h3Elem);
+    h3Elem.replaceWith(section);
     section.insertBefore(h3Elem, section.firstChild);
 
     const divDepth = section.dataset.lerDepth = h3Elem.className.substr(-1);

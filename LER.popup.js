@@ -131,6 +131,9 @@ const popupWrapper = (docLoader, ...args) => {
             docLoader(...args).then(nodes => {
                 body.lastChild.replaceWith(...nodes);
                 setPopupPosition(event, popup);
+                body.querySelectorAll("dt").forEach(dt => {
+                    dt.style.top = body.firstChild.clientHeight + "px";
+                });
             });
             setPopupPosition(event, popup);
 
