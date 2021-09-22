@@ -2,6 +2,10 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.6.4
+2021-09-22
+* 棄用 `console.log` ，改用其 `info` 或 `debug` 方法取代。
+
 ## 1.6.2
 2021-09-21
 * 改回統一抓 `kong0107/mojLawSplitJSON` 的 `arranged` 分支…

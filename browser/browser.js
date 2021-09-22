@@ -3,10 +3,7 @@
  */
 "use strict";
 
-const errorHandler = error =>
-    console.log(error);
-;
-
+const errorHandler = console.error.bind(console);
 
 /**
  * 擷取 JSON 檔案並解析

@@ -316,8 +316,7 @@ const objArr2nodes = (arr, textNode) => {
                 return e("SPAN", null, ...nodes);
             }
             default:
-                console.log(item);
-                throw new TypeError("uncaught type");
+                console.error("uncaught type", item);
         }
     })
 };
@@ -332,7 +331,7 @@ const parse = (elem, defaultLaw) => {
     domCrawler.replaceTextsAsync(LER.rules, elem, reject, objArr2nodes, 2)
     .then(() => {
         if(elem === document.body)
-            console.log(`LER spent ${Date.now() - start} ms in ${window.innerWidth}x${window.innerHeight} on\n${location.href}`);
+            console.info(`LER spent ${Date.now() - start} ms in ${window.innerWidth}x${window.innerHeight} on\n${location.href}`);
     });
 };
 

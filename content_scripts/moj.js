@@ -1,6 +1,6 @@
 "use strict";
 (() => {
-const start = new Date();
+console.time("moj.js");
 
 /**
  * 設定預設法規。
@@ -43,6 +43,5 @@ document.head.appendChild(
     domCrawler.createElement("style", {type: "text/css"}, css)
 );
 
-
-console.log("`moj.js` ran " + ((new Date()) - start) + " ms.");
+console.timeEnd("moj.js");
 })();

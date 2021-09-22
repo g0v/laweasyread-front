@@ -16,7 +16,7 @@ if(typeof LER == "object" && document.body && window.innerWidth && window.innerH
     ]).then(([storage, matched_pattern]) => {
         LER.artNumberParserMethod = storage.artNumberParserMethod;
         LER.enablePopup = storage.enablePopup;
-        if(matched_pattern) console.log(`LER skipped auto-parse because location ${location.href} is matched by the pattern ${matched_pattern}`);
+        if(matched_pattern) console.debug(`LER skipped auto-parse because location ${location.href} is matched by the pattern ${matched_pattern}`);
         else if(storage.autoParse) LER.parse(document.body);
     });
 
@@ -46,7 +46,7 @@ if(typeof LER == "object" && document.body && window.innerWidth && window.innerH
                 LER.parseText(text).then(LER.popupComplex);
                 break;
             default:
-                console.log("Error: uncaught message.");
+                console.error("uncaught message");
         }
     });
 }

@@ -15,7 +15,6 @@ const createList = paras => {
             case "fullLine":
                 if(para.stratum === 0 && index + 1 < paras.length) {
                     props.className = "LER-warning warning-fullLine";
-                    //console.log(para);
                 }
                 break;
             case "table":

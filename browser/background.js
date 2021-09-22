@@ -13,7 +13,7 @@ browser.runtime.onInstalled.addListener(() => {
         fetch("/data/aliases.json").then(res => res.json())
     ]).then(([mojData, aliases]) =>
         setData({laws: parseData(mojData, aliases)})
-    ).then(() => console.log("Laws loaded."));
+    ).then(() => console.debug("Laws loaded."));
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
     fetch("/data/options_default.json")
@@ -47,7 +47,7 @@ browser.runtime.onInstalled.addListener(() => {
  * 訊息處理
  */
 browser.runtime.onMessage.addListener(message => {
-    console.log("runtime.onMessage", message);
+    console.debug("runtime.onMessage", message);
     switch(message.command) {
         case "checkUpdate":
             return checkUpdate();
@@ -73,7 +73,7 @@ const checkUpdate = async() => {
         remoteDate: vRemote,
         lastCheckUpdate: Date.now()
     });
-    console.log("checkUpdate: " + vRemote);
+    console.info("checkUpdate: " + vRemote);
     if(vLocal == vRemote) return false;
     return vRemote;
 };
@@ -95,6 +95,6 @@ const update = async() => {
         updateDate: vRemote,
         laws: parseData(mojData, aliases)
     });
-    console.log("laws updated");
+    console.info("laws updated");
     return vRemote;
 };
