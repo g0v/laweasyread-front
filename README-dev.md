@@ -22,7 +22,8 @@
     - [x] [Chrome](https://chrome.google.com/webstore/detail/iedodmlnmhobigohbkalkkjlbmdkjalj)
     - [x] [Firefox](https://addons.mozilla.org/zh-TW/firefox/addon/laweasyread/)
     - [x] Opera: 搭配 [Install Chrome Extensions](https://addons.opera.com/en/extensions/details/install-chrome-extensions/)
-    - [x]] Edge: 2020年1月起改為 Chromium 核心後，即可直接在「 Chrome 線上應用程式商店」更新
+    - [x] Edge: 2020年1月起改為 Chromium 核心後，即可直接在「 Chrome 線上應用程式商店」更新
+    - [x] Brave
   - [x] 常用站台排版
     - [x] 全國法規資料庫的排版
     - [x] 立法院法律系統的排版
