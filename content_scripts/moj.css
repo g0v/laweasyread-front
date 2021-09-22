@@ -55,3 +55,10 @@
         margin-left: 0 !important;
     }
 }
+
+@media print {
+    .law-content .h3,
+    .col-no {
+        position: static;
+    }
+}
