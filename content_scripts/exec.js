@@ -46,7 +46,7 @@ if(typeof LER == "object" && document.body && window.innerWidth && window.innerH
                 LER.parseText(text).then(LER.popupComplex);
                 break;
             default:
-                console.error("uncaught message");
+                console.warn("uncaught message in `exec.js`");
         }
     });
 }

@@ -53,7 +53,8 @@
             "content_scripts/functions.js",
             "LER.js",
             "LER.popup.js",
-            "content_scripts/loadLaws.js"
+            "content_scripts/loadLaws.js",
+            "content_scripts/exec.js"
         ],
         "css": ["content_scripts/main.css"],
         "all_frames": true
@@ -78,11 +79,6 @@
         "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
         "js": ["content_scripts/ly_lawsingle.js"],
         "css": ["content_scripts/ly_lawsingle.css"],
-        "all_frames": true
-    },
-    {
-        "matches": ["<all_urls>"],
-        "js": ["content_scripts/exec.js"],
         "all_frames": true
     }
 ]

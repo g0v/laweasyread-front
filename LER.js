@@ -15,10 +15,9 @@
  * 本專案主要物件
  * 主程式 LER.parse 宣告在文件最末。
  */
-const LER = {
-    laws: [],
-    rules: []
-};
+const LER = new EventTarget();
+LER.laws = [];
+LER.rules = [];
 
 {
 /****************

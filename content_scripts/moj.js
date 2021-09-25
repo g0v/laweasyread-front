@@ -43,5 +43,9 @@ document.head.appendChild(
     domCrawler.createElement("style", {type: "text/css"}, css)
 );
 
+LER.addEventListener("parseend", event => {
+    console.log("event!");
+});
+
 console.timeEnd("moj.js");
 })();
