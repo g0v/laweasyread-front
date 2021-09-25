@@ -274,12 +274,15 @@ const objArr2nodes = (arr, textNode) => {
         switch(item.type) {
             case "law": {
                 const law = item.law;
-                return e(isInA ? "SPAN" : "A", {
-                    target: "_blank",
-                    href: `https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=${law.PCode}`,
+                const attrs = {
                     title: law.fullName || law.name,
-                    "data-pcode": law.PCode
-                }, item.text || law.name);
+                    data: {pcode: law.PCode}
+                };
+                if(!isInA) Object.assign(attrs, {
+                    target: "_blank",
+                    href: `https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=${law.PCode}`
+                });
+                return e(isInA ? "SPAN" : "A", attrs, item.text || law.name);
             }
             case "articles": {
                 let theLaw = LER.defaultLaw;
@@ -294,24 +297,34 @@ const objArr2nodes = (arr, textNode) => {
                     }
                 }
                 if(!theLaw || !item.rangeText) return e("EM", {title: item.raw}, item.text);
-                return e(isInA ? "SPAN" : "A", {
+
+                const attrs = {
                     title: item.raw,
+                    onmouseenter: LER.popupArticles(theLaw.PCode, item.ranges),
+                    data: {pcode: theLaw.PCode, rangeText: item.rangeText}
+                };
+                if(!isInA) Object.assign(attrs, {
                     target: "_blank",
                     href: /^\d+(\.\d+)?$/.test(item.rangeText) // 因應是單條或多條，而連向不同格式的頁面。
                       ? `https://law.moj.gov.tw/LawClass/LawSingle.aspx?pcode=${theLaw.PCode}&flno=${item.rangeText.replace('.', '-')}`
-                      : `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${theLaw.PCode}&norge=${item.rangeText}`,
-                    onmouseenter: LER.popupArticles(theLaw.PCode, item.ranges)
-                }, item.text);
+                      : `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${theLaw.PCode}&norge=${item.rangeText}`
+                });
+                return e(isInA ? "SPAN" : "A", attrs, item.text);
             }
             case "jyis": {
                 const nodes = [item.previous];
                 item.jyis.forEach((jyi, index) => {
                     if(index) nodes.push(item.conjs[index - 1]);
-                    nodes.push(e(isInA ? "SPAN" : "A", {
-                        href: `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${jyi}`,
+                    const attrs = {
+                        title: `釋字第${jyi}號`,
+                        onmouseenter: LER.popupJYI(jyi),
+                        data: {jyi: jyi}
+                    };
+                    if(!isInA) Object.assign(attrs, {
                         target: "_blank",
-                        onmouseenter: LER.popupJYI(jyi)
-                    }, `第${jyi}號`));
+                        href: `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${jyi}`
+                    });
+                    nodes.push(e(isInA ? "SPAN" : "A", attrs, `第${jyi}號`));
                 });
                 return e("SPAN", null, ...nodes);
             }
@@ -332,6 +345,7 @@ const parse = (elem, defaultLaw) => {
     .then(() => {
         if(elem === document.body)
             console.info(`LER spent ${Date.now() - start} ms in ${window.innerWidth}x${window.innerHeight} on\n${location.href}`);
+        LER.dispatchEvent(new Event("parseend"));
     });
 };
 
