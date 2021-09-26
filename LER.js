@@ -15,7 +15,7 @@
  * 本專案主要物件
  * 主程式 LER.parse 宣告在文件最末。
  */
-const LER = new EventTarget();
+const LER = {}; // 在其他地方模仿 EventTarget
 LER.laws = [];
 LER.rules = [];
 
@@ -257,7 +257,7 @@ LER.rules.push({
 /****************
  * 把單一文字節點的資料解析完之後，弄成節點陣列
  */
-const objArr2nodes = (arr, textNode) => {
+const objArr2nodes = (arr, textNode, defaultLaw = LER.defaultLaw) => {
     arr = arr.filter(x => x);   // 先濾掉空字串
 
     // 判斷這個文字節點是不是在 <A /> 裡面
@@ -284,14 +284,14 @@ const objArr2nodes = (arr, textNode) => {
                 return e(isInA ? "SPAN" : "A", attrs, item.text || law.name);
             }
             case "articles": {
-                let theLaw = LER.defaultLaw;
+                let theLaw = defaultLaw;
                 if(!theLaw && !LER.matchedAnyLaw) return item.raw;
                 if(index && item.rangeText) {
                     const prevItem = arr[index - 1];
                     if(prevItem.type == "law") theLaw = prevItem.law;
-                    else if(LER.defaultLaw && LER.defaultLaw.name.endsWith("施行細則") && /本(法|條例)$/.test(prevItem)) {
-                        // TODO: 不用每次出現「本法」就再跑一次 getLaw
-                        const name = LER.defaultLaw.name;
+                    else if(defaultLaw && defaultLaw.name.endsWith("施行細則") && /本(法|條例)$/.test(prevItem)) {
+                        // TODO: 改成不用每次在施行細則的條文裡出現「本法」就再跑一次 getLaw
+                        const name = defaultLaw.name;
                         theLaw = getLaw({name: name.substring(0, name.length - 4)});
                     }
                 }
@@ -339,20 +339,53 @@ const objArr2nodes = (arr, textNode) => {
  */
 const parse = (elem, defaultLaw) => {
     const start = Date.now();
-    if(defaultLaw) LER.defaultLaw = getLaw(defaultLaw);
-    domCrawler.replaceTextsAsync(LER.rules, elem, reject, objArr2nodes, 2)
+    if(typeof defaultLaw === "string") {
+        defaultLaw = /^[A-Z]\d{7}$/.test(defaultLaw)
+            ? getLaw({PCode: defaultLaw})
+            : getLaw({name: defaultLaw})
+        ;
+    }
+    const wrapper = (arr, textNode) => objArr2nodes(arr, textNode, defaultLaw);
+    domCrawler.replaceTextsAsync(LER.rules, elem, reject, wrapper, 1)
     .then(() => {
         if(elem === document.body)
-            console.info(`LER spent ${Date.now() - start} ms in ${window.innerWidth}x${window.innerHeight} on\n${location.href}`);
-        LER.dispatchEvent(new Event("parseend"));
+            console.debug(`LER spent ${Date.now() - start} ms on ${location.href}`);
+        const event = new CustomEvent("parseend", {detail: {target: elem}});
+        LER.dispatchEvent(event);
     });
 };
 
-/**
+/****************
  * 把主程式包裝起來
  * `LER.loadLaws` 是 Promise 物件，建立於其他檔案。
  */
 LER.parse = (...args) => LER.loadLaws.then(() => parse(...args));
 LER.parseText = text => LER.loadLaws.then(() => domCrawler.strSplitAndJoinByRules(text, LER.rules));
 LER.getLaw = getLaw; //< TODO: 改成 setDefaultLaw
+
+/****************
+ * 模仿 EventTarget
+ * @see https://stackoverflow.com/questions/10364298/#10364316
+ */
+const listeners = {};
+LER.addEventListener = (type, listener) => {
+    if(!listeners.hasOwnProperty(type)) {
+        listeners[type] = [listener];
+        return 0;
+    }
+    LER.removeEventListener(type, listener);
+    listeners[type].push(listener);
+    return listeners[type].length - 1;
+};
+LER.removeEventListener = (type, listener) => {
+    const index = listeners[type].indexOf(listener);
+    if(index != -1) listeners[type].splice(index, 1);
+    return index;
+}
+LER.dispatchEvent = event => {
+    if(typeof event === "string") event = {type: event};
+    if(!listeners.hasOwnProperty(event.type)) return;
+    listeners[event.type].forEach(listener => listener(event));
+}
+
 }

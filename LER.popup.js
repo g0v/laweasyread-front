@@ -227,7 +227,7 @@ const loadArticles = async(pcode, compRanges) => {
         e("dd", null, createList(lawtext2obj(article["條文內容"])))
     ));
     const body = e("div", {className: "LER-modal-body"}, ...articles);
-    LER.parse(body, {PCode: pcode});
+    LER.parse(body, pcode);
 
     return [header, body];
 };

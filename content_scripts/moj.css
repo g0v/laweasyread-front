@@ -50,15 +50,113 @@
     z-index: 1;
 }
 
+[class^=line-] p {
+    line-height: inherit;
+}
+
 @media (max-width: 991px) {
     .law-content section > .h3 {
         margin-left: 0 !important;
     }
 }
 
+/**
+ * 列印時不需/不宜有 sticky 元件
+ */
 @media print {
     .law-content .h3,
     .col-no {
         position: static;
+    }
+}
+
+
+/**
+ * 提及條文
+ */
+details.LER-article-groups {
+    text-indent: 0; /* 覆寫網站設定，不然款、目裡的情形會亂掉 */
+}
+
+details.LER-article-groups > summary {
+    font-size: small;
+    color: gray;
+    display: list-item; /* 只有這個值會有預設的三角形 */
+    cursor: pointer;
+}
+
+details.LER-article-groups > summary::before {
+    content: "提及條文"; /* 為了讓使用者複製條文時不會複製到提示文字 */
+}
+
+details.LER-article-groups .LER-modal-title,
+details.LER-article-groups .LER-modal-date {
+    display: inline-block;
+    margin-right: 1em;
+}
+
+details.LER-article-groups section {
+    padding: 0 .5em;
+    margin-bottom: .5em;
+}
+
+details.LER-article-groups dd {
+    padding-left: 1em;
+}
+
+.law-reg-content .law-reg-content {
+    margin-left: 0;
+}
+
+.law-reg-content .law-reg-content div.col-no {
+    text-align: left;
+}
+
+.law-reg-content .law-reg-content .col-data {
+    clear: both;
+    padding-left: 1em;
+}
+
+.law-reg-content .law-reg-content .law-article {
+    width: auto;
+}
+
+.law-reg-content .table-title > table.table {
+    margin: 0;
+}
+
+.law-reg-content .law-reg-content .clearfix {
+    display: none;
+}
+
+.law-reg-content .well {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+@media print {
+    body,
+    div.container {
+        width: auto !important;
+    }
+
+    details.LER-article-groups:not([open]) {
+        display: none; /* 沒展開的就不要印出來了 */
+    }
+
+    .law-reg-content div.row,
+    .law-reg-content .row > div.col-no,
+    .law-reg-content .row > div.col-data {
+        display: block;
+        text-align: left;
+    }
+
+    .law-reg-content .col-no {
+        font-weight: bold;
+    }
+
+    .law-reg-content .col-data {
+        clear: both;
+        padding-left: 1em;
     }
 }

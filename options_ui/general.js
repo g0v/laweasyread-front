@@ -1,12 +1,6 @@
 "use strict";
 
-$("#autoParse").addEventListener("change", event =>
-    setData({autoParse: event.target.checked})
-);
-
-$("#enablePopup").addEventListener("change", event =>
-    setData({enablePopup: event.target.checked})
-);
+const booleanOptions = ["autoParse", "enablePopup", "mojAddReferringArticles"];
 
 /**
  * 條號轉換方式的選擇
@@ -59,10 +53,14 @@ const artNumberParserOptions = [
 });
 $("#artNumberParserOptions").append(...artNumberParserOptions);
 
-
-getData(["autoParse", "enablePopup", "artNumberParserMethod"])
+getData(booleanOptions.concat("artNumberParserMethod"))
 .then(storage => {
-    $("#autoParse").checked = storage.autoParse;
-    $("#enablePopup").checked = storage.enablePopup;
     $("#artNumberParserMethod-" + storage.artNumberParserMethod).checked = true;
+    booleanOptions.forEach(option => {
+        const checkbox = document.getElementById(option);
+        checkbox.checked = storage[option];
+        checkbox.addEventListener("change", () =>
+            setData({ [option]: checkbox.checked })
+        );
+    });
 });

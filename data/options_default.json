@@ -4,5 +4,6 @@
     "lastCheckUpdate": 0,
     "autoParse": false,
     "artNumberParserMethod": "hyphen",
-    "enablePopup": true
+    "enablePopup": true,
+    "mojAddReferringArticles": true
 }

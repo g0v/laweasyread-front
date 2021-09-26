@@ -33,7 +33,6 @@ const getStratum = text => {
  * 主程式
  * 會先把包住關鍵字的 `<font />` 當成純文字來分析，最後再用 `domCrawler` 的功能替換回來。
  */
-console.time("Parse lines to ULs");
 document.querySelectorAll("td").forEach(td => {
     if(!td.hasChildNodes() || !/^\n?　　/.test(td.firstChild.textContent)) return;
 
@@ -86,7 +85,6 @@ document.querySelectorAll("td").forEach(td => {
 
     td.replaceWith(newTd);
 });
-console.timeEnd("Parse lines to ULs");
 
 
 /**

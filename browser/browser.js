@@ -19,6 +19,18 @@ const fetchJSON = (...args) =>
     )
 ;
 
+/**
+ * 擷取 HTML 檔案並建立 DOM
+ */
+const fetchDOM = (...args) =>
+    fetch(...args).then(response =>
+        new Promise((resolve, reject) => response.ok
+            ? response.text().then(html => resolve((new DOMParser()).parseFromString(html, "text/html")), reject)
+            : reject(new ReferenceError(response.statusText))
+        )
+    )
+;
+
 
 /**
  * 抓 browser.storage 裡的資料

@@ -2,10 +2,16 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.7.0
+2021-09-27
+* 全國法規資料庫的「提及條文」功能是抓該網站自己的資料，所以不用維護 `kong0107/mojLawSplitJSON` 也可順利運作。
+* 因為 [Firefox 的安全性限制](https://developer.mozilla.org/en-US/docs/Web/API/CustomEvent#firing_from_privileged_code_to_non-privileged_code)，棄用 `EventTarget` ，改成自己刻簡單版的 `LER.addEventListener` 等方法。
+* 改善 `LER.parse` 指定預設法規的機制，盡量不去動 `LER.defaultLaw` 。
+
 ## 1.6.4
 2021-09-25
 * 棄用 `console.log` ，改用其 `info` 或 `debug` 方法取代。
-* 開始建立 `LER` 的事件機制，從將之改以 `EventTarget` 類別宣告起。
+* 開始建立 `LER` 的事件機制，從將之改以 `EventTarget` 類別宣告起。（ v1.7.0 時因 Firefox 的安全性限制而改成自己刻）
 
 ## 1.6.2
 2021-09-21

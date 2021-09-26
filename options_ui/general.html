@@ -5,12 +5,11 @@
         <dd>
             <label for="autoParse">開啟自動轉換</label>
             <ul class="text-muted small list-unstyled">
-                <li>即使關閉自動轉換，仍會對全國法規資料庫與立法院法律系統的頁面進行排版。</li>
+                <li>即使關閉自動轉換，仍會對<em>全國法規資料庫</em>與<em>立法院法律系統</em>的頁面進行排版。</li>
                 <li>此功能在動態讀取的網頁（如臉書）上未必有作用。</li>
             </ul>
         </dd>
     </dl>
-
     <dl class="d-flex">
         <dt><input type="checkbox" id="enablePopup"></dt>
         <dd>
@@ -18,6 +17,15 @@
             <ul class="text-muted small list-unstyled">
                 <li>必須先「轉換」（無論手動或自動）後才會顯示。</li>
                 <li>條文內容與大法官解釋是從網路抓取資料，可能不會即時顯示內容。</li>
+            </ul>
+        </dd>
+    </dl>
+    <dl class="d-flex">
+        <dt><input type="checkbox" id="mojAddReferringArticles"></dt>
+        <dd>
+            <label for="mojAddReferringArticles">在全國法規資料庫啟用「提及條文」功能</label>
+            <ul class="text-muted small list-unstyled">
+                <li>在全國法規資料庫瀏覽條文時，若該條/項/款/目有提及其他條文，則可以顯示在該段落下方，而不是浮動視窗。</li>
             </ul>
         </dd>
     </dl>
