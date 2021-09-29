@@ -341,12 +341,31 @@ LER.popupComplex = arr => {
             container.lastChild.remove();
     }
     else {
-        container = e("div", {id: "LER-float-box"},
-            e("header", null,
-                e("span"),
+        let dragging = false, offsetX, offsetY;
+
+        container =
+        e("div", {
+            id: "LER-float-box",
+            onmousemove: event => {
+                if(!dragging) return;
+                const style = getComputedStyle(container);
+                container.style.left = `calc(${event.pageX - offsetX}px - ${style.marginLeft})`;
+                container.style.top = `calc(${event.pageY - offsetY}px - ${style.marginTop})`;
+            }
+        },
+            e("header", {
+                onmousedown: event => {
+                    dragging = true;
+                    const rect = container.getBoundingClientRect();
+                    offsetX = event.pageX - rect.left;
+                    offsetY = event.pageY - rect.top;
+                },
+                onmouseup: () => dragging = false
+            },
+                e("span", null, "本頁的法律資料"),
                 e("span", {
                     onclick: () => container.remove(),
-                    style: {cursor: "pointer"},
+                    onmousedown: event => event.stopPropagation(),
                     title: "關閉"
                 }, "\xD7")
             )

@@ -74,9 +74,10 @@
  * * 法操的 .content-wrapper 是89
  * * 法律白話文的 #wi-wrapper 是 1000
  * * Bootstrap 的各式動態元件是 1000~1070
+ * * 大法官解釋的 nav 是 1030
  */
 .LER-modal-container {
-    z-index: 1020;
+    z-index: 1032;
     position: absolute;
     width: 480px;
     text-align: left;
@@ -183,21 +184,24 @@
     background-color: #000;
     color: #fff;
     top: 0.5em;
-    right: 0.5em;
-    padding: 0 0.5em 0.5em 1em;
-    max-height: calc(100% - 1em);
+    right: 2em;
+    padding: 0;
+    height: 60vh;
+    max-height: calc(100vh - 1em);
     width: 300px;
     overflow: visible auto;
-    border: 0.2em solid gray;
+    border: solid gray;
+    border-width: 0 .2em .2em;
     box-sizing: border-box;
     font-size: 14px;
     line-height: 150%;
-    z-index: 1010;
+    z-index: 1031;
     text-align: left;
+    resize: both;
 }
 
 #LER-float-box * {
-    background-color: inherit;
+    background: none;
     font: inherit;
     text-align: inherit;
     color: inherit;
@@ -206,16 +210,35 @@
 #LER-float-box > header {
     display: flex;
     justify-content: space-between;
+    padding: 0;
+    cursor: grab;
+    background-color: #ccc;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    height: calc(1.5em + 1px);
 }
 
-#LER-float-box > section:not(:first-child) {
+#LER-float-box > header > span:last-of-type {
+    padding: 0 .4em;
+    cursor: pointer;
+    border-radius: .4em;
+    border: 1px solid gray;
+}
+
+#LER-float-box > section:not(:first-of-type) {
     padding-top: 0.5em;
     margin-top: 0.5em;
 }
 
-#LER-float-box > section:not(:last-child) {
+#LER-float-box > section:not(:first-of-type) {
     border-bottom: 2px solid gray;
     padding-bottom: 0.5em;
+}
+
+#LER-float-box .LER-modal-header {
+    top: 1.5em;
+    background-color: #444;
 }
 
 #LER-float-box .LER-modal-title {
