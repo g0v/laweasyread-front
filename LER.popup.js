@@ -127,13 +127,18 @@ const popupWrapper = (docLoader, ...args) => {
             popup = document.body.appendChild(createModal());
 
             const body = popup.childNodes[1];
-            body.append("讀取中");
-            docLoader(...args).then(nodes => {
+            body.append(e("p", null, "讀取中…"));
+            docLoader(...args)
+            .then(nodes => {
                 body.lastChild.replaceWith(...nodes);
                 setPopupPosition(event, popup);
                 body.querySelectorAll("dt").forEach(dt => {
                     dt.style.top = body.firstChild.clientHeight + "px";
                 });
+            })
+            .catch(error => {
+                body.lastChild.replaceWith(e("p", null, "錯誤：找不到法條，可能是法規名稱解析錯誤。"));
+                console.info(error);
             });
             setPopupPosition(event, popup);
 
@@ -226,9 +231,11 @@ const loadArticles = async(pcode, compRanges) => {
         ),
         e("dd", null, createList(lawtext2obj(article["條文內容"])))
     ));
+    if(!articles.length)
+        throw new RangeError(`沒有指定條號的條文：${pcode} ${law["法規名稱"]}\n` + JSON.stringify(ranges));
+
     const body = e("div", {className: "LER-modal-body"}, ...articles);
     LER.parse(body, pcode);
-
     return [header, body];
 };
 
@@ -389,7 +396,8 @@ LER.popupComplex = arr => {
 
         lawContainer.append(e("div", {className: "LER-modal-body"}, "資料下載中…"));
         loadArticles(item.law.PCode, item.artRanges)
-        .then(nodes => lawContainer.replaceWith(e("section", null, ...nodes)));
+        .then(nodes => lawContainer.replaceWith(e("section", null, ...nodes)))
+        .catch(() => lawContainer.remove());
     });
 
     jyis.forEach(jyi => {

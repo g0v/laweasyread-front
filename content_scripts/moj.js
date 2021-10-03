@@ -80,6 +80,11 @@ getData("mojAddReferringArticles").then(mojAddReferringArticles => {
                     container.appendChild(loadingText);
                     fetchDOM(a.href).then(doc => {
                         const body = doc.querySelector(".law-reg");
+                        if(!body || !body.querySelector(".row")) {
+                            console.info("找不到法條", a); // TODO
+                            loadingText.remove();
+                            return;
+                        }
                         LER.parse(body, pcode);
                         const section = e(
                             "section",
