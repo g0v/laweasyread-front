@@ -344,23 +344,14 @@ LER.popupComplex = arr => {
         let dragging = false, offsetX, offsetY;
 
         container =
-        e("div", {
-            id: "LER-float-box",
-            onmousemove: event => {
-                if(!dragging) return;
-                const style = getComputedStyle(container);
-                container.style.left = `calc(${event.pageX - offsetX}px - ${style.marginLeft})`;
-                container.style.top = `calc(${event.pageY - offsetY}px - ${style.marginTop})`;
-            }
-        },
+        e("div", {id: "LER-float-box"},
             e("header", {
                 onmousedown: event => {
                     dragging = true;
                     const rect = container.getBoundingClientRect();
                     offsetX = event.pageX - rect.left;
                     offsetY = event.pageY - rect.top;
-                },
-                onmouseup: () => dragging = false
+                }
             },
                 e("span", null, "本頁的法律資料"),
                 e("span", {
@@ -370,6 +361,15 @@ LER.popupComplex = arr => {
                 }, "\xD7")
             )
         );
+
+        document.addEventListener("mousemove", event => {
+            if(!dragging) return;
+            const style = getComputedStyle(container);
+            container.style.left = `calc(${event.pageX - offsetX}px - ${style.marginLeft})`;
+            container.style.top = `calc(${event.pageY - offsetY}px - ${style.marginTop})`;
+            getSelection().removeAllRanges();
+        });
+        document.addEventListener("mouseup", () => dragging = false);
     }
     document.body.append(container);
 
