@@ -2,6 +2,10 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.7.1
+2021-10-03
+* 改於 `document_end` 時載入核心套件，以修正 `content_scripts/moj.js` 「偶爾」讀不到 `domCrawler` 的錯誤。
+
 ## 1.7.0
 2021-09-27
 * 全國法規資料庫的「提及條文」功能是抓該網站自己的資料，所以不用維護 `kong0107/mojLawSplitJSON` 也可順利運作。
