@@ -2,7 +2,7 @@
 "manifest_version": 2,
 "name": "法規亦毒氣",
 "description": "將網頁中的法規與條號都轉變成連結，讓您快速查閱指定條文。",
-"version": "1.7.1",
+"version": "1.7.2",
 "author": "kong0107",
 "homepage_url": "https://g0v.github.io/laweasyread-front/",
 "options_ui": {
@@ -39,11 +39,6 @@
 "content_scripts": [
     {
         "matches": ["<all_urls>"],
-        "exclude_matches": [
-            "*://www.youtube.com/embed/*",
-            "*://apis.google.com/*",
-            "*://accounts.google.com/*"
-        ],
         "js": [
             "node_modules/webextension-polyfill/dist/browser-polyfill.min.js",
             "chinese-parseint/chinese-parseint.js",
@@ -53,45 +48,34 @@
             "content_scripts/functions.js",
             "LER.js"
         ],
-        "all_frames": true,
         "run_at": "document_end"
     },
     {
         "matches": ["<all_urls>"],
-        "exclude_matches": [
-            "*://www.youtube.com/embed/*",
-            "*://apis.google.com/*",
-            "*://accounts.google.com/*"
-        ],
         "js": [
             "LER.popup.js",
             "content_scripts/loadLaws.js",
             "content_scripts/exec.js"
         ],
-        "css": ["content_scripts/main.css"],
-        "all_frames": true
+        "css": ["content_scripts/main.css"]
     },
     {
         "matches": ["*://law.moj.gov.tw/*"],
-        "css": ["content_scripts/moj.css"],
-        "all_frames": true
+        "css": ["content_scripts/moj.css"]
     },
     {
         "matches": ["*://law.moj.gov.tw/LawClass/*"],
         "exclude_matches": ["*://law.moj.gov.tw/LawClass/LawHistory.aspx*"],
-        "js": ["content_scripts/moj.js"],
-        "all_frames": true
+        "js": ["content_scripts/moj.js"]
     },
     {
         "matches": ["https://lis.ly.gov.tw/lglawc/lglawkm"],
-        "js": ["content_scripts/ly_lglawkm.js"],
-        "all_frames": true
+        "js": ["content_scripts/ly_lglawkm.js"]
     },
     {
         "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
         "js": ["content_scripts/ly_lawsingle.js"],
-        "css": ["content_scripts/ly_lawsingle.css"],
-        "all_frames": true
+        "css": ["content_scripts/ly_lawsingle.css"]
     }
 ]
 }

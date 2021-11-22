@@ -37,7 +37,6 @@
 - [ ] 允許網站嵌入本專案
   - [ ] 設定轉換選項
   - [ ] 轉成 ES5
-  - [ ] 支援 IE
 
 
 ## Files
@@ -46,13 +45,14 @@
 * `changelog-dev.md`: [開發紀錄](changelog-dev.md)
 * `g0v.json`: G0V 專案設定
 * `package.json`: Node.js 專案設定
-* `maniffest.json`: 瀏覽器擴充功能設定
+* `maniffest.json`: 瀏覽器擴充元件設定
 * `LER.js`: 本專案主程式
-* `parseData.js`: 將其他資料轉為本專案所需的資料並存為 `data/laws.js`
+* `LER.popup.js`: 浮動視窗程式碼
+* `parseData.js`: 僅開發時使用，將其他資料轉為本專案所需的資料並存為 `data/laws.js`
 * `data/laws.json`: 全國法規資料庫的法規名稱與其編號，由 `/parseData.js` 輸出。
 * `data/aliases.json`: 法規的簡稱、暱稱對照，手動維護。
-* `data/options_default.json`: 預設的使用者設定。
-* `data/exclude_matches_default.txt`: 預設的例外網站清單。
+* `data/options_default.json`: 預設的使用者設定，手動維護。
+* `data/exclude_matches_default.txt`: 預設的例外網站清單，手動維護。
 
 
 ## Data Sources

@@ -2,6 +2,12 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.7.2
+2021-11-22
+* 更新 `domCrawler` 以符合需求，並取消呼叫 `Node.normalize()` 。
+* 取消 `all_frames` 設定。（以前全國法規資料庫有用 iFrame ，立法院法律系統似乎也是，但現在都沒有了）
+* 取消 `exclude_matches` 。
+
 ## 1.7.1
 2021-10-03
 * 改於 `document_end` 時載入核心套件，以修正 `content_scripts/moj.js` 「偶爾」讀不到 `domCrawler` 的錯誤。

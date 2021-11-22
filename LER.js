@@ -61,7 +61,6 @@ const getLaw = keys => LER.laws.find(law => {
 
 /**
  * 回傳「是否要跳過這個元素」的函式
- * TODO: 用 class name 指示應忽略的元素
  */
 const skippableTags = "TEXTAREA,STYLE,SCRIPT,CODE,BUTTON,SELECT,SUMMARY,TEMPLATE".split(",");
 const reject = node => {
@@ -72,7 +71,6 @@ const reject = node => {
 
     const text = node.textContent;
     if(text.length < 2) return true;
-    if(/^[\x20-\xff]+$/.test(text)) return true; //< 如果只有字母 ASCII
     if(!/[\u4E00-\u9FFF]{2}/.test(text)) return true; //< 如果沒有連續的「中日韓統一表意文字」
     return false;
 };
@@ -259,15 +257,7 @@ LER.rules.push({
  */
 const objArr2nodes = (arr, textNode, defaultLaw = LER.defaultLaw) => {
     arr = arr.filter(x => x);   // 先濾掉空字串
-
-    // 判斷這個文字節點是不是在 <A /> 裡面
-    let isInA = false;
-    for(let node = textNode; node; node = node.parentNode)
-        if(node.nodeName === "A") {
-            isInA = true;
-            break;
-        }
-
+    const isInA = !!textNode.parentNode.closet("a"); // 判斷這個文字節點是不是在 <A /> 裡面
     return arr.map((item, index) => {
         if(typeof item == "string" || item instanceof Element) return item;
         switch(item.type) {
@@ -346,13 +336,17 @@ const parse = (elem, defaultLaw) => {
         ;
     }
     const wrapper = (arr, textNode) => objArr2nodes(arr, textNode, defaultLaw);
-    domCrawler.replaceTextsAsync(LER.rules, elem, reject, wrapper, 1)
+    domCrawler.replaceTexts(LER.rules, elem, reject, wrapper, textNodeParsedTrigger, 2, 128)
     .then(() => {
         if(elem === document.body)
             console.debug(`LER spent ${Date.now() - start} ms on ${location.href}`);
         const event = new CustomEvent("parseend", {detail: {target: elem}});
         LER.dispatchEvent(event);
     });
+};
+
+const textNodeParsedTrigger = (newNodes, parent, oldNode) => {
+    LER.dispatchEvent(new CustomEvent("textNodeParsed", {detail: {target: oldNode, newNodes, parent}}));
 };
 
 /****************

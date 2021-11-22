@@ -31,7 +31,7 @@ if(typeof LER == "object" && document.body && window.innerWidth && window.innerH
                 if(typeof text !== "string") {
                     const bodyClone = document.body.cloneNode(true);
 
-                    // 把所有 iframe 裡的東西也複製近來——前提是有存取權限
+                    // 把所有 iframe 裡的東西也複製進來，如果有存取權限的話
                     document.querySelectorAll("iframe").forEach(ie => {
                         const d = ie.contentDocument;
                         if(!d) return;

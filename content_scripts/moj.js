@@ -50,57 +50,52 @@ document.head.appendChild(e("style", {type: "text/css"}, css));
  */
 getData("mojAddReferringArticles").then(mojAddReferringArticles => {
     if(!mojAddReferringArticles) return;
-    LER.addEventListener("parseend", event => {
-        console.debug("parseend", event.detail.target);
-        const targets = event.detail.target.querySelectorAll("[class^=line-]");
-        if(
-            !targets.length || //< 浮動視窗非本區須處理的事情
-            targets[0].firstChild.tagName === "P" //< 表示本頁已處理過了
-        ) return;
+    LER.addEventListener("textNodeParsed", event => {
+        const line = event.detail.parent;
+        if(!/(^| )line-\d{4}( |$)/.test(line.className)) return;
+        if(line.firstChild.tagName === "P") return; // 若第一個 child 是 P ，表示已經處理過了。
 
-        targets.forEach(line => {
-            // 先將 `div.line-*` 的內容再用一個 `p` 包起來，以利跟後續要增加的東西區隔。
-            line.appendChild(e("p", null, ...line.childNodes));
+        // 先將 `div.line-*` 的內容再用一個 `p` 包起來，以利跟後續要增加的東西區隔。
+        line.appendChild(e("p", null, ...line.childNodes));
 
-            let articleGroups = line.querySelectorAll("a[data-range-text]");
-            if(!articleGroups.length) return; // 若沒有提到其他條文，那就不需要處理，也不用加上連結
+        let articleGroups = line.querySelectorAll("a[data-range-text]");
+        if(!articleGroups.length) return; // 若沒有提到其他條文，那就不需要處理，也不用加上連結
 
-            const container = e(
-                "details",
-                {className: "LER-article-groups"},
-                e("summary") // 提示文字改用 CSS 寫在 summary::before ，以免使用者複製條文時會有多餘文字。
-            );
-            let onceToggled = false;
-            container.addEventListener("toggle", () => {
-                if(onceToggled) return;
-                onceToggled = true;
-                articleGroups.forEach(a => {
-                    const pcode = a.dataset.pcode;
-                    const loadingText = e("p", null, "讀取中…");
-                    container.appendChild(loadingText);
-                    fetchDOM(a.href).then(doc => {
-                        const body = doc.querySelector(".law-reg");
-                        if(!body || !body.querySelector(".row")) {
-                            console.info("找不到法條", a); // TODO
-                            loadingText.remove();
-                            return;
-                        }
-                        LER.parse(body, pcode);
-                        const section = e(
-                            "section",
-                            {data: {pcode}},
-                            doc.querySelector(".table-title"),
-                            body
-                        );
-                        section.querySelectorAll("[id]").forEach(elem => elem.removeAttribute("id")); // 非必要，就養成習慣要避免重複的 ID 。
-                        section.querySelectorAll(".btnZone, .text-danger > div").forEach(elem => elem.remove()); // 拿掉不需要的元件（也可以用 CSS 藏起來啦）
+        const container = e(
+            "details",
+            {className: "LER-article-groups"},
+            e("summary") // 提示文字改用 CSS 寫在 summary::before ，以免使用者複製條文時會有多餘文字。
+        );
+        let onceToggled = false;
+        container.addEventListener("toggle", () => {
+            if(onceToggled) return;
+            onceToggled = true;
+            articleGroups.forEach(a => {
+                const pcode = a.dataset.pcode;
+                const loadingText = e("p", null, "讀取中…");
+                container.appendChild(loadingText);
+                fetchDOM(a.href).then(doc => {
+                    const body = doc.querySelector(".law-reg");
+                    if(!body || !body.querySelector(".row")) {
+                        console.info("找不到法條", a); // TODO
+                        loadingText.remove();
+                        return;
+                    }
+                    LER.parse(body, pcode);
+                    const section = e(
+                        "section",
+                        {data: {pcode}},
+                        doc.querySelector(".table-title"),
+                        body
+                    );
+                    section.querySelectorAll("[id]").forEach(elem => elem.removeAttribute("id")); // 非必要，就養成習慣要避免重複的 ID 。
+                    section.querySelectorAll(".btnZone, .text-danger > div").forEach(elem => elem.remove()); // 拿掉不需要的元件（也可以用 CSS 藏起來啦）
 
-                        loadingText.replaceWith(section);
-                    });
+                    loadingText.replaceWith(section);
                 });
             });
-            line.appendChild(container);
         });
+        line.appendChild(container);
     });
 });
 
