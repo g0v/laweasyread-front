@@ -2,6 +2,11 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.7.3
+2021-11-30
+* `Node.closest()` 拼錯成 "closet" 了，蠢。
+* 為使 `textNodeParsed` 的監聽器註冊於該事件發生之前，於 `manifest.json` 中將 `exec.js` 挪到最後面。
+
 ## 1.7.2
 2021-11-22
 * 更新 `domCrawler` 以符合需求，並取消呼叫 `Node.normalize()` 。

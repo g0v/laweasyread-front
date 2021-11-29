@@ -257,7 +257,7 @@ LER.rules.push({
  */
 const objArr2nodes = (arr, textNode, defaultLaw = LER.defaultLaw) => {
     arr = arr.filter(x => x);   // 先濾掉空字串
-    const isInA = !!textNode.parentNode.closet("a"); // 判斷這個文字節點是不是在 <A /> 裡面
+    const isInA = !!textNode.parentNode.closest("a"); // 判斷這個文字節點是不是在 <A /> 裡面
     return arr.map((item, index) => {
         if(typeof item == "string" || item instanceof Element) return item;
         switch(item.type) {

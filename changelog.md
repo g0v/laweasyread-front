@@ -2,6 +2,11 @@
 
 Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
 
+## 1.7.3
+2021-11-30
+* 修正轉換失敗問題。
+* 修正「提及條文」未出現問題。
+
 ## 1.7.2
 2021-11-22
 * 加快全國法規資料庫頁面中「提及條文」的顯示。
