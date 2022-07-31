@@ -2,6 +2,11 @@
 
 Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
 
+## 1.7.4
+2022-07-31
+* 因應大法官會議改制為憲法法庭的網站改版及連結更動。
+* 精簡預設的法規列表。
+
 ## 1.7.3
 2021-11-30
 * 修正轉換失敗問題。

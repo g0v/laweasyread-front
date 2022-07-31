@@ -38,7 +38,7 @@
             </div>
             <form method="get" action="https://law.moj.gov.tw/Law/LawSearchResult.aspx">
                 <input type="hidden" name="ty" value="ONEBAR">
-                <input type="text" name="kw">
+                <input name="kw">
                 <input type="submit" value="整合查詢">
             </form>
         </section>
@@ -47,7 +47,7 @@
                 <a href="https://lis.ly.gov.tw/lglawc/lglawkm">立法院法律系統</a>
             </div>
             <form id="formLy" method="post" action="https://lis.ly.gov.tw/lglawc/lglawkm">
-                <input type="text" name="_1_5_T">
+                <input name="_1_5_T">
                 <input type="submit" value="法律查詢">
             </form>
         </section>
@@ -56,8 +56,11 @@
                 <a href="https://law.judicial.gov.tw/FJUD/default.aspx">司法院法學資料檢索</a>
             </div>
             <div>
-                <a href="http://cons.judicial.gov.tw/jcc/zh-tw/jep03">大法官解釋</a>
-                <form method="get" action="http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show" class="d-inline">
+                <a href="https://cons.judicial.gov.tw/judcurrentNew1.aspx?fid=38">憲法法庭判決</a>
+            </div>
+            <div>
+                <form method="get" action="https://cons.judicial.gov.tw/jcc/zh-tw/jep03/show">
+                    <a href="https://cons.judicial.gov.tw/judcurrent.aspx?fid=2195">大法官解釋</a>
                     第
                     <input name="expno" style="width: 3em;">
                     號

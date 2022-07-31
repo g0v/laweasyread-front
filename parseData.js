@@ -5,7 +5,35 @@
  * @return 後依法規名稱長度，由長至短排序
  */
 function parseData(mojData, aliases) {
-    const ret = mojData.map(law => ({PCode: law.PCode, name: law.name}));
+    const map = new Map();
+
+    const result = mojData
+    .filter(law => {
+        if(law.name.endsWith("定）")) {
+            const name = law.name.substring(0, law.name.lastIndexOf("（"));
+            if(!map.has(name)) map.set(name, []);
+            map.get(name).push(law);
+            return false;
+        }
+        if(law.name.length > 16) return false;
+
+        return true;
+    })
+    .map(law => ({PCode: law.PCode, name: law.name}));
+
+    /**
+     * 把名字後面有括號的同名法規只留下最新的
+     */
+    map.forEach((versions, name) => {
+        if(name.length > 16) return false;
+        versions.forEach(law => {
+            const match = /(\d+\.\d+\.\d+)\s*[訂制]定）$/.exec(law.name);
+            const date = match[1].padStart(9, "0");
+            law.lastUpdate = date;
+        });
+        versions.sort((a, b) => a.lastUpdate < b.lastUpdate ? 1 : -1);
+        result.push({PCode: versions[0].PCode, name});
+    });
 
     /**
      * 把讀入的暱稱轉為一個暱稱一筆法規
@@ -14,43 +42,23 @@ function parseData(mojData, aliases) {
     for(let PCode in aliases) {
         const fullName = mojData.find(law => law.PCode == PCode).name;
         aliases[PCode].forEach(name =>
-            ret.push({PCode, name, fullName})
+            result.push({PCode, name, fullName})
         );
     }
 
-    /**
-     * 找出法規名稱最後面有修訂日期的那些，塞入一筆最新版的對照。
-     */
-    const namesWithoutDates = ret.reduce((acc, cur) => {
-        const match = /（新?\s?(\d+\.\d+\.\d+)\s?[訂制]定）$/.exec(cur.name);
-        if(!match) return acc;
-        const name = cur.name.substring(0, match.index);
-        const newItem = {PCode: cur.PCode, name, fullName: cur.name};
-
-        // 如果已經有同名的法規，那就看誰的 PCode 比較大（「應該」也就比較新）
-        const existing = acc.findIndex(law => law.name == name);
-        if(existing != -1) {
-            const e = acc[existing];
-            if(e.PCode < cur.PCode) acc[existing] = newItem;
-        }
-        else acc.push(newItem);
-
-        return acc;
-    }, []);
-
-    return ret.concat(namesWithoutDates).sort((a, b) => b.name.length - a.name.length);
+    return result.sort((a, b) => b.name.length - a.name.length);
 }
 
 /**
  * 開發階段生成 data/laws.json 用
- * 由另一專案讀取所有法規資料
+ * 從另一專案讀取所有法規資料
  * @see {@link https://github.com/kong0107/mojLawSplitJSON }
  */
 if(typeof module !== 'undefined' && module.exports) {
     const fs = require("fs");
     const mojData = JSON.parse(fs.readFileSync("../mojLawSplit/json/index.json").toString());
     const aliases = JSON.parse(fs.readFileSync("./data/aliases.json").toString());
-    fs.writeFileSync("./data/laws.json", JSON.stringify(
-        parseData(mojData, aliases), null, 1
-    ));
+
+    const json = JSON.stringify(parseData(mojData, aliases)).replace(/{/g, "\n{");
+    fs.writeFileSync("./data/laws.json", json);
 }
