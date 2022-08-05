@@ -4,7 +4,7 @@
  * 可用於瀏覽器外掛的更新資料，亦可用於開發階段生成 data/laws.json
  * @return 後依法規名稱長度，由長至短排序
  */
-function parseData(mojData, aliases) {
+function parseData(mojData, aliases, nameLengthLimit = Infinity) {
     const map = new Map();
 
     const result = mojData
@@ -15,7 +15,8 @@ function parseData(mojData, aliases) {
             map.get(name).push(law);
             return false;
         }
-        if(law.name.length > 16) return false;
+        if(/([^辦]法|律|條例|通則)$/.test(law.name)) return true;
+        if(law.name.length > nameLengthLimit) return false;
 
         return true;
     })
@@ -25,7 +26,7 @@ function parseData(mojData, aliases) {
      * 把名字後面有括號的同名法規只留下最新的
      */
     map.forEach((versions, name) => {
-        if(name.length > 16) return false;
+        if(name.length > nameLengthLimit) return false;
         versions.forEach(law => {
             const match = /(\d+\.\d+\.\d+)\s*[訂制]定）$/.exec(law.name);
             const date = match[1].padStart(9, "0");
@@ -59,6 +60,6 @@ if(typeof module !== 'undefined' && module.exports) {
     const mojData = JSON.parse(fs.readFileSync("../mojLawSplit/json/index.json").toString());
     const aliases = JSON.parse(fs.readFileSync("./data/aliases.json").toString());
 
-    const json = JSON.stringify(parseData(mojData, aliases)).replace(/{/g, "\n{");
+    const json = JSON.stringify(parseData(mojData, aliases, 10)).replace(/{/g, "\n{");
     fs.writeFileSync("./data/laws.json", json);
 }

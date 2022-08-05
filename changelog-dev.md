@@ -2,10 +2,15 @@
 
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 
+## 1.7.5
+2022-08-05
+* 修改 `parseData.js` ，使精簡的部分不要差太多，且不會略過法律層級的。
+* 修改 `manifest.json` ，使不用擔心 `content_scripts` 之間的執行順序（跟 v1.7.1 處理的困境類似）。把 v1.7.3 時另列的 `exec.js` 併回之前的位置，改用 `setTimeout` 延後 100 毫秒來賭監聽器會先註冊好才發生 `textNodeParsed` 事件。
+
 ## 1.7.3
 2021-11-30
 * `Node.closest()` 拼錯成 "closet" 了，蠢。
-* 為使 `textNodeParsed` 的監聽器註冊於該事件發生之前，於 `manifest.json` 中將 `exec.js` 挪到最後面。
+* 為使 `textNodeParsed` 的監聽器註冊於該事件發生之前，於 `manifest.json` 中將 `exec.js` 挪到最後面。 （ v1.7.5 改為另一做法）
 
 ## 1.7.2
 2021-11-22

@@ -2,6 +2,10 @@
 
 Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
 
+## 1.7.5
+2022-08-05
+* 修正「有時候」不會顯示「提及條文」區塊的問題。
+
 ## 1.7.4
 2022-07-31
 * 因應大法官會議改制為憲法法庭的網站改版及連結更動。

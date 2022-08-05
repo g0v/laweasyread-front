@@ -1,11 +1,6 @@
 "use strict";
 
-LER.loadLaws = getData("laws").then((laws = []) => {
-    // 放棄一些過長的法規名稱，可以加快速度。
-    laws = laws.filter(law =>
-        !law.name.endsWith("）")
-        //&& law.name.length < 20
-    );
+if(!LER.loadLaws) LER.loadLaws = getData("laws").then((laws = []) => {
     const rules = laws.map(law => ({
         pattern: law.name,
         replacer: () => {

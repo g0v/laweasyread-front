@@ -1,14 +1,13 @@
 {
   "name": "laweasyread",
-  "version": "1.7.4",
+  "version": "1.7.5",
   "fullName": "法規亦毒氣",
   "author": "kong0107",
   "description": "an extension for browsers to view Taiwan's law articles/websites easier",
   "id": "jid0-TbNAc8Mn0J5idqU6wtcFNmtNcqo",
   "keywords": [
     "law",
-    "Taiwan",
-    "WebExtension"
+    "Taiwan"
   ],
   "homepage": "http://g0v.github.io/laweasyread-front",
   "repository": {

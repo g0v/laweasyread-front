@@ -17,7 +17,7 @@ if(typeof LER == "object" && document.body && window.innerWidth && window.innerH
         LER.artNumberParserMethod = storage.artNumberParserMethod;
         LER.enablePopup = storage.enablePopup;
         if(matched_pattern) console.debug(`LER skipped auto-parse because location ${location.href} is matched by the pattern ${matched_pattern}`);
-        else if(storage.autoParse) LER.parse(document.body);
+        else if(storage.autoParse) setTimeout(() => LER.parse(document.body), 100);
     });
 
     browser.runtime.onMessage.addListener(message => {
