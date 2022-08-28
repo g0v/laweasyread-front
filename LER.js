@@ -317,6 +317,9 @@ const objArr2nodes = (arr, textNode, defaultLaw = LER.defaultLaw) => {
                 });
                 return e("SPAN", null, ...nodes);
             }
+            case "exclude_term": {
+                return document.createTextNode(item.text);
+            }
             default:
                 console.error("uncaught type", item);
         }

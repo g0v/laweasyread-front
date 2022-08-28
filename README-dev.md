@@ -48,11 +48,13 @@
 * `maniffest.json`: 瀏覽器擴充元件設定
 * `LER.js`: 本專案主程式
 * `LER.popup.js`: 浮動視窗程式碼
-* `parseData.js`: 僅開發時使用，將其他資料轉為本專案所需的資料並存為 `data/laws.js`
-* `data/laws.json`: 全國法規資料庫的法規名稱與其編號，由 `/parseData.js` 輸出。
-* `data/aliases.json`: 法規的簡稱、暱稱對照，手動維護。
-* `data/options_default.json`: 預設的使用者設定，手動維護。
-* `data/exclude_matches_default.txt`: 預設的例外網站清單，手動維護。
+* `parseData.js`: 僅開發時使用，將 [mojLawSplitJSON](https://github.com/kong0107/mojLawSplitJSON) 轉為本專案所需的資料並存為 `data/laws.json`
+* `data/`:
+  * `data/laws.json`: 全國法規資料庫的法規名稱與其編號，由 `/parseData.js` 輸出。
+  * `data/aliases.json`: 法規的簡稱、暱稱對照，手動維護。
+  * `data/options_default.json`: 預設的使用者設定，手動維護。
+  * `data/exclude_matches_default.txt`: 預設的例外網站清單，手動維護。
+  * `data/exclude_terms.txt`: 不要匹配的詞彙清單。
 
 
 ## Data Sources
