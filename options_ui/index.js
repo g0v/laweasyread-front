@@ -1,10 +1,6 @@
-"use strict";
-
-const e = domCrawler.createElement;
-const domParser = new DOMParser();
+const e = createElement;
 const hash = location.hash.substring(1);
 
-const $ = (s, n = document) => (typeof s === "string") ? n.querySelector(s) : s;
 const setContent = (elem, ...nodes) => {
     elem = $(elem);
     while(elem.hasChildNodes()) elem.lastChild.remove();
@@ -16,7 +12,6 @@ const show = elem => $(elem).style.display = "";
 
 // 顯示專案版本
 setContent("#version", browser.runtime.getManifest().version);
-
 
 /**
  * 自己刻一個簡單的 router
@@ -30,44 +25,32 @@ const routes = [
 ];
 
 let activeTab;
-const tabs = [];
-const containers = [];
+const main = $("main");
 routes.forEach((route, index) => {
-    const tab = e("li", {className: "nav-item"},
-        e("a",
-            {
-                className: "nav-link",
-                href: `#${route.name}`,
-                onclick: event => event.preventDefault()
-            },
-            route.title
-        )
+    const tab =
+    e("li", {className: "nav-item"},
+        e("span", {className: "nav-link"}, route.title)
     );
-    tabs.push(tab);
     $("#navbar").appendChild(tab);
 
     const container = e("div", {id: `name-${route.name}`});
-    containers.push(container);
 
-    const main = $("main");
     tab.addEventListener("click", () => {
         if(tab.classList.contains("active")) return;
 
-        tabs.forEach(t => t.classList.remove("active"));
-        tab.classList.add("active");
-        if(main.hasChildNodes()) main.lastChild.remove();
+        document.querySelectorAll("header .nav-link").forEach(nl => nl.classList.remove("active"));
+        tab.lastChild.classList.add("active");
+        main.lastChild?.remove();
         main.appendChild(container);
         history.replaceState(null, null, `#${route.name}`);
-        activeTab = tab; // 其實用不到
 
         // 只在第一次顯示此元件時讀取內容
         if(container.hasChildNodes()) return;
-        fetch(`${route.name}.html`)
-        .then(res => res.text())
-        .then(html => {
-            container.append(...domParser.parseFromString(html, "text/html").body.childNodes);
+        fetchDOM(`${route.name}.html`)
+        .then(doc => {
+            container.append(...doc.body.childNodes);
             $("main").appendChild(container);
-            document.body.appendChild(e("script", {src: `${route.name}.js`}));
+            document.head.appendChild(e("script", {src: `${route.name}.js`}));
         });
     });
 

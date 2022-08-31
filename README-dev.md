@@ -46,6 +46,9 @@
 
 ## To-Do List
 
+* `options_ui/tools`
+* `options_ui/exclusion`
+* `content_scripts`
 * 立法院法律系統在所得稅法第14條的問題
 * 嘗試支援「前條」。
 * 整合 ronnywang 抓下來的立法院資料。

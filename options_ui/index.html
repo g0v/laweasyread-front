@@ -1,22 +1,24 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
+<head>
     <meta charset="utf-8">
     <title>法規亦毒氣 - 設定</title>
     <base target="_blank">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
-  </head>
-  <body>
+    <script defer="true" src="/browser/lib.js"></script>
+    <script defer="true" src="index.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body>
     <header class="border-bottom bg-secondary">
-        <div class="container">
-            <nav class="navbar navbar-expand-sm navbar-dark p-0">
+        <nav class="navbar navbar-expand navbar-dark">
+            <div class="container">
                 <h1 class="navbar-brand">法規亦毒氣</h1>
                 <div class="collapse navbar-collapse">
-                    <ul id="navbar" class="navbar-nav mr-auto"></ul>
+                    <ul id="navbar" class="navbar-nav me-auto"></ul>
                     <span id="version" class="text-white-50"></span>
                 </div>
-            </nav>
-        </div>
+            </div>
+        </nav>
     </header>
     <main class="container py-3"></main>
     <footer class="bg-dark">
@@ -25,13 +27,5 @@
             <ul class="nav" id="links"></ul>
         </div>
     </footer>
-    <script src="/node_modules/webextension-polyfill/dist/browser-polyfill.min.js"></script>
-    <script src="/domCrawler/domCrawler.js"></script>
-    <script src="/browser/browser.js"></script>
-    <script src="/chinese-parseint/chinese-parseint.js"></script>
-    <script src="/LER.js"></script>
-    <script src="/LER.popup.js"></script>
-    <script src="/content_scripts/loadLaws.js"></script>
-    <script src="index.js"></script>
-  </body>
+</body>
 </html>

@@ -1,73 +1,72 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="utf-8">
+<head>
+    <meta charset="UTF-8">
     <title>法規亦毒氣</title>
     <base target="_blank">
-    <link rel="stylesheet" href="popup.css">
-    <script defer="true" src="/node_modules/webextension-polyfill/dist/browser-polyfill.min.js"></script>
-    <script defer="true" src="/browser/browser.js"></script>
+    <script defer="true" src="lib.js"></script>
     <script defer="true" src="popup.js"></script>
-  </head>
-  <body>
-    <header>
-        <h1>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+</head>
+<body class="p-2 bg-dark bg-gradient text-white" style="width: 375px">
+    <header class="row">
+        <h1 class="offset-4 col-4 text-center fs-6">
             法規亦毒氣
-            <span id="version"></span>
+            <span id="version" class="font-monospace"></span>
         </h1>
-        <nav>
-            <span id="updateSpan" style="display: none;">更新</span>
-            <a href="/options_ui/index.html">設定</a>
+        <nav class="col-4 text-end">
+            <span class="btn btn-sm btn-info" id="update" style="display: none">更新</span>
+            <a class="btn btn-sm btn-secondary" href="/options_ui/index.html">設定</a>
         </nav>
     </header>
     <main>
-        <section>
-            <div style="float: right;">
-                <button id="parseTheCurrentTab">轉換此頁面</button>
-            </div>
+        <div class="d-flex justify-content-between">
             <div>
                 <label>
-                    <input type="checkbox" id="autoParse">
+                    <input type="checkbox" id="autoParse" class="form-check-input">
                     自動轉換
                 </label>
             </div>
-        </section>
-        <section>
             <div>
-                <a href="https://law.moj.gov.tw/Law/LawSearchAll.aspx">全國法規資料庫</a>
+                <button type="button" class="btn btn-sm btn-primary" id="parseCurrentTab">轉換此頁面</button>
             </div>
-            <form method="get" action="https://law.moj.gov.tw/Law/LawSearchResult.aspx">
+        </div>
+        <section class="border-start border-secondary ps-2 mt-2">
+            <div>
+                <a href="https://law.moj.gov.tw/Law/LawSearchAll.aspx" class="link-light">全國法規資料庫</a>
+            </div>
+            <form method="get" action="https://law.moj.gov.tw/Law/LawSearchResult.aspx" class="input-group input-group-sm">
                 <input type="hidden" name="ty" value="ONEBAR">
-                <input name="kw">
-                <input type="submit" value="整合查詢">
+                <input name="kw" class="form-control" required>
+                <input type="submit" value="法規查詢" class="btn btn-secondary">
             </form>
         </section>
-        <section>
+        <section class="border-start border-secondary ps-2 mt-2">
             <div>
-                <a href="https://lis.ly.gov.tw/lglawc/lglawkm">立法院法律系統</a>
+                <a href="https://lis.ly.gov.tw/lglawc/lglawkm" class="link-light">立法院法律系統</a>
             </div>
-            <form id="formLy" method="post" action="https://lis.ly.gov.tw/lglawc/lglawkm">
-                <input name="_1_5_T">
-                <input type="submit" value="法律查詢">
+            <form id="formLy" method="post" action="https://lis.ly.gov.tw/lglawc/lglawkm" class="input-group input-group-sm">
+                <input name="_1_5_T" class="form-control" required>
+                <input type="submit" value="法律查詢" class="btn btn-secondary">
             </form>
         </section>
-        <section>
+        <section class="border-start border-secondary ps-2 mt-2">
             <div>
-                <a href="https://law.judicial.gov.tw/FJUD/default.aspx">司法院法學資料檢索</a>
+                <a href="https://law.judicial.gov.tw/FJUD/default.aspx" class="link-light">司法院法學資料檢索</a>
             </div>
             <div>
-                <a href="https://cons.judicial.gov.tw/judcurrentNew1.aspx?fid=38">憲法法庭判決</a>
+                <a href="https://cons.judicial.gov.tw/judcurrentNew1.aspx?fid=38" class="link-light">憲法法庭判決</a>
             </div>
-            <div>
-                <form method="get" action="https://cons.judicial.gov.tw/jcc/zh-tw/jep03/show">
-                    <a href="https://cons.judicial.gov.tw/judcurrent.aspx?fid=2195">大法官解釋</a>
-                    第
-                    <input name="expno" style="width: 3em;">
-                    號
-                    <input type="submit" value="查閱">
+            <div class="d-flex">
+                <a href="https://cons.judicial.gov.tw/judcurrent.aspx?fid=2195" class="text-nowrap link-light">大法官解釋</a>
+                <form method="get" action="https://cons.judicial.gov.tw/jcc/zh-tw/jep03/show" class="input-group input-group-sm ms-2" style="width: 10em">
+                    <span class="input-group-text">第</span>
+                    <input name="expno" pattern="\d{1,3}" required class="form-control">
+                    <span class="input-group-text">號</span>
+                    <input type="submit" value="查閱" class="btn btn-secondary">
                 </form>
             </div>
         </section>
     </main>
-  </body>
+</body>
 </html>

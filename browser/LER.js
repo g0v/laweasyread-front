@@ -45,6 +45,7 @@ async function update() {
     });
     setData({laws, localDate: remoteDate});
     loadStaticRules(laws);
+    return remoteDate;
 }
 
 /**

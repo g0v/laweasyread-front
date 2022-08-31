@@ -1,33 +1,23 @@
 "use strict";
 
-/**
- * 取得資料
- * @param {string} updateDate 本地資料庫的版本
- * @param {string} remoteDate 已偵測到遠端的版本
- * @param {number} lastCheckUpdate 日期物件的毫秒數
- */
-
-getData([
-    "updateDate",
-    "remoteDate",
-    "lastCheckUpdate"
-]).then(storage => {
-    if(storage.updateDate) setContent("#updateDate", storage.updateDate);
-    else hide("#updateDateContainer");
+getData(["localDate", "remoteDate", "lastCheck"])
+.then(({localDate, remoteDate, lastCheck}) => {
+    if(localDate) setContent("#localDate", localDate);
+    else hide("#localDateContainer");
 
     const ub = $("#updateButton");
-    if(storage.remoteDate > storage.updateDate) {
-        setContent(ub, `更新到 ${storage.remoteDate}`);
+    if(remoteDate > localDate) {
+        setContent(ub, `更新到 ${remoteDate}`);
         ub.classList.add("btn-info");
     }
     else ub.classList.add("btn-primary");
 
-    if(storage.lastCheckUpdate)
+    if(lastCheck)
         setContent(
-            "#lastCheckUpdate",
-            (new Date(storage.lastCheckUpdate)).toLocaleString()
+            "#lastCheck",
+            (new Date(lastCheck)).toLocaleString()
         );
-    else hide("#lastCheckUpdateContainer");
+    else hide("#lastCheckContainer");
 });
 
 
@@ -38,14 +28,15 @@ getData([
 $("#updateButton").addEventListener("click", event => {
     const self = event.target;
     const cl = self.classList;
-    hide("#lastCheckUpdateContainer");
+    self.disabled = true;
     setContent(self, "檢查更新中…");
     cl.remove("btn-primary", "btn-info");
     cl.add("btn-warning");
+    hide("#lastCheckContainer");
     browser.runtime.sendMessage({command: "update"})
     .then(newDate => {
         if(newDate) { // 有更新且已安裝
-            setContent("#updateDate", newDate);
+            setContent("#localDate", newDate);
             setContent(self, "已更新");
             cl.add("btn-success");
         }
@@ -53,10 +44,9 @@ $("#updateButton").addEventListener("click", event => {
             setContent(self, "無可更新");
             cl.add("btn-secondary");
         }
-        show("#updateDateContainer");
+        setContent("#lastCheck", (new Date).toLocaleString());
         cl.remove("btn-warning");
-        self.disabled = true;
-        setContent("#lastCheckUpdate", (new Date).toLocaleString());
-        show("#lastCheckUpdateContainer");
+        show("#localDateContainer");
+        show("#lastCheckContainer");
     });
 });

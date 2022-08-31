@@ -9,8 +9,7 @@ browser.runtime.onInstalled.addListener(() => {
     });
 
     // 把 manifest.json 裡的版本資訊儲存到瀏覽器。
-    fetchJSON("/manifest.json")
-    .then(({version}) => setData({version}));
+    setData({version: browser.runtime.getManifest().version});
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
     fetchJSON("/data/options_default.json")
@@ -25,9 +24,9 @@ browser.runtime.onInstalled.addListener(() => {
 // 鬧鐘響時就檢查是否有更新
 browser.alarms.onAlarm.addListener(LER.checkUpdate);
 
+// 整個 LER 就是 listener
 browser.runtime.onMessage.addListener((request, sender, callback) => {
     const result = LER[request.command]?.(request, sender);
-    if(typeof callback !== "function") return;
     if(result instanceof Promise)
         return !!result.then(callback); // return true for callback to be called async
     callback(result);

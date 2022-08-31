@@ -1,4 +1,6 @@
 if(typeof browser === "undefined") globalThis.browser = chrome;
+if(typeof window !== "undefined")
+    $ = (s, n = document) => (s instanceof Node) ? s : n.querySelector(s);
 
 /**
  * console
@@ -34,11 +36,15 @@ const setData = (items, area = "local") => browser.storage[area].set(items);
 
 
 /**
- * 傳送訊息到當前的分頁
+ * 傳送訊息到當前的分頁，但不要傳到瀏覽器設定頁面。
+ * MDN and Google both say `Tab.url` is present only if permission `tabs` is granted, but it seems that I got it by permission `activeTab`?
  */
 const sendMessageToCurrentTab = message =>
     browser.tabs.query({active: true, currentWindow: true})
-    .then(tabs => browser.tabs.sendMessage(tabs[0].id, message))
+    .then(([tab]) => {
+        if(tab.url.startsWith("http") || tab.url.startsWith("file"))
+            return browser.tabs.sendMessage(tab.id, message);
+    })
 ;
 
 
@@ -69,7 +75,12 @@ function getTextNodes(root = document.body, filter = () => true) {
 /**
  * 用可序列化的物件建構 HTML 元素
  */
-function createElement(tagName, props, children = []) {
+// function createElement(tagName, props, children = []) {
+function createElement() {
+    const tagName = arguments[0]?.tagName ?? arguments[0]?.tag ?? arguments[0];
+    const props = arguments[0]?.props ?? arguments[1] ?? null;
+    const children = [arguments[0]?.children ?? [].slice.call(arguments, 2)].flat();
+
     const elem = document.createElement(tagName);
     for(let attr in props) {
         const value = props[attr];

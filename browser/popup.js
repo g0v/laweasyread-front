@@ -1,21 +1,13 @@
-"use strict";
-
-const $ = s => document.querySelector(s);
-
 // 顯示專案版本
 $("#version").append(browser.runtime.getManifest().version);
 
-getData({
-    autoParse: false,
-    updateDate: "",
-    remoteDate: ""
-})
-.then(storage => {
-    $("#autoParse").checked = storage.autoParse;
-    if(storage.remoteDate > storage.updateDate) {
-        const e = $("#updateSpan");
-        e.style.display = "";
-        e.title = `可更新至 ${storage.remoteDate} 的法規名稱`;
+getData(["autoParse", "localDate", "remoteDate"])
+.then(({autoParse, localDate, remoteDate}) => {
+    $("#autoParse").checked = autoParse;
+    if(remoteDate > localDate) {
+        const elem = $("#update");
+        elem.style.display = "";
+        elem.title = `可更新至 ${remoteDate} 的法規清單`;
     }
 });
 
@@ -27,20 +19,27 @@ $("#autoParse").addEventListener("click", event => {
 });
 
 // 手動轉換的 button
-// TODO: 在不能轉換的頁面（網址為 chrome 開頭的那些）隱藏這個按鈕
-// 因為就算是 <all_urls> 也不包含 chrome*:// 協定。
-// @see {@link https://developer.chrome.com/extensions/match_patterns }
-$("#parseTheCurrentTab").addEventListener("click", () =>
+$("#parseCurrentTab").addEventListener("click", () =>
     sendMessageToCurrentTab({command: "parseDocument"})
 );
 
 // 「更新」的 span
-$("#updateSpan").addEventListener("click", event => {
+$("#update").addEventListener("click", event => {
     const self = event.target;
     self.firstChild.replaceWith("更新中…");
     browser.runtime.sendMessage({command: "update"})
-    .then(() => self.remove());
+    .then(
+        () => self.remove(),
+        () => self.replaceWith("更新失敗")
+    );
 });
 
 // 如果是 Firefox ，就隱藏立法院的搜尋表單（因為不知道怎麼讓他運作）
-if(navigator.userAgent.indexOf("Firefox") > -1) $("#formLy").remove();
+if(navigator.userAgent.includes("Firefox")) $("#formLy").remove();
+
+// 用網址檢查現在的頁面是否可以被轉換
+browser.tabs.query({active: true, currentWindow: true})
+.then(([tab]) => {
+    if(tab.url.startsWith("http") || tab.url.startsWith("file")) return;
+    $("#parseCurrentTab").remove();
+});
