@@ -1,9 +1,7 @@
 {
-    "updateDate": "",
-    "remoteDate": "",
-    "lastCheckUpdate": 0,
-    "autoParse": false,
+    "autoParse": true,
     "artNumberParserMethod": "hyphen",
     "enablePopup": true,
-    "mojAddReferringArticles": true
+    "mojAddReferringArticles": true,
+    "exclude_matches": []
 }

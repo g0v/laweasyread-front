@@ -1,9 +1,0 @@
-[submodule "lawtext2obj"]
-	path = lawtext2obj
-	url = https://github.com/kong0107/lawtext2obj.git
-[submodule "domCrawler"]
-	path = domCrawler
-	url = https://github.com/kong0107/domCrawler.git
-[submodule "chinese-parseint"]
-	path = chinese-parseint
-	url = https://github.com/kong0107/chinese-parseint.git

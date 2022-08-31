@@ -3,40 +3,8 @@
 ## Design Principle
 
 對所有文字節點比對所有法條名稱，然後將單一文字節點依規則替換成新的節點們。
-
-
-## Milestones
-
-- [x] 比對到法規全名並加上連結
-- [x] 比對法規簡稱
-- [x] 將中文條號簡化
-- [x] 將條號加上連結
-- [x] 大法官解釋加上連結
-- [x] 滑鼠移過時，顯示相關資訊
-- [ ] 裁判書連結
-- [ ] 整合立法院資料（連結[ronnywang/tw-law-corpus](https://github.com/ronnywang/tw-law-corpus)）
-  - [ ] 法條的引用與被引用情形
-  - [ ] 修法理由？
-- [ ] 瀏覽器外掛
-  - [x] 主流瀏覽器
-    - [x] [Chrome](https://chrome.google.com/webstore/detail/iedodmlnmhobigohbkalkkjlbmdkjalj)
-    - [x] [Firefox](https://addons.mozilla.org/zh-TW/firefox/addon/laweasyread/)
-    - [x] Opera: 搭配 [Install Chrome Extensions](https://addons.opera.com/en/extensions/details/install-chrome-extensions/)
-    - [x] Edge: 2020年1月起改為 Chromium 核心後，即可直接在「 Chrome 線上應用程式商店」更新
-    - [x] Brave
-  - [x] 常用站台排版
-    - [x] 全國法規資料庫的排版
-    - [x] 立法院法律系統的排版
-    - [ ] 其他政府機關的法規查詢介面
-    - [ ] 裁判書？
-    - [ ] 法源法律網？
-  - [x] 設定頁面
-  - [x] 更新法規名稱資料（不含法條）
-  - [ ] 下載法規資料庫（包含法條）
-  - [ ] 於頁面在例外清單中時，顯示適當標記
-- [ ] 允許網站嵌入本專案
-  - [ ] 設定轉換選項
-  - [ ] 轉成 ES5
+前台 (content scripts) 將文字節點的內容傳給後台 (background) ，後台處理成 JSON 物件丟回前台，再由前台把物件轉成 HTML 元素及置換。
+將法規資料維護在後台就好，不用讓前台每次都載入所有法規資料。
 
 
 ## Files
@@ -45,31 +13,20 @@
 * `changelog-dev.md`: [開發紀錄](changelog-dev.md)
 * `g0v.json`: G0V 專案設定
 * `package.json`: Node.js 專案設定
-* `maniffest.json`: 瀏覽器擴充元件設定
-* `LER.js`: 本專案主程式
-* `LER.popup.js`: 浮動視窗程式碼
-* `parseData.js`: 僅開發時使用，將 [mojLawSplitJSON](https://github.com/kong0107/mojLawSplitJSON) 轉為本專案所需的資料並存為 `data/laws.json`
+* `manifest.json`: 瀏覽器擴充元件設定
+* ~~`LER.js`: 本專案主程式~~
+* ~~`LER.popup.js`: 浮動視窗程式碼~~
 * `data/`:
-  * `data/laws.json`: 全國法規資料庫的法規名稱與其編號，由 `/parseData.js` 輸出。
-  * `data/aliases.json`: 法規的簡稱、暱稱對照，手動維護。
-  * `data/options_default.json`: 預設的使用者設定，手動維護。
-  * `data/exclude_matches_default.txt`: 預設的例外網站清單，手動維護。
+  * `data/aliases.json`: 法規的簡稱、暱稱對照。
+  * `data/options_default.json`: 預設的使用者設定。
   * `data/exclude_terms.txt`: 不要匹配的詞彙清單。
 
+其餘請閱讀 `manifest.json` 。
 
 ## Data Sources
 
 * [mojLawSplitJSON](https://github.com/kong0107/mojLawSplitJSON)
 * [jyi](https://github.com/kong0107/jyi)
-* [ronnywang/tw-law-corpus](https://github.com/ronnywang/tw-law-corpus/)
-
-
-## Dependencies
-
-* [domCrawler](https://github.com/kong0107/domCrawler): 抓取文字節點並套用轉換規則。
-* [chinese-parseInt](https://github.com/kong0107/chinese-parseint/): 將中文數字轉成整數。
-* [lawtext2obj](https://github.com/kong0107/lawtext2obj/): 將全國法規資料庫那種用換行排版的字串，分析成巢狀陣列。
-* [mozilla/webextension-polyfill](https://github.com/mozilla/webextension-polyfill): 方便開發跨瀏覽器的外掛。
 
 
 ## Important Cases
@@ -85,6 +42,21 @@
 * 表格
 * 原始資料缺漏一些標點符號：
   * 中央研究院組織法第7條第1款
+
+
+## To-Do List
+
+* 立法院法律系統在所得稅法第14條的問題
+* 嘗試支援「前條」。
+* 整合 ronnywang 抓下來的立法院資料。
+  * 「相關法條」資料
+  * 正確的分項（除了所得稅法§14）
+* 支援法規名稱被框住之後的條號連結，例如 `《刑法》第10條` 。
+* 支援更多條號的格式（例如 `民法第3至5條` 、 `民法1124條`），但不能在不需要的時候跳出來。
+* 支援切換成「只處理白名單中的網站」。
+* 裁判書連結。
+* 於頁面在例外清單中時，顯示適當標記。
+* 民國年換成西元年
 
 
 # License
