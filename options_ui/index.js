@@ -1,17 +1,16 @@
 const e = createElement;
-const hash = location.hash.substring(1);
 
 const setContent = (elem, ...nodes) => {
-    elem = $(elem);
-    while(elem.hasChildNodes()) elem.lastChild.remove();
+    let last;
+    while(last = elem.lastChild) last.remove();
     elem.append(...nodes);
 };
-const hide = elem => $(elem).style.display = "none";
-const show = elem => $(elem).style.display = "";
+const hide = elem => elem.style.display = "none";
+const show = elem => elem.style.display = "";
 
 
 // 顯示專案版本
-setContent("#version", browser.runtime.getManifest().version);
+setContent($("#version"), browser.runtime.getManifest().version);
 
 /**
  * 自己刻一個簡單的 router
@@ -27,14 +26,10 @@ const routes = [
 let activeTab;
 const main = $("main");
 routes.forEach((route, index) => {
-    const tab =
-    e("li", {className: "nav-item"},
-        e("span", {className: "nav-link"}, route.title)
-    );
+    const tab = parseElement(`<li class="nav-item me-2"><span class="nav-link btn">${route.title}</span></li>`);
     $("#navbar").appendChild(tab);
 
-    const container = e("div", {id: `name-${route.name}`});
-
+    const container = parseElement(`<div id="name-${route.name}"></div>`);
     tab.addEventListener("click", () => {
         if(tab.classList.contains("active")) return;
 
@@ -54,7 +49,7 @@ routes.forEach((route, index) => {
         });
     });
 
-    if(!index || hash === route.name) activeTab = tab;
+    if(!index || route.name === location.hash.substring(1)) activeTab = tab;
 });
 
 activeTab.dispatchEvent(new Event("click"));

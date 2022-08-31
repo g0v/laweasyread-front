@@ -1,12 +1,23 @@
-if(typeof browser === "undefined") globalThis.browser = chrome;
-if(typeof window !== "undefined")
-    $ = (s, n = document) => (s instanceof Node) ? s : n.querySelector(s);
+if(typeof browser === "undefined") browser = chrome;
+if(typeof document !== "undefined") $ = document.querySelector.bind(document);
 
 /**
  * console
  */
 const errorHandler = console.error.bind(console);
 const debug = console.debug.bind(console);
+
+
+/**
+ * 將 HTML 轉換成 DOM
+ * @returns {HTMLDocument}
+ */
+const parseHTML = (() => {
+    if(typeof DOMParser === "undefined") return;
+    const domParser = new DOMParser();
+    return html => domParser.parseFromString(html, "text/html");
+})();
+const parseElement = html => parseHTML(html.trim())?.body.lastChild;
 
 
 /**
@@ -19,7 +30,7 @@ const fetch2 = (...args) => fetch(...args).then(response => {
 });
 const fetchJSON = (...args) => fetch2(...args).then(res => res.json());
 const fetchText = (...args) => fetch2(...args).then(res => res.text());
-const fetchDOM = (...args) => fetchText(...args).then(html => (new DOMParser()).parseFromString(html, "text/html"));
+const fetchDOM = (...args) => fetchText(...args).then(parseHTML);
 
 
 /**
@@ -74,12 +85,33 @@ function getTextNodes(root = document.body, filter = () => true) {
 
 /**
  * 用可序列化的物件建構 HTML 元素
+ * supports several ways to assign tag name and children
+ * @returns {Element}
+ *
+ * @example simulate `React.createElement`
+ * // returns equivalent to '<a href="#">foobar</a>'
+ * createElement("a", {href: "#"}, "foo", "bar");
+ *
+ * @example supports event listener
+ * createElement("span", {onclick: () => alert("haha")}, "click me");
+ *
+ * @example children could be either listed or in an array
+ * // returns equivalent to '<a href="#">foobar</a>'
+ * createElement({tagName: "a", href: "#"}, ["foo", "bar"]);
+ *
+ * @example nested JSON to DOM
+ * // returns equivalent to "<ul><li>foo</li><li>bar</li></ul>"
+ * createElement({"<>": "ul", children: [{tag: "LI", text: "foo"}, {tagName: "li", children: "bar"}]});
  */
-// function createElement(tagName, props, children = []) {
 function createElement() {
-    const tagName = arguments[0]?.tagName ?? arguments[0]?.tag ?? arguments[0];
-    const props = arguments[0]?.props ?? arguments[1] ?? null;
-    const children = [arguments[0]?.children ?? [].slice.call(arguments, 2)].flat();
+    const tagName = arguments[0]?.tagName ?? arguments[0]?.tag ?? arguments[0]?.["<>"] ?? arguments[0];
+    const props = (typeof arguments[0] === "object") ? arguments[0] : arguments[1];
+    const children = [
+        arguments[0]?.children ??
+        [].slice.call(arguments,
+            (typeof arguments[0] === "object") ? 1 : 2
+        )
+    ].flat(2);
 
     const elem = document.createElement(tagName);
     for(let attr in props) {
@@ -102,6 +134,14 @@ function createElement() {
             case "style":
                 if(typeof props.style == "string") elem.style.cssText = props.style;
                 else for(let sp in props.style) elem.style[sp] = props.style[sp];
+                break;
+            case "text":
+                elem.append(value);
+                break;
+            case "<>":
+            case "tag":
+            case "tagname":
+            case "children":
                 break;
             default:
                 elem.setAttribute(attr, value);
