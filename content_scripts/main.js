@@ -29,13 +29,7 @@ function parseElement(element = document.body) {
                 string: node.textContent
             }).then(objects => {
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-                const isInA = node.parentElement?.closest("a");
-                const nodeList = objects.map(obj => {
-                    if(typeof obj === "string") return obj;
-                    if(!obj.pcode) return obj.name;
-                    return createElement(isInA ? "span" : "a", {title: obj.pcode}, [obj.name]);
-                })
-                node.replaceWith(...nodeList);
+                node.replaceWith(...objects.map(createElement));
             });
         }, 1);
     });

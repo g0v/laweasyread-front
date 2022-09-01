@@ -32,49 +32,28 @@ const artNumberParserOptions = [
         example: "§91-1 Ⅱ⑤"   // 羅馬數字：U+2160~216B ；圓圈數字：U+2460~2473
     }*/
 ].map(option => {
-    // const trElem = parseElement(`\
-    //     <tr>\
-    //         <td>\
-    //             <label>\
-    //                 <input type="radio" name="artNumberParserMethod" id="artNumberParserMethod-${option.value}" value="${option.value}">\
-    //                 ${option.title}\
-    //             </label>\
-    //         </td>\
-    //         <td><label for="artNumberParserMethod-${option.value}">${option.example}</label></td>\
-    //     </tr>\
-    // `);
-    // console.debug(trElem);
-    // trElem.querySelector("input").addEventListener("change", setData({artNumberParserMethod: option.value}));
-    // return trElem;
-
-    const optionElemProps = {
-        tag: "input",
-        type: "radio",
-        name: "artNumberParserMethod",
-        id: "artNumberParserMethod-" + option.value,
-        value: option.value,
-        onchange: () => setData({artNumberParserMethod: option.value})
-    };
-    return createElement({
-        tag: "tr",
-        children: [
-            {
-                tag: "td",
-                children: [{
-                    tag: "label",
-                    children: [optionElemProps, option.title]
-                }]
-            },
-            {
-                tag: "td",
-                children: [{
-                    tag: "label",
-                    for: optionElemProps.id,
-                    children: [option.example]
-                }]
-            }
-        ]
-    });
+    return createElement(
+        {tr: {children: [
+            {td: {children: [
+                {label: {children: [
+                    {input: {
+                        type: "radio",
+                        name: "artNumberParserMethod",
+                        id: `artNumberParserMethod-${option.value}`,
+                        value: option.value,
+                        onchange: () => setData({artNumberParserMethod: option.value})
+                    }},
+                    option.title
+                ]}}
+            ]}},
+            {td: {children: [
+                {label: {
+                    for: `artNumberParserMethod-${option.value}`,
+                    text: option.example
+                }}
+            ]}}
+        ]}}
+    );
 });
 $("#artNumberParserOptions").append(...artNumberParserOptions);
 

@@ -27,6 +27,7 @@ $("#parseCurrentTab").addEventListener("click", () =>
 $("#update").addEventListener("click", event => {
     const self = event.target;
     self.firstChild.replaceWith("更新中…");
+    self.disabled = true;
     browser.runtime.sendMessage({command: "update"})
     .then(
         () => self.remove(),

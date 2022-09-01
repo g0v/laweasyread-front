@@ -1,5 +1,3 @@
-const e = createElement;
-
 const setContent = (elem, ...nodes) => {
     let last;
     while(last = elem.lastChild) last.remove();
@@ -10,7 +8,7 @@ const show = elem => elem.style.display = "";
 
 
 // 顯示專案版本
-setContent($("#version"), browser.runtime.getManifest().version);
+setContent($("#version"), "v" + browser.runtime.getManifest().version);
 
 /**
  * 自己刻一個簡單的 router
@@ -26,10 +24,20 @@ const routes = [
 let activeTab;
 const main = $("main");
 routes.forEach((route, index) => {
-    const tab = parseElement(`<li class="nav-item me-2"><span class="nav-link btn">${route.title}</span></li>`);
+    const tab = createElement(
+        {li: {
+            class: "nav-item me-2",
+            children: [
+                {span: {
+                    class: "nav-link btn",
+                    text: route.title
+                }}
+            ]
+        }}
+    );
     $("#navbar").appendChild(tab);
 
-    const container = parseElement(`<div id="name-${route.name}"></div>`);
+    const container = createElement({div: {id: `name-${route.name}`}});
     tab.addEventListener("click", () => {
         if(tab.classList.contains("active")) return;
 
@@ -45,7 +53,7 @@ routes.forEach((route, index) => {
         .then(doc => {
             container.append(...doc.body.childNodes);
             $("main").appendChild(container);
-            document.head.appendChild(e("script", {src: `${route.name}.js`}));
+            document.head.append(createElement({script: {src: `${route.name}.js`}}));
         });
     });
 
