@@ -1,4 +1,8 @@
-importScripts("./LER.js");
+importScripts(
+    "../node_modules/kong-util/dist/web.js",
+    "./LER.js"
+);
+kongUtilWeb.use();
 
 browser.runtime.onInstalled.addListener(() => {
     // 若是初次安裝，則抓取法規資料。

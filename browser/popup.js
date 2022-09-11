@@ -1,3 +1,6 @@
+kongUtil.use("$");
+kongUtil.extendEventTargetPrototype();
+
 // 顯示專案版本
 $("#version").append(browser.runtime.getManifest().version);
 
@@ -12,19 +15,19 @@ getData(["autoParse", "localDate", "remoteDate"])
 });
 
 // 自動轉換的 checkbox
-$("#autoParse").addEventListener("click", event => {
+listen($("#autoParse"), "click", event => {
     const checked = event.target.checked;
     setData({autoParse: checked});
     if(checked) sendMessageToCurrentTab({command: "parseDocument"});
 });
 
 // 手動轉換的 button
-$("#parseCurrentTab").addEventListener("click", () =>
+listen($("#parseCurrentTab"), "click", () =>
     sendMessageToCurrentTab({command: "parseDocument"})
 );
 
 // 「更新」的 span
-$("#update").addEventListener("click", event => {
+listen($("#update"), "click", event => {
     const self = event.target;
     self.firstChild.replaceWith("更新中…");
     self.disabled = true;

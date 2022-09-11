@@ -1,6 +1,4 @@
-getData("autoParse").then(autoParse => {
-    if(autoParse) parseElement(document.body);
-});
+kongUtil.extendArrayPrototype();
 
 browser.runtime.onMessage.addListener(({command}) => {
     switch(command) {
@@ -11,11 +9,22 @@ browser.runtime.onMessage.addListener(({command}) => {
     }
 });
 
+getData("autoParse").then(autoParse => {
+    if(autoParse) parseElement(document.body);
+});
 
-/******** Functions ********/
 
+/**
+ * 轉換指定的元素。
+ * @param {Element} element
+ * @returns {Promise}
+ */
 function parseElement(element = document.body) {
-    const textNodes = getTextNodes(element, node => /[\u4E00-\u9FFF]{2}/.test(node.textContent));
+    const textNodes = getTextNodes(
+        element,
+        node => /[\u4E00-\u9FFF]{2}/.test(node.textContent),
+        "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
+    );
     return new Promise(resolve => {
         const intervalID = setInterval(() => {
             const node = textNodes.shift();
@@ -29,7 +38,7 @@ function parseElement(element = document.body) {
                 string: node.textContent
             }).then(objects => {
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-                node.replaceWith(...objects.map(createElement));
+                node.replaceWith(...objects.map(kongUtil.createElement));
             });
         }, 1);
     });

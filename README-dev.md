@@ -1,10 +1,15 @@
 # Development
 
-## Design Principle
+## Algorithm
 
-對所有文字節點比對所有法條名稱，然後將單一文字節點依規則替換成新的節點們。
-前台 (content scripts) 將文字節點的內容傳給後台 (background) ，後台處理成 JSON 物件丟回前台，再由前台把物件轉成 HTML 元素及置換。
-將法規資料維護在後台就好，不用讓前台每次都載入所有法規資料。
+對所有文字節點的內容進行比對，若內容包含法規名稱，則置換成新的 HTML 元素。
+
+1. 前端將第一個 `TextNode` 的 `textContent` 和 *某些特徵* 傳給後端。
+2. 後端依照 `ReplaceRule[]` 將前述字串拆為 `Fragment[]` 。此步驟只處理字串，每個被拆開的物件和字串彼此獨立。
+3. 後端將前述 `Fragment[]` 轉換為 `JsonElement[]` 並傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
+4. 前端用 `createHtmlElement()` 將前述 `JsonElement[]` 轉為 `HTMLElement[]` 。
+5. 前端將步驟一的 `TextNode` 置換為前述 `HTMLElement[]` 。
+6. 回到步驟一，但傳送的是下一個 `TextNode` 的資料。
 
 
 ## Files

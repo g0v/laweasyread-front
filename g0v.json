@@ -15,10 +15,11 @@
   "licenses": [
     {
       "type": "modified MIT",
-      "url": "https://github.com/g0v/laweasyread-front#license"
+      "url": "https://github.com/g0v/laweasyread-front/blob/v1.x/README-dev.md#license"
     }
   ],
   "keywords": [
+    "BrowserExtension",
     "JavaScript",
     "law"
   ],

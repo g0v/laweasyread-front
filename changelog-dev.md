@@ -3,6 +3,10 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
+## 2.0.0902
+2022-09-xx
+* 將常用函式庫獨立出去為 [JSML](https://www.npmjs.com/package/jsml-parser) 和 [kong-util](https://www.npmjs.com/package/kong-util) 。
+
 ## 2.0.0832
 2022-09-01
 * 修復 action popup 。
