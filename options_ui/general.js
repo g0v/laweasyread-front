@@ -1,6 +1,6 @@
 "use strict";
 
-const booleanOptions = ["autoParse", "enablePopup", "mojAddReferringArticles"];
+const booleanOptions = ["autoParse", "enablePopup", "mojAddReferringArticles", "autoUpdate"];
 
 /**
  * 條號轉換方式的選擇

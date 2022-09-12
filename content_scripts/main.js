@@ -1,4 +1,4 @@
-kongUtil.extendArrayPrototype();
+kongUtil.use();
 
 browser.runtime.onMessage.addListener(({command}) => {
     switch(command) {
@@ -15,10 +15,12 @@ getData("autoParse").then(autoParse => {
 
 
 /**
- * 轉換指定的元素。
+ * @func parseElement
+ * @desc 轉換指定的元素。
  * @param {Element} element
  * @returns {Promise}
  */
+// const createElement = jsml => kongUtil.createElement(jsml);
 function parseElement(element = document.body) {
     const textNodes = getTextNodes(
         element,
@@ -35,10 +37,12 @@ function parseElement(element = document.body) {
 
             browser.runtime.sendMessage({
                 command: "parseString",
-                string: node.textContent
+                string: node.textContent,
+                allowLink: !node.parentNode?.closest?.("a")
             }).then(objects => {
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-                node.replaceWith(...objects.map(kongUtil.createElement));
+                logger()(node.textContent, objects);
+                node.replaceWith(...objects.map(jsml => createElement(jsml)));
             });
         }, 1);
     });

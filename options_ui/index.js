@@ -1,3 +1,4 @@
+kongUtil.use();
 const setContent = (elem, ...nodes) => {
     let last;
     while(last = elem.lastChild) last.remove();

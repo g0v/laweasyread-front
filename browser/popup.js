@@ -1,4 +1,4 @@
-kongUtil.use("$");
+kongUtil.use("$", "listen");
 kongUtil.extendEventTargetPrototype();
 
 // 顯示專案版本

@@ -1,7 +1,8 @@
 {
-    "autoParse": true,
     "artNumberParserMethod": "hyphen",
+    "autoParse": true,
+    "autoUpdate": true,
     "enablePopup": true,
-    "mojAddReferringArticles": true,
-    "exclude_matches": []
+    "exclude_matches": [],
+    "mojAddReferringArticles": true
 }
