@@ -1,5 +1,4 @@
 kongUtil.use("$", "listen");
-kongUtil.extendEventTargetPrototype();
 
 // 顯示專案版本
 $("#version").append(browser.runtime.getManifest().version);
@@ -22,9 +21,10 @@ listen($("#autoParse"), "click", event => {
 });
 
 // 手動轉換的 button
-listen($("#parseCurrentTab"), "click", () =>
+listen($("#parseCurrentTab"), "click", event => {
     sendMessageToCurrentTab({command: "parseDocument"})
-);
+    event.target.disabled = true;
+});
 
 // 「更新」的 span
 listen($("#update"), "click", event => {
@@ -37,9 +37,6 @@ listen($("#update"), "click", event => {
         () => self.replaceWith("更新失敗")
     );
 });
-
-// 如果是 Firefox ，就隱藏立法院的搜尋表單（因為不知道怎麼讓他運作）
-if(navigator.userAgent.includes("Firefox")) $("#formLy").remove();
 
 // 用網址檢查現在的頁面是否可以被轉換
 browser.tabs.query({active: true, currentWindow: true})

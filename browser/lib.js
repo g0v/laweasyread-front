@@ -87,39 +87,6 @@ function getTextNodes(
 
 
 /**
- * @func parseChineseInt
- * @param {string} str
- * @returns {integer}
- *
- * @example /// 可用此測試
-    ["十", "二十", "十二", "一百", "一百零七", "一百十", "一百十七", "一百一十七", "一百二十七", "一千", "一千零七", "一千零十", "一千零十七", "一千零二十", "一千一百"].map(parseChineseInt)
-    ["伍", "五七六", "七零零二", "三四零"].map(parseChineseInt)
- */
-const digits = ["０零〇", "一壹", "二貳", "三參", "四肆", "五伍", "六陸", "七柒", "八捌", "九玖"];
-const exponents = {十: 10, 百: 100, 千: 1000};
-function parseChineseInt(str) {
-    str = str.replace(/\s/g, "");
-    let result = 0, digit = null;
-    if(!/[十百千]/g.test(str)) {
-        for(let char of str)
-            result = result * 10 + digits.findIndex(d => d.includes(char));
-        return result;
-    }
-    for(let char of str) {
-        if(exponents.hasOwnProperty(char)) {
-            if(char === "十" && !digit) digit = 1; // 一百十三
-            result += exponents[char] * digit;
-            digit = null;
-            continue;
-        }
-        digit = digits.findIndex(d => d.includes(char));
-    }
-    if(digit) result += digit; // 三十
-    return result;
-}
-
-
-/**
  * @callback NodeTester
  * @param {Node} node
  * @returns {boolean}

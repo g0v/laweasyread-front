@@ -1,4 +1,5 @@
-kongUtil.use();
+kongUtil.use("createElement");
+kongUtil.use("logger");
 
 browser.runtime.onMessage.addListener(({command}) => {
     switch(command) {
@@ -20,11 +21,10 @@ getData("autoParse").then(autoParse => {
  * @param {Element} element
  * @returns {Promise}
  */
-// const createElement = jsml => kongUtil.createElement(jsml);
 function parseElement(element = document.body) {
     const textNodes = getTextNodes(
         element,
-        node => /[\u4E00-\u9FFF]{2}/.test(node.textContent),
+        node => /[\u4E00-\u9FFF]{2}/.test(node.textContent), // 有連續中日韓字元
         "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
     );
     return new Promise(resolve => {
@@ -40,6 +40,7 @@ function parseElement(element = document.body) {
                 string: node.textContent,
                 allowLink: !node.parentNode?.closest?.("a")
             }).then(objects => {
+                objects = objects.flat();
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
                 logger()(node.textContent, objects);
                 node.replaceWith(...objects.map(jsml => createElement(jsml)));
