@@ -32,6 +32,8 @@ function parseElement(element = document.body) {
             const node = textNodes.shift();
             if(!node) {
                 clearInterval(intervalID);
+                const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
+                document.dispatchEvent(event);
                 return resolve(element);
             }
 
@@ -42,7 +44,6 @@ function parseElement(element = document.body) {
             }).then(objects => {
                 objects = objects.flat();
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-                logger()(node.textContent, objects);
                 node.replaceWith(...objects.map(jsml => createElement(jsml)));
             });
         }, 1);

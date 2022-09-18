@@ -1,33 +1,31 @@
-"use strict";
-{
-const e = domCrawler.createElement;
+kongUtil.use("$", "$$", "listen", "fetchDOM");
 
 /**
  * 設定預設法規。
  */
-const params = new URLSearchParams(location.search);
-const pcode = params.get("pcode");
-if(pcode) LER.loadLaws.then(() =>
-    LER.defaultLaw = LER.getLaw({PCode: pcode})
-);
+const pcode = (new URLSearchParams(location.search)).get("pcode");
+// if(pcode) LER.loadLaws.then(() =>
+//     LER.defaultLaw = LER.getLaw({PCode: pcode})
+// );
+
 
 /**
  * 將編章節（及各自後接的條文們）重新調整為巢狀結構，並計算 sticky 的 top 值。
  */
 const height = 36;
 const depths = [];
-document.querySelectorAll(".law-reg-content .h3").forEach((h3Elem, index, list) => {
-    const section = e("section");
-    while(h3Elem.nextElementSibling && h3Elem.nextElementSibling.className === "row")
-        section.appendChild(h3Elem.nextElementSibling);
-    h3Elem.replaceWith(section);
-    section.insertBefore(h3Elem, section.firstChild);
+$$(".law-reg-content .h3").forEach((h3, index, list) => {
+    const section = createElement({tag: "section"});
+    while(h3.nextElementSibling?.className === "row")
+        section.append(h3.nextElementSibling);
+    h3.replaceWith(section);
+    section.insertBefore(h3, section.firstChild);
 
-    const divDepth = section.dataset.lerDepth = h3Elem.className.substr(-1);
+    const divDepth = section.dataset.lerDepth = h3.className.slice(-1);
     for(let j = index - 1; j >= 0; --j) {
         const parentSection = list[j].parentNode;
         if(parentSection.dataset.lerDepth < divDepth) {
-            parentSection.appendChild(section);
+            parentSection.append(section);
             break;
         }
     }
@@ -39,7 +37,8 @@ const css = depths.map((depth, index) => {
         .char-${depth} ~ .row > .col-no { top: ${(index+1)*height}px; }
     `;
 }).join("\n");
-document.head.appendChild(e("style", {type: "text/css"}, css));
+document.head.appendChild(createElement({style: css}));
+
 
 /**
  * 加上「提及條文」區塊。
@@ -50,53 +49,43 @@ document.head.appendChild(e("style", {type: "text/css"}, css));
  */
 getData("mojAddReferringArticles").then(mojAddReferringArticles => {
     if(!mojAddReferringArticles) return;
-    LER.addEventListener("textNodeParsed", event => {
-        const line = event.detail.parent;
-        if(!/(^| )line-\d{4}( |$)/.test(line.className)) return;
-        if(line.firstChild.tagName === "P") return; // 若第一個 child 是 P ，表示已經處理過了。
-
-        // 先將 `div.line-*` 的內容再用一個 `p` 包起來，以利跟後續要增加的東西區隔。
-        line.appendChild(e("p", null, ...line.childNodes));
-
-        let articleGroups = line.querySelectorAll("a[data-range-text]");
-        if(!articleGroups.length) return; // 若沒有提到其他條文，那就不需要處理，也不用加上連結
-
-        const container = e(
-            "details",
-            {className: "LER-article-groups"},
-            e("summary") // 提示文字改用 CSS 寫在 summary::before ，以免使用者複製條文時會有多餘文字。
-        );
-        let onceToggled = false;
-        container.addEventListener("toggle", () => {
-            if(onceToggled) return;
-            onceToggled = true;
-            articleGroups.forEach(a => {
-                const pcode = a.dataset.pcode;
-                const loadingText = e("p", null, "讀取中…");
-                container.appendChild(loadingText);
-                fetchDOM(a.href).then(doc => {
-                    const body = doc.querySelector(".law-reg");
-                    if(!body || !body.querySelector(".row")) {
-                        console.info("找不到法條", a); // TODO
-                        loadingText.remove();
-                        return;
-                    }
-                    LER.parse(body, pcode);
-                    const section = e(
-                        "section",
-                        {data: {pcode}},
-                        doc.querySelector(".table-title"),
-                        body
-                    );
-                    section.querySelectorAll("[id]").forEach(elem => elem.removeAttribute("id")); // 非必要，就養成習慣要避免重複的 ID 。
-                    section.querySelectorAll(".btnZone, .text-danger > div").forEach(elem => elem.remove()); // 拿掉不需要的元件（也可以用 CSS 藏起來啦）
-
-                    loadingText.replaceWith(section);
-                });
+    listen(document, "lerParseEnd", ({detail: {target}}) => {
+        console.assert(target instanceof Element);
+        $$("div[class|=line]:has(>[data-norge]", target).forEach(line => {
+            const details = createElement({
+                details: {
+                    class: "LER-article-groups",
+                    $: [{tag: "summary"}]
+                }
             });
+            listen(details, "toggle", () => {
+                $$("[data-norge]", line).forEach(elem => {
+                    const loadingNode = createElement({p: "讀取中…"});
+                    details.append(loadingNode);
+                    fetchDOM(elem.href).then(doc => {
+                        const body = $(".law-reg", doc);
+                        if(!body || !$(".row", body)) {
+                            console.warn("找不到法條", elem.href);
+                            return loadingNode.remove();
+                        }
+                        parseElement(body);
+
+                        const head = createElement({
+                            tag: "div",
+                            class: "table-title"
+                        });
+                        head.append($(".table-title td", doc));
+
+                        const section = createElement({tag: "section"});
+                        section.append(head, body);
+                        $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
+                        // $$(".btnZone, .text-danger > div", section).forEach(elem => elem.remove());
+                        loadingNode.replaceWith(section);
+                    });
+                });
+
+            }, {once: true});
+            line.append(details);
         });
-        line.appendChild(container);
     });
 });
-
-}
