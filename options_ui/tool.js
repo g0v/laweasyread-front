@@ -1,6 +1,6 @@
 "use strict";
 
-$("#toolInput").addEventListener("input", () => {
+listen($("#toolInput"), "input", () => {
     setContent($("#toolResult"), $("#toolInput").value);
     // LER.parse($("#toolResult"));
 });

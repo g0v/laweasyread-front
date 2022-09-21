@@ -1,5 +1,4 @@
 "use strict";
-
 const booleanOptions = ["autoParse", "enablePopup", "mojAddReferringArticles", "autoUpdate"];
 
 /**
@@ -63,8 +62,8 @@ getData(booleanOptions.concat("artNumberParserMethod"))
     booleanOptions.forEach(option => {
         const checkbox = document.getElementById(option);
         checkbox.checked = storage[option];
-        checkbox.addEventListener("change", () =>
-            setData({ [option]: checkbox.checked })
+        listen(checkbox, "change",
+            () => setData({ [option]: checkbox.checked })
         );
     });
 });

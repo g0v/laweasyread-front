@@ -1,3 +1,4 @@
+"use strict";
 kongUtil.use();
 const setContent = (elem, ...nodes) => {
     let last;
@@ -39,24 +40,22 @@ routes.forEach((route, index) => {
     $("#navbar").appendChild(tab);
 
     const container = createElement({div: {id: `name-${route.name}`}});
-    tab.addEventListener("click", () => {
+    listen(tab, "click", () => {
         if(tab.classList.contains("active")) return;
-
-        document.querySelectorAll("header .nav-link").forEach(nl => nl.classList.remove("active"));
+        $$("header .nav-link").forEach(nl => nl.classList.remove("active"));
         tab.lastChild.classList.add("active");
-        main.lastChild?.remove();
-        main.appendChild(container);
+        clearElement(main);
+        main.append(container);
         history.replaceState(null, null, `#${route.name}`);
+    });
 
-        // 只在第一次顯示此元件時讀取內容
-        if(container.hasChildNodes()) return;
+    listen(tab, "click", () => {
         fetchDOM(`${route.name}.html`)
         .then(doc => {
             container.append(...doc.body.childNodes);
-            $("main").appendChild(container);
             document.head.append(createElement({script: {src: `${route.name}.js`}}));
         });
-    });
+    }, {once: true});
 
     if(!index || route.name === location.hash.substring(1)) activeTab = tab;
 });

@@ -25,7 +25,7 @@ getData(["localDate", "remoteDate", "lastCheck"])
  * 設定「檢查更新」鈕
  * 結果分為「安裝更新」和「不用更新」。
  */
-$("#updateButton").addEventListener("click", event => {
+listen($("#updateButton"), "click", event => {
     const self = event.target;
     const cl = self.classList;
     self.disabled = true;

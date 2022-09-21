@@ -13,7 +13,7 @@ hide($("#saveButton"));
 /**
  * 事件監聽
  */
-$("#editButton").addEventListener("click", () => {
+listen($("#editButton"), "click", () => {
     hide($("#editButton"));
     show($("#saveButton"));
     $("#saveButton").disabled = true;
@@ -30,15 +30,15 @@ const testRules = () => {
         : "沒有比對到任何規則，這個網址將套用「自動轉換」的設定。"
     ));
 };
-$("#sandbox").addEventListener("input", testRules);
+listen($("#sandbox"), "input", testRules);
 
-$("#exclude_matches").addEventListener("input", event => {
+listen($("#exclude_matches"), "input", () => {
     $("#saveButtonContainer").style.visibility = "";
     $("#saveButton").disabled = false;
     testRules();
 });
 
-$("#saveButton").addEventListener("click", event => {
+listen($("#saveButton"), "click", event => {
     const self = event.target;
     const em = $("#exclude_matches");
     self.disabled = true;
