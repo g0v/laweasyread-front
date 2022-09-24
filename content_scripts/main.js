@@ -10,8 +10,11 @@ browser.runtime.onMessage.addListener(({command}) => {
     }
 });
 
-getData("autoParse").then(autoParse => {
-    if(autoParse) parseElement(document.body);
+let enablePopup;
+getData(["autoParse", "enablePopup"]).
+then(storage => {
+    if(storage.autoParse) parseElement(document.body);
+    enablePopup = storage.enablePopup;
 });
 
 
@@ -27,6 +30,7 @@ function parseElement(element = document.body) {
         node => /[\u4E00-\u9FFF]{2}/.test(node.textContent), // 有連續中日韓字元
         "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
     );
+    console.time("LawEasyRead");
     return new Promise(resolve => {
         const intervalID = setInterval(() => {
             const node = textNodes.shift();
@@ -34,6 +38,7 @@ function parseElement(element = document.body) {
                 clearInterval(intervalID);
                 const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
                 document.dispatchEvent(event);
+                console.timeEnd("LawEasyRead");
                 return resolve(element);
             }
 
@@ -44,7 +49,22 @@ function parseElement(element = document.body) {
             }).then(objects => {
                 objects = objects.flat();
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-                node.replaceWith(...objects.map(jsml => createElement(jsml)));
+                objects = objects.map(createElement);
+
+                if(enablePopup) objects
+                    .filter(elem => elem instanceof Element && elem.dataset.pcode && elem.dataset.norge)
+                    .forEach(elem => {
+                        listen(elem, "mouseenter", logger("mouseenter"));
+                    })
+                ;
+
+                const isLastChild = !node.nextSibling;
+                node.replaceWith(...objects);
+                if(isLastChild) {
+                    const parent = objects[0].parentNode;
+                    const event = new CustomEvent("lerParseEnd");
+                    parent.dispatchEvent(event);
+                }
             });
         }, 1);
     });

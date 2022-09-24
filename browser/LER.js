@@ -125,7 +125,7 @@ async function loadStaticRules(laws) {
  * @param {string} param0.string
  * @returns {JsonElement[]}
  */
-function parseString({string, allowLink = true, defaultLaw}, {url}) {
+function parseString({string, allowLink = true, defaultLaw}) {
     // const pcode = (new URL(url)).searchParams.get("pcode");
     // if(pcode) {
     //     // 判斷「本法」（常見於被授權的細則、辦法）
@@ -196,6 +196,7 @@ function parseString({string, allowLink = true, defaultLaw}, {url}) {
                     });
                     else jsml.tag = "span";
                     result[index] = jsml;
+                    break;
                 }
                 // 若提到多個釋字，則「釋字」二字不宜有連結，而是數字有各自的連結。
                 const nodes = cur.jyis.reduce((nodes, jyi, index) => {
@@ -218,7 +219,6 @@ function parseString({string, allowLink = true, defaultLaw}, {url}) {
                 }, []);
                 const posttext = cur.text.substring(cur.jyis.pop().end);
                 if(posttext) nodes.push(posttext);
-                console.log(nodes);
                 result[index] = nodes;
                 break;
             }

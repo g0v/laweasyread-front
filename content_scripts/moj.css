@@ -121,7 +121,7 @@ details.LER-article-groups dd {
     width: auto;
 }
 
-.law-reg-content .table-title > table.table {
+.law-reg-content header.table-title {
     margin: 0;
 }
 

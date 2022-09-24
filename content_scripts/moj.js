@@ -45,47 +45,40 @@ document.head.appendChild(createElement({style: css}));
  *
  * 利用 HTML 的 `details` 和 `summary` ，在展開時才載入內容。
  * 載入的是全國法規資料庫自己的網頁，這樣就不用擔心版本更新問題了。
- * 載入後要再次呼叫 LER.parse 處理其內容，並且讓其內容提及其他條文時也有巢狀結構。
+ * 載入後要再次呼叫 `parseElement` 處理其內容，並且讓其內容提及其他條文時也有巢狀結構。
  */
 getData("mojAddReferringArticles").then(mojAddReferringArticles => {
     if(!mojAddReferringArticles) return;
-    listen(document, "lerParseEnd", ({detail: {target}}) => {
-        console.assert(target instanceof Element);
-        $$("div[class|=line]:has(>[data-norge]", target).forEach(line => {
-            const details = createElement({
-                details: {
-                    class: "LER-article-groups",
-                    $: [{tag: "summary"}]
-                }
-            });
-            listen(details, "toggle", () => {
-                $$("[data-norge]", line).forEach(elem => {
-                    const loadingNode = createElement({p: "讀取中…"});
-                    details.append(loadingNode);
-                    fetchDOM(elem.href).then(doc => {
-                        const body = $(".law-reg", doc);
-                        if(!body || !$(".row", body)) {
-                            console.warn("找不到法條", elem.href);
-                            return loadingNode.remove();
-                        }
-                        parseElement(body);
+    $$("div[class|=line]").forEach(line => listen(line, "lerParseEnd", () => {
+        const details = createElement({
+            tag: "details",
+            class: "LER-article-groups",
+            children: [{tag: "summary"}]
+        });
+        line.append(details);
+        listen(details, "toggle", embedArticles, {once: true});
+    }));
+});
 
-                        const head = createElement({
-                            tag: "div",
-                            class: "table-title"
-                        });
-                        head.append($(".table-title td", doc));
 
-                        const section = createElement({tag: "section"});
-                        section.append(head, body);
-                        $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
-                        // $$(".btnZone, .text-danger > div", section).forEach(elem => elem.remove());
-                        loadingNode.replaceWith(section);
-                    });
-                });
-
-            }, {once: true});
-            line.append(details);
+function embedArticles(event) {
+    const details = event.target;
+    $$("[data-norge]", details.parentNode).forEach(anchor => {
+        const loadingNode = createElement({p: "讀取中…"});
+        details.append(loadingNode);
+        fetchDOM(anchor.href).then(doc => {
+            const section = createElement(
+                {section: {$: [
+                    {header: {
+                        class: "table-title",
+                        $: $$(".table-title td > *", doc)
+                    }},
+                    $(".law-reg", doc) || "找不到法條"
+                ]}}
+            );
+            parseElement(section.lastChild);
+            $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
+            loadingNode.replaceWith(section);
         });
     });
-});
+}
