@@ -10,7 +10,6 @@ importScripts(
 );
 kongUtilDebug.use("logger");
 kongUtilWeb.use("fetchJSON", "fetchText");
-// kongUtilString.use("parseChineseNumber");
 
 const LER = (() => {
 
@@ -189,7 +188,10 @@ function parseString({string, allowLink = true, defaultLaw}) {
             }
             case "jyis": {
                 if(cur.jyis.length === 1) { // 若只提到一個釋字，則整個字串（包含「釋字」二字）都是連結。
-                    const jsml = {text: cur.text};
+                    const jsml = {
+                        text: cur.text,
+                        data: {jyi: cur.jyis[0].jyi}
+                    };
                     if(allowLink) Object.assign(jsml, {
                         tag: "a",
                         href: `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${cur.jyis[0].jyi}`
@@ -220,6 +222,10 @@ function parseString({string, allowLink = true, defaultLaw}) {
                 const posttext = cur.text.substring(cur.jyis.pop().end);
                 if(posttext) nodes.push(posttext);
                 result[index] = nodes;
+                break;
+            }
+            case "exclude": {
+                result[index] = cur.text;
                 break;
             }
             default: throw TypeError("unknonw object", cur);
@@ -257,6 +263,21 @@ function applyReplaceRule(string, {pattern, replacer}) {
     for(let i = debris.length - 1; i; --i)
         debris.splice(i, 0, replacer);
     return debris;
+}
+
+/**
+ * @func readFile
+ * @desc 讀取檔案後傳給呼叫此方法的前端。
+ * @param {string} request.file - 路徑。如無指定協定，則讀取擴充元件的檔案。
+ * @param {string} request.type - 讀檔方式， `text` 或 `json` 。
+ * @returns
+ */
+function readFile({file, type}) {
+    file = /:\/\//.test(file) ? file : browser.runtime.getURL(file);
+    switch(type) {
+        case "text": return fetchText(file);
+        case "json": return fetchJSON(file);
+    }
 }
 
 
@@ -356,12 +377,11 @@ const dynamicRules = [
 
 
 return {
-    applyReplaceRule, // debug only
-
     loadStaticRules,
     checkUpdate,
     update,
-    parseString
+    parseString,
+    readFile
 };
 
 })();

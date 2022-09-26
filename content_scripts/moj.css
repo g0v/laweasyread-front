@@ -89,12 +89,6 @@ details.LER-article-groups > summary::before {
     content: "提及條文"; /* 為了讓使用者複製條文時不會複製到提示文字 */
 }
 
-details.LER-article-groups .LER-modal-title,
-details.LER-article-groups .LER-modal-date {
-    display: inline-block;
-    margin-right: 1em;
-}
-
 details.LER-article-groups section {
     padding: 0 .5em;
     margin-bottom: .5em;

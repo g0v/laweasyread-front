@@ -1,4 +1,4 @@
-kongUtil.use("$", "$$", "listen", "fetchDOM");
+kongUtil.use("$$", "fetchDOM");
 
 /**
  * 設定預設法規。
@@ -67,16 +67,18 @@ function embedArticles(event) {
         const loadingNode = createElement({p: "讀取中…"});
         details.append(loadingNode);
         fetchDOM(anchor.href).then(doc => {
+            const body = $(".law-reg", doc);
+            if(!body) body = "找不到法條。";
+            else parseElement(document.adoptNode(body));
             const section = createElement(
                 {section: {$: [
                     {header: {
                         class: "table-title",
                         $: $$(".table-title td > *", doc)
                     }},
-                    $(".law-reg", doc) || "找不到法條"
+                    body
                 ]}}
             );
-            parseElement(section.lastChild);
             $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
             loadingNode.replaceWith(section);
         });
