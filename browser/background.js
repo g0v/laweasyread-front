@@ -31,3 +31,5 @@ browser.runtime.onMessage.addListener((request, sender, callback) => {
         return !!result.then(callback); // return true for callback to be called async
     callback(result);
 });
+
+LER.loadStaticRules();

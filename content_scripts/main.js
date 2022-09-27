@@ -77,8 +77,8 @@ function parseElement(element = document.body) {
  * @returns {undefined} undefined
  *
  *  做四件事：
- *  1. 滑鼠首次移入目標時，建立彈出窗格；
- *  2. 滑鼠移入目標時，顯示窗格；
+ *  1. 滑鼠首次移入目標時，同步建立彈出窗格，異步載入資料，載入資料後再次定位窗格；
+ *  2. 滑鼠移入目標時，顯示並定位窗格；
  *  3. 滑鼠移出目標時，若也不在窗格內，則隱藏窗格；
  *  4. 滑鼠移出窗格時，若也不在目標內，則隱藏窗格。
  */
@@ -88,104 +88,39 @@ function bindPopup(elem) {
     if(!(jyi || pcode && norge)) return;
 
     let popup;
+    const onMouseLeave = event => {
+        if(isEventInElem(elem, event) || isEventInElem(popup, event)) return;
+        if($(".LER-popup-pin", popup).checked) return;
+        popup.style.display = "none";
+    };
+
     listen(elem, "mouseenter", event => {
-        popup = createPopup(elem.dataset, event);
+        // 為同步建立空白窗格，就不從後端取得 JSML ，而是複製已載入的 DOM 。
+        popup = popupTemplate.cloneNode(true);
+        const body = $(".LER-popup-body", popup);
+        body.textContent = "讀取中…";
         document.body.append(popup);
-        listen(popup, "mouseleave", event => {
-            if(!isEventInElem(elem, event)) popup.style.display = "none";
+        listen(popup, "mouseleave", onMouseLeave);
+
+        // 異步載入資料。
+        browser.runtime.sendMessage(Object.assign(
+            {command: "createPopupJSML"},
+            elem.dataset
+        )).then(({headers, bodyParts}) => {
+            $("header", popup).append(...headers.map(createElement));
+            body.textContent = "";
+            body.append(...bodyParts.map(createElement));
+            parseElement(body);
+            setPopupPosition(popup, event); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
     }, {once: true});
+
     listen(elem, "mouseenter", event => {
         if(!popup) throw new ReferenceError("popup does not exist.");
         setPopupPosition(popup, event);
     });
-    listen(elem, "mouseleave", event => {
-        if(!isEventInElem(popup, event)) popup.style.display = "none";
-    });
-}
 
-/**
- * 建立滑鼠移過時要彈出的窗格
- * @param {DOMStringMap} dataset
- * @param {MouseEvent} event
- * @returns {Element}
- */
-function createPopup({jyi, pcode, norge}, event) {
-    const popup = popupTemplate.cloneNode(true);
-    let promise;
-    if(jyi) promise =
-        fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`)
-        .then(jyi => {
-            const header = createElement(
-                {header: {$: [
-                    {a: {
-                        href: 'http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=' + jyi.number,
-                        $: [`釋字第 ${jyi.number} 號 `, {time: jyi.date}]
-                    }}
-                ]}}
-            );
-            if(jyi.title) header.append(createElement({div: jyi.title}));
-            $("header", popup).replaceWith(header);
-
-            let body = {dl: {class: "LER-popup-body", $: []}};
-            if(jyi.issue) body.dl.$.push({dt: "爭點"}, {dd: jyi.issue});
-            body.dl.$.push({dt: "解釋文"}, {dd: {$:
-                jyi.holding.split("\n").map(para => ({li: para}))
-            }});
-            if(jyi.reasoning)
-                body.dl.$.push({dt: "理由書"}, {dd: {$:
-                    jyi.reasoning.split("\n").map(para => ({li: para}))
-                }});
-            body = createElement(body);
-            parseElement(body);
-            $(".LER-popup-body", popup).replaceWith(body);
-        })
-    ;
-    if(pcode && norge) promise =
-        fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/FalVMingLing/${pcode}.json`)
-        .then(law => {
-            const date = law.lastUpdate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-            const header = createElement(
-                {header: {$: [
-                    law.title, {time: date}
-                ]}}
-            );
-            $("header", popup).replaceWith(header);
-
-            /// "3.1-5,7.1" => [[301, 500], [701]]
-            const ranges = norge.split(",").map(range => {
-                return range.split("-").map(articleNumber => {
-                    const numbers = articleNumber.split(".").map(s => parseInt(s));
-                    return numbers[0] * 100 + (numbers[1] || 0);
-                });
-            });
-            const articles = law.articles.filter(({number}) =>
-                ranges.some(([start, end]) => end
-                    ? (number >= start && number <= end)
-                    : (start === number)
-                )
-            );
-
-            let body = {dl: {class: "LER-popup-body", $: []}};
-            articles.forEach(({number, content}) => {
-                const aug = number % 100;
-                number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
-                body.dl.$.push({dt: `第 ${number} 條`});
-
-                content = content.split("\r\n").map(line => ({li: line}));
-                body.dl.$.push(
-                    {dd: {$: [
-                        {ul: {$: content}}
-                    ]}}
-                );
-            });
-            body = createElement(body);
-            parseElement(body);
-            $(".LER-popup-body", popup).replaceWith(body);
-        })
-    ;
-    promise.then(() => setPopupPosition(popup, event));
-    return popup;
+    listen(elem, "mouseleave", onMouseLeave);
 }
 
 

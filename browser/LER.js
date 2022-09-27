@@ -15,7 +15,7 @@ const LER = (() => {
 
 /**
  * @private
- * @const {string}
+ * @const {string} remoteDocRoot
  * @desc 資料存放在 jsDelivr
  */
 const remoteDocRoot = "https://cdn.jsdelivr.net/gh";
@@ -90,12 +90,13 @@ async function update() {
 /**
  * @func loadStaticRules
  * @desc 讀取置換規則。
+ * @param {Object[]} laws
  * @returns {Promise.<ReplaceRule[]>} 置換規則陣列。
  *
  * 法規名稱與排除名單必須合併在一起，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
  */
 async function loadStaticRules(laws) {
-    if(!laws) laws = await getData("laws");
+    if(!laws) laws = (await getData("laws")) || [];
     const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
     return replaceRules = laws
@@ -121,7 +122,10 @@ async function loadStaticRules(laws) {
 /**
  * @func parseString
  * @desc 將字串轉換成可建立成 HTML 元素的物件列表。
- * @param {string} param0.string
+ * @param {Object} request
+ * @param {string} request.string
+ * @param {boolean} [request.allowLink=true]
+ * @param {string} [defaultLaw]
  * @returns {JsonElement[]}
  */
 function parseString({string, allowLink = true, defaultLaw}) {
@@ -268,9 +272,10 @@ function applyReplaceRule(string, {pattern, replacer}) {
 /**
  * @func readFile
  * @desc 讀取檔案後傳給呼叫此方法的前端。
+ * @param {Object} request
  * @param {string} request.file - 路徑。如無指定協定，則讀取擴充元件的檔案。
  * @param {string} request.type - 讀檔方式， `text` 或 `json` 。
- * @returns
+ * @returns {Promise}
  */
 function readFile({file, type}) {
     file = /:\/\//.test(file) ? file : browser.runtime.getURL(file);
@@ -278,6 +283,76 @@ function readFile({file, type}) {
         case "text": return fetchText(file);
         case "json": return fetchJSON(file);
     }
+}
+
+
+/**
+ * @func createPopupJSML
+ * @desc 讀取並整理資料，準備建立彈出窗格。
+ * @param {DOMStringMap} dataset
+ * @returns {Promise.<Object>} {headers, bodyParts}
+ */
+function createPopupJSML({jyi, pcode, norge}) {
+    // logger("createPopupJSML")(...arguments);
+    if(jyi) return fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`)
+        .then(jyi => {
+            const headers = [
+                {a: {
+                    href: 'http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=' + jyi.number,
+                    $: [`釋字第 ${jyi.number} 號 `, {time: jyi.date}]
+                }}
+            ];
+            if(jyi.title) headers.push({div: jyi.title});
+
+            const bodyParts = [];
+            if(jyi.issue) bodyParts.push({dt: "爭點"}, {dd: jyi.issue});
+            bodyParts.push({dt: "解釋文"}, {dd: {$:
+                jyi.holding.split("\n").map(para => ({li: para}))
+            }});
+            if(jyi.reasoning) bodyParts.push({dt: "理由書"}, {dd: {$:
+                jyi.reasoning.split("\n").map(para => ({li: para}))
+            }});
+
+            // logger("createJyiPopup")(jyi, headers, bodyParts);
+            return {headers, bodyParts};
+        })
+    ;
+    if(pcode && norge) return fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/FalVMingLing/${pcode}.json`)
+        .then(law => {
+            const date = law.lastUpdate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+            const headers = [law.title, {time: date}];
+
+            /// "3.1-5,7.1" => [[301, 500], [701]]
+            const ranges = norge.split(",").map(range => {
+                return range.split("-").map(articleNumber => {
+                    const numbers = articleNumber.split(".").map(s => parseInt(s));
+                    return numbers[0] * 100 + (numbers[1] || 0);
+                });
+            });
+            const articles = law.articles.filter(({number}) =>
+                ranges.some(([start, end]) => end
+                    ? (number >= start && number <= end)
+                    : (start === number)
+                )
+            );
+            const bodyParts = [];
+            articles.forEach(({number, content}) => {
+                const aug = number % 100;
+                number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
+                bodyParts.push({dt: `第 ${number} 條`});
+
+                content = content.split("\r\n").map(line => ({li: line}));
+                bodyParts.push(
+                    {dd: {$: [
+                        {ul: {$: content}}
+                    ]}}
+                );
+            });
+
+            // logger("createArticlesPopup")(pcode, norge, headers, bodyParts);
+            return {headers, bodyParts};
+        })
+    ;
 }
 
 
@@ -381,7 +456,8 @@ return {
     checkUpdate,
     update,
     parseString,
-    readFile
+    readFile,
+    createPopupJSML
 };
 
 })();
