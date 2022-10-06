@@ -1,14 +1,4 @@
 /**
- * 修正首頁的「熱門法規瀏覽」
- */
-.section-hot a span:not(:first-of-type) {
-    width: auto !important;
-    background-color: inherit !important;
-    color: inherit !important;
-    margin-right: 0 !important;
-}
-
-/**
  * 將條號改為 sticky
  */
 .law-content .row {

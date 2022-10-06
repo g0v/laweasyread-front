@@ -15,13 +15,6 @@ const LER = (() => {
 
 /**
  * @private
- * @const {string} remoteDocRoot
- * @desc 資料存放在 jsDelivr
- */
-const remoteDocRoot = "https://cdn.jsdelivr.net/gh";
-
-/**
- * @private
  * @func pcn
  * @desc alias of `kongUtilString.parseChineseNumber()`
  */
@@ -55,7 +48,7 @@ let replaceRules = [];
 async function checkUpdate() {
     const [localDate = "", remoteDate] = await Promise.all([
         getData("localDate"),
-        fetchText(remoteDocRoot + "/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"})
+        fetchText("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"})
     ]);
     setData({
         remoteDate,
@@ -73,14 +66,14 @@ async function update() {
     const remoteDate = await checkUpdate();
     if(!remoteDate) return false;
 
-    const [laws, aliases] = await Promise.all([
-        fetchJSON(remoteDocRoot + "/kong0107/mojLawSplitJSON@arranged/index.json", { cache: "no-cache" }),
+    const [map, aliases] = await Promise.all([
+        fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
         fetchJSON("/data/aliases.json")
     ]);
-    laws.forEach(law => {
-        if(aliases[law.pcode]) law.aliases = aliases[law.pcode];
-        delete law.lastUpdate;
-        delete law.english;
+    const laws = Object.keys(map).map(pcode => {
+        const law = {pcode, name: map[pcode]};
+        if(aliases[pcode]) law.aliases = aliases[pcode];
+        return law;
     });
     setData({laws, localDate: remoteDate});
     loadStaticRules(laws);
@@ -292,67 +285,85 @@ function readFile({file, type}) {
  * @param {DOMStringMap} dataset
  * @returns {Promise.<Object>} {headers, bodyParts}
  */
-function createPopupJSML({jyi, pcode, norge}) {
-    // logger("createPopupJSML")(...arguments);
-    if(jyi) return fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`)
-        .then(jyi => {
-            const headers = [
-                {a: {
-                    href: 'http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=' + jyi.number,
-                    $: [`釋字第 ${jyi.number} 號 `, {time: jyi.date}]
+async function createPopupJSML({jyi, pcode, norge}) {
+    let headers = [], bodyParts = [];
+    if(jyi) {
+        jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
+        headers = [`釋字第 ${jyi.number} 號 `, {time: jyi.date}];
+
+        if(jyi.title) bodyParts.push({dd: jyi.title});
+        if(jyi.issue) bodyParts.push({dt: "爭點"},
+            {dd: {$:
+                jyi.issue.split("\n").map(para => ({p: para}))
+            }}
+        );
+        bodyParts.push({dt: "解釋文"},
+            {dd: {$: [
+                {ol: {
+                    class: "list-style-decimal",
+                    $: jyi.holding.split("\n").map(para => ({li: para.trim()}))
                 }}
-            ];
-            if(jyi.title) headers.push({div: jyi.title});
+            ]}}
+        );
+        if(jyi.reasoning) bodyParts.push({dt: "理由書"},
+            {dd: {$: [
+                {ol: {
+                    class: "list-style-decimal",
+                    $: jyi.reasoning.split("\n").map(para => ({li: para.trim()}))
+                }}
+            ]}}
+        );
+    }
+    if(pcode && norge) {
+        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`);
+        const date = law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
+        headers = [law.LawName + " ", {time: date}];
 
-            const bodyParts = [];
-            if(jyi.issue) bodyParts.push({dt: "爭點"}, {dd: jyi.issue});
-            bodyParts.push({dt: "解釋文"}, {dd: {$:
-                jyi.holding.split("\n").map(para => ({li: para}))
-            }});
-            if(jyi.reasoning) bodyParts.push({dt: "理由書"}, {dd: {$:
-                jyi.reasoning.split("\n").map(para => ({li: para}))
-            }});
+        if(law.discarded) headers.splice(1, 0,
+            {span: {
+                class: "LER-badge-discard",
+                text: "已廢止"
+            }}
+        );
+        // const today = (new Date()).toJSON().replaceAll("-", "").substring(0,8);
+        // if(law?.effectiveDate > today) {
+        //     const text = (law.effectiveDate === "9999-12-31") ? "未全部施行，日期待定" : `將於${law.effectiveDate}全部施行`;
+        //     headers.push(
+        //         {span : {
+        //             class: "LER-badge-future",
+        //             text,
+        //             title: law.effectiveContent
+        //         }}
+        //     );
+        // }
 
-            // logger("createJyiPopup")(jyi, headers, bodyParts);
-            return {headers, bodyParts};
-        })
-    ;
-    if(pcode && norge) return fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/FalVMingLing/${pcode}.json`)
-        .then(law => {
-            const date = law.lastUpdate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-            const headers = [law.title, {time: date}];
-
-            /// "3.1-5,7.1" => [[301, 500], [701]]
-            const ranges = norge.split(",").map(range => {
-                return range.split("-").map(articleNumber => {
-                    const numbers = articleNumber.split(".").map(s => parseInt(s));
-                    return numbers[0] * 100 + (numbers[1] || 0);
-                });
+        /// "3.1-5,7.1" => [[301, 500], [701]]
+        const ranges = norge.split(",").map(range => {
+            return range.split("-").map(articleNumber => {
+                const numbers = articleNumber.split(".").map(s => parseInt(s));
+                return numbers[0] * 100 + (numbers[1] || 0);
             });
-            const articles = law.articles.filter(({number}) =>
-                ranges.some(([start, end]) => end
-                    ? (number >= start && number <= end)
-                    : (start === number)
-                )
+        });
+        const articles = law.articles.filter(({number}) =>
+            ranges.some(([start, end]) => end
+                ? (number >= start && number <= end)
+                : (start === number)
+            )
+        );
+        articles.forEach(({number, content}) => {
+            const aug = number % 100;
+            number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
+            bodyParts.push({dt: `第 ${number} 條`});
+
+            content = content.split("\r\n").map(line => ({li: line}));
+            bodyParts.push(
+                {dd: {$: [
+                    {ul: {$: content}}
+                ]}}
             );
-            const bodyParts = [];
-            articles.forEach(({number, content}) => {
-                const aug = number % 100;
-                number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
-                bodyParts.push({dt: `第 ${number} 條`});
-
-                content = content.split("\r\n").map(line => ({li: line}));
-                bodyParts.push(
-                    {dd: {$: [
-                        {ul: {$: content}}
-                    ]}}
-                );
-            });
-
-            // logger("createArticlesPopup")(pcode, norge, headers, bodyParts);
-            return {headers, bodyParts};
-        })
-    ;
+        });
+    }
+    return {headers, bodyParts};
 }
 
 

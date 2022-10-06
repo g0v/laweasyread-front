@@ -1,4 +1,9 @@
-kongUtil.use("$$", "fetchDOM");
+kongUtil.use("$$", "fetchDOM", "createElement");
+
+/**
+ * 排除首頁的「熱門法規瀏覽」（排版考量）
+ */
+$(".section-hot")?.classList.add("LER-skip");
 
 /**
  * 設定預設法規。

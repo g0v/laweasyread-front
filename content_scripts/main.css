@@ -1,4 +1,4 @@
-[class^="LER-stratum-"],
+/* [class^="LER-stratum-"],
 [class*=" LER-stratum-"] {
     margin: 0 0 0 2em !important;
     padding: 0;
@@ -40,12 +40,12 @@
 }
 .LER-stratum-2 > li > p:first-child {
     text-indent: -2em;
-}
+}*/
 
 /**
  * 全國法規資料庫的「目」的括號是全形；但立法院法律系統中的括號是半形。
  */
-.LER-stratum-3 > li {
+/* .LER-stratum-3 > li {
     padding-left: 1em;
 }
 .LER-stratum-3 > li > p:first-child {
@@ -64,7 +64,7 @@
 }
 .LER-stratum-5 > li > p:first-child {
     text-indent: -2.5em;
-}
+} */
 
 
 /**
@@ -89,13 +89,15 @@
     font-size: inherit;
     margin: 0;
     padding: 0;
-    list-style-type: none;
-    line-height: 1.25;
+    list-style-type: inherit;
+    line-height: 1.75;
+    background: #eee;
 }
 .LER-popup-before,
 .LER-popup-after {
     width: 0;
     height: 0;
+    background: transparent;
     border-style: solid;
     border-color: #44444488 transparent;
     border-width: .6em .4em;
@@ -115,7 +117,7 @@
     border: 1px solid #44444488;
     border-radius: .5em;
     position: relative;
-    background: #eeeeee;
+    box-shadow: .3em .3em .2em #00000040;
 }
 .LER-popup-pin {
     position: absolute;
@@ -132,6 +134,21 @@
 }
 .LER-popup > header:not(:empty) {
     border-bottom: 1px dashed #888;
+    padding-right: 1em;
+}
+[class|=LER-badge] {
+    font-size: smaller;
+    padding: 0 .2em .1em;
+    border-radius: .25em;
+}
+.LER-badge-discard {
+    background-color: #DC3545;
+    color: #fff;
+}
+.LER-badge-future {
+    background-color: #FFC107;
+    color: #000;
+    cursor: help;
 }
 .LER-popup > header time {
     font-size: smaller;
@@ -153,9 +170,34 @@
 .LER-popup-body a[href]:hover {
     text-decoration: underline;
 }
+.LER-popup-body dt {
+    position: sticky;
+    top: 0;
+    background: linear-gradient(to right, #eeeeeeff, #eeeeee00);
+}
+.LER-popup-body dt:not(:first-child) {
+    margin-top: .6em;
+}
+.LER-popup-body ol {
+    padding-left: 1.75em; /* 須能顯示二位數 */
+}
+.list-style-decimal {
+    list-style-type: decimal;
+}
+.list-style-upper-roman {
+    list-style-type: upper-roman;
+}
+.list-style-cjk {
+    list-style-type: cjk-decimal;
+    padding-left: 2.5em;
+}
+.LER-popup-body p,
+.LER-popup-body li {
+    margin-bottom: .5em;
+}
 
 
-#LER-float-box {
+/* #LER-float-box {
     position: fixed;
     background-color: #000;
     color: #fff;
@@ -222,4 +264,4 @@
 
 #LER-float-box dt {
     font-weight: bold;
-}
+} */

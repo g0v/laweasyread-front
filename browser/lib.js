@@ -49,7 +49,7 @@ const sendMessageToCurrentTab = message =>
  * @func getTextNodes
  * @desc 取得文字節點們。
  * @param {Node} [root = document.body]
- * @param {NodeTester} [filter = ()=>true] - test whether to traverse the text node
+ * @param {NodeTester} [filter] - test whether to traverse the node
  * @param {string|string[]} [skipTags=script,style] - html tags to be skipped
  * @returns {Node[]} 符合條件的文字節點陣列。
  *
@@ -61,7 +61,7 @@ const sendMessageToCurrentTab = message =>
  */
 function getTextNodes(
     root = document.body,
-    filter = () => true,
+    filter,
     skipTags = "script,style"
 ) {
     if(typeof skipTags === "string") skipTags = skipTags.split(",");
@@ -71,13 +71,9 @@ function getTextNodes(
         root,
         NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
         node => {
-            if(node.nodeType !== Node.TEXT_NODE) {
-                return skipTags.includes(node.nodeName)
-                    ? NodeFilter.FILTER_REJECT
-                    : NodeFilter.FILTER_SKIP
-                ;
-            }
-            return filter(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+            if(skipTags.includes(node.nodeName)) return NodeFilter.FILTER_REJECT;
+            if(typeof filter === "function" && !filter(node)) return NodeFilter.FILTER_REJECT;
+            return (node.nodeType === Node.TEXT_NODE) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_SKIP;
         }
     );
     let node;

@@ -28,14 +28,18 @@ getData(["autoParse", "enablePopup"])
 });
 
 /**
- * 轉換指定的元素。
+ * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
  * @param {Element} element
  * @returns {Promise}
  */
 function parseElement(element = document.body) {
     const textNodes = getTextNodes(
         element,
-        node => /[\u4E00-\u9FFF]{2}/.test(node.textContent), // 有連續中日韓字元
+        node => (
+            (node.nodeType === Node.TEXT_NODE)
+            ? /[\u4E00-\u9FFF]{2}/.test(node.textContent) // 有連續中日韓字元
+            : !/(^|\x20)LER-/.test(node.className)
+        ),
         "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
     );
     console.time("LawEasyRead");
