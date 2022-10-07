@@ -44,13 +44,23 @@ document.head.appendChild(createElement({style: css}));
 /**
  * 加上「提及條文」區塊。
  *
- * 利用 HTML 的 `details` 和 `summary` ，在展開時才載入內容。
+ * 利用 HTML 的 `details` 和 `summary` ，在展開時才呼叫 `embedArticles()` 載入內容。
  * 載入的是全國法規資料庫自己的網頁，這樣就不用擔心版本更新問題了。
- * 載入後要再次呼叫 `parseElement` 處理其內容，並且讓其內容提及其他條文時也有巢狀結構。
+ * 載入後要再次呼叫 `parseElement` 處理其內容，並且呼叫 `addDetails` 讓內嵌條文提及其他條文時能有巢狀結構。
  */
-getData("mojAddReferringArticles").then(mojAddReferringArticles => {
-    if(!mojAddReferringArticles) return;
-    $$("div[class|=line]").forEach(line => listen(line, "lerParseEnd", () => {
+getData("mojAddReferringArticles").then(setting => {
+    if(!setting) return;
+    $$("div[class|=line]").forEach(addDetails);
+});
+
+/**
+ * 監聽 `div.line-*` 轉換完成的事件，加上 `<details>`
+ * @param {Element} line
+ *
+ * 以監聽方式執行，救不用等到 `createElement` 跑完整頁才觸發。
+ */
+function addDetails(line) {
+    listen(line, "lerParseEnd", () => {
         if(!$("[data-norge]", line)) return;
         const details = createElement({
             tag: "details",
@@ -59,8 +69,8 @@ getData("mojAddReferringArticles").then(mojAddReferringArticles => {
         });
         line.append(details);
         listen(details, "toggle", embedArticles, {once: true});
-    }, {once: true}));
-});
+    }, {once: true});
+}
 
 /**
  * 載入要嵌入的內容。
@@ -74,16 +84,18 @@ function embedArticles(event) {
         fetchDOM(anchor.href).then(doc => {
             const body = $(".law-reg", doc);
             if(!body) body = "找不到法條。";
-            else parseElement(document.adoptNode(body), anchor.dataset.pcode);
             const section = createElement(
                 {section: {$: [
                     {header: {
                         class: "table-title",
-                        $: $$(".table-title td > *", doc)
+                        $: $$(".table-title td > *:not(.law-vaildMemo)", doc)
                     }},
                     body
                 ]}}
             );
+            $$("div[class|=line]", section).forEach(addDetails);
+            parseElement(section.lastChild, anchor.dataset.pcode);
+
             $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
             loadingNode.replaceWith(section);
         });

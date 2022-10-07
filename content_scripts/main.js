@@ -10,6 +10,9 @@ let popupTemplate;
 /** @type {Object} */
 let pageDefaultLaw;
 
+/** @type {integer} */
+let counter = 0;
+
 browser.runtime.onMessage.addListener(({command}) => {
     switch(command) {
         case "parseDocument": // 來自 ./browser/popup.html
@@ -52,7 +55,7 @@ function searchLaw(string) {
  * @returns {Promise}
  */
 async function parseElement(element = document.body, defaultLaw) {
-    console.time("LawEasyRead");
+    console.time("LawEasyRead" + (++counter));
     const textNodes = getTextNodes(
         element,
         node => (
@@ -73,7 +76,7 @@ async function parseElement(element = document.body, defaultLaw) {
                 clearInterval(intervalID);
                 const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
                 document.dispatchEvent(event);
-                console.timeEnd("LawEasyRead");
+                console.timeEnd("LawEasyRead" + counter);
                 return resolve(element);
             }
 
