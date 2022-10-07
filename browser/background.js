@@ -4,7 +4,7 @@ browser.runtime.onInstalled.addListener(() => {
     // 若是初次安裝，則抓取法規資料。
     getData("version")
     .then(version => {
-        if(version) LER.loadStaticRules();
+        if(version) LER.loadRules();
         else LER.update();
     });
 
@@ -32,4 +32,4 @@ browser.runtime.onMessage.addListener((request, sender, callback) => {
     callback(result);
 });
 
-LER.loadStaticRules();
+LER.loadRules();

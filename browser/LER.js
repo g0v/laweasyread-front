@@ -76,19 +76,19 @@ async function update() {
         return law;
     });
     setData({laws, localDate: remoteDate});
-    loadStaticRules(laws);
+    loadRules(laws);
     return remoteDate;
 }
 
 /**
- * @func loadStaticRules
+ * @func loadRules
  * @desc 讀取置換規則。
  * @param {Object[]} laws
  * @returns {Promise.<ReplaceRule[]>} 置換規則陣列。
  *
  * 法規名稱與排除名單必須合併在一起，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
  */
-async function loadStaticRules(laws) {
+async function loadRules(laws) {
     if(!laws) laws = (await getData("laws")) || [];
     const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
@@ -118,15 +118,10 @@ async function loadStaticRules(laws) {
  * @param {Object} request
  * @param {string} request.string
  * @param {boolean} [request.allowLink=true]
- * @param {string} [defaultLaw]
+ * @param {Object} [defaultLaw]
  * @returns {JsonElement[]}
  */
 function parseString({string, allowLink = true, defaultLaw}) {
-    // const pcode = (new URL(url)).searchParams.get("pcode");
-    // if(pcode) {
-    //     // 判斷「本法」（常見於被授權的細則、辦法）
-    // }
-
     const result = replaceRules.reduce((acc, rule) =>
         acc.flatMap(strOrObj => {
             if(typeof strOrObj !== "string") return strOrObj;
@@ -159,19 +154,23 @@ function parseString({string, allowLink = true, defaultLaw}) {
                     data: {norge: cur.norge}
                 };
                 /**
-                 * 可能的情形：
-                 * - [x] 前面有法規名稱。
-                 * - [ ] 前面有「本法」，但現在的文章是施行細則，「本法」指的是別人。
-                 * - [x] 前面沒東西，或前面提到的「本法」就是自己。
-                 *
-                 * 注意前面也可能是「基本法」。
+                 * 前一物件可能是：
+                 * - [x] 法規名稱
+                 * - [x] 一般文字
+                 * - [x] 「本法」，指現在的法規自己
+                 * - [ ] 「本法」，但現在的頁面是施行細則，「本法」指的是母法。（須留意有些命令有多個母法）
                  */
                 let pcode = defaultLaw?.pcode;
                 const prev = result[index - 1];
                 if(prev) {
-                    if(prev.data?.pcode) pcode = prev.data.pcode;
-                    if(prev.endsWith?.("本法") || prev.endsWith?.("本條例")) {
-                        // todo: 判斷「本法」（常見於被授權的細則、辦法）
+                    if(prev.data?.pcode) pcode = prev.data.pcode; // 前面是法規名稱
+                    else if(typeof prev === "string" && defaultLaw) { // 前面是字串，且知道目前頁面是特定法規
+                        const match = prev.match(/本(法|條例|通則|規程|規則|細則|辦法|綱要|標準|準則)$/);
+                        if(match) {
+                            if(defaultLaw.name.endsWith(match[1])) ; // 「本法」是指自己的情形，已於宣告 `pcode` 時處理。
+                            else { // 「本法」是指母法
+                            }
+                        }
                     }
                 }
                 if(pcode) jsml.data.pcode = pcode;
@@ -286,7 +285,7 @@ function readFile({file, type}) {
  * @returns {Promise.<Object>} {headers, bodyParts}
  */
 async function createPopupJSML({jyi, pcode, norge}) {
-    let headers = [], bodyParts = [];
+    let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
         jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
         headers = [`釋字第 ${jyi.number} 號 `, {time: jyi.date}];
@@ -362,8 +361,10 @@ async function createPopupJSML({jyi, pcode, norge}) {
                 ]}}
             );
         });
+
+        defaultLaw = {pcode, name: law.name};
     }
-    return {headers, bodyParts};
+    return {headers, bodyParts, defaultLaw};
 }
 
 
@@ -463,7 +464,7 @@ const dynamicRules = [
 
 
 return {
-    loadStaticRules,
+    loadRules,
     checkUpdate,
     update,
     parseString,

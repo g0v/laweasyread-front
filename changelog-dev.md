@@ -3,21 +3,25 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
-## 2.0.0902
-2022-09-xx
+## 2.0.1001
+2022-10-07
+* 實作「本法」、「本條例」，但未支援該詞彙係指母法之情形。
+
+## 2.0.0910
+2022-10-06
 * 將常用函式庫獨立出去為 [JSML](https://www.npmjs.com/package/jsml-parser) 和 [kong-util](https://www.npmjs.com/package/kong-util) 。
+* 因應法規資料來源格式變更。
 
 ## 2.0.0832
 2022-09-01
 * 修復 action popup 。
-* 修復 options_ui 的分頁功能，但 `exclusion.js` 和 `tools.js` 還沒好。
+* 修復 options_ui 的部分分頁功能。
 * 更新引用的 Bootstrap 至 5.2 版。
 * 更新 `createElement()` 。
 
 ## 2.0.0831
 2022-08-31
 * 改為 Manifest V3 並重建架構。
-  幾乎還沒有功能。有些檔案之後仍可能刪除。
 * 棄用 `git submodule` ，如需引用其他專案，則使用 `npm install` 。
 * 將 `LER` 設計成只在 background 把字串處理成能序列化的物件，前台 (content script) 看不到 `LER` 。
 * 棄用 `domCrawler` ，改為針對專案而設計函式。

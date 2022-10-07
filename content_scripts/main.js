@@ -1,19 +1,27 @@
 kongUtil.use("$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML");
 kongUtil.use("logger");
 
+/** @type {boolean} */
+let enablePopup;
+
+/** @type {Element} */
+let popupTemplate;
+
+/** @type {Object} */
+let pageDefaultLaw;
+
 browser.runtime.onMessage.addListener(({command}) => {
     switch(command) {
-        case "parseDocument":
-            return parseElement(document.body);
+        case "parseDocument": // 來自 ./browser/popup.html
+            return parseElement(document.body, pageDefaultLaw);
         default:
             console.error("unknown command");
     }
 });
 
-let enablePopup, popupTemplate;
 getData(["autoParse", "enablePopup"])
 .then(storage => {
-    if(storage.autoParse) parseElement(document.body);
+    if(storage.autoParse) parseElement(document.body, pageDefaultLaw);
     if(enablePopup = storage.enablePopup) {
         browser.runtime.sendMessage({
             command: "readFile",
@@ -28,11 +36,23 @@ getData(["autoParse", "enablePopup"])
 });
 
 /**
- * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
- * @param {Element} element
+ * 用 `pcode` 或名稱找法規。
+ * @param {string} string
  * @returns {Promise}
  */
-function parseElement(element = document.body) {
+function searchLaw(string) {
+    const key = /^[A-Z]\d{7}$/.test(string) ? "pcode" : "name";
+    return getData("laws").then(laws => laws.find(law => law[key] === string));
+}
+
+/**
+ * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
+ * @param {Element} element
+ * @param {string} [defaultLawPcode]
+ * @returns {Promise}
+ */
+async function parseElement(element = document.body, defaultLaw) {
+    console.time("LawEasyRead");
     const textNodes = getTextNodes(
         element,
         node => (
@@ -42,7 +62,10 @@ function parseElement(element = document.body) {
         ),
         "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
     );
-    console.time("LawEasyRead");
+
+    if(typeof defaultLaw === "string" && defaultLaw)
+        defaultLaw = await searchLaw(defaultLaw);
+
     return new Promise(resolve => {
         const intervalID = setInterval(() => {
             const node = textNodes.shift();
@@ -57,7 +80,8 @@ function parseElement(element = document.body) {
             browser.runtime.sendMessage({
                 command: "parseString",
                 string: node.textContent,
-                allowLink: !node.parentNode?.closest?.("a")
+                allowLink: !node.parentNode?.closest?.("a"),
+                defaultLaw
             }).then(objects => {
                 objects = objects.flat();
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
@@ -110,11 +134,11 @@ function bindPopup(elem) {
         browser.runtime.sendMessage(Object.assign(
             {command: "createPopupJSML"},
             elem.dataset
-        )).then(({headers, bodyParts}) => {
+        )).then(({headers, bodyParts, defaultLaw}) => {
             $("header", popup).append(...headers.map(createElement));
             body.textContent = "";
             body.append(...bodyParts.map(createElement));
-            parseElement(body);
+            parseElement(body, defaultLaw);
             setPopupPosition(popup, event); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
     }, {once: true});
@@ -178,7 +202,7 @@ function setPopupPosition(popup, event) {
     ; // 如果目標元素比彈出窗格還要寬，那就依滑鼠在目標元素的相對位置來調整彈出窗格的X軸位置。
     if(left + popup.offsetWidth > document.body.clientWidth) // 不能讓彈出窗格超過畫面寬度
         left = document.body.clientWidth - popup.offsetWidth;
-    popup.style.left = left + "px";
+    popup.style.left = Math.max(left, 0) + "px";
 
     // 箭頭的位置：跟著滑鼠座標的X值，但不能超出彈出窗格本身。
     const arrowLeft = Math.min(

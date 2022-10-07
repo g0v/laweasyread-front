@@ -8,11 +8,7 @@ $(".section-hot")?.classList.add("LER-skip");
 /**
  * 設定預設法規。
  */
-const pcode = (new URLSearchParams(location.search)).get("pcode");
-// if(pcode) LER.loadLaws.then(() =>
-//     LER.defaultLaw = LER.getLaw({PCode: pcode})
-// );
-
+pageDefaultLaw = (new URLSearchParams(location.search)).get("pcode");
 
 /**
  * 將編章節（及各自後接的條文們）重新調整為巢狀結構，並計算 sticky 的 top 值。
@@ -55,6 +51,7 @@ document.head.appendChild(createElement({style: css}));
 getData("mojAddReferringArticles").then(mojAddReferringArticles => {
     if(!mojAddReferringArticles) return;
     $$("div[class|=line]").forEach(line => listen(line, "lerParseEnd", () => {
+        if(!$("[data-norge]", line)) return;
         const details = createElement({
             tag: "details",
             class: "LER-article-groups",
@@ -62,10 +59,13 @@ getData("mojAddReferringArticles").then(mojAddReferringArticles => {
         });
         line.append(details);
         listen(details, "toggle", embedArticles, {once: true});
-    }));
+    }, {once: true}));
 });
 
-
+/**
+ * 載入要嵌入的內容。
+ * @param {MouseEvent} event
+ */
 function embedArticles(event) {
     const details = event.target;
     $$("[data-norge]", details.parentNode).forEach(anchor => {
@@ -74,7 +74,7 @@ function embedArticles(event) {
         fetchDOM(anchor.href).then(doc => {
             const body = $(".law-reg", doc);
             if(!body) body = "找不到法條。";
-            else parseElement(document.adoptNode(body));
+            else parseElement(document.adoptNode(body), anchor.dataset.pcode);
             const section = createElement(
                 {section: {$: [
                     {header: {
