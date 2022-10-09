@@ -128,7 +128,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
             return applyReplaceRule(strOrObj, rule).filter(x => x);
         })
     , [string]);
-    if(result.length > 1 || result[0].type) logger()(string, result);
+    // if(result.length > 1 || result[0].type) logger()(string, result);
 
     for(let index = 0; index < result.length; ++index) {
         const cur = result[index];
@@ -313,59 +313,136 @@ async function createPopupJSML({jyi, pcode, norge}) {
             ]}}
         );
     }
-    if(pcode && norge) {
-        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`);
+    if(pcode) {
+        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`);//, {cache: "no-cache"});
         const date = law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
-        headers = [law.LawName + " ", {time: date}];
 
+        headers = [law.name + " ", {time: date}];
         if(law.discarded) headers.splice(1, 0,
             {span: {
                 class: "LER-badge-discard",
                 text: "已廢止"
             }}
         );
-        // const today = (new Date()).toJSON().replaceAll("-", "").substring(0,8);
-        // if(law?.effectiveDate > today) {
-        //     const text = (law.effectiveDate === "9999-12-31") ? "未全部施行，日期待定" : `將於${law.effectiveDate}全部施行`;
-        //     headers.push(
-        //         {span : {
-        //             class: "LER-badge-future",
-        //             text,
-        //             title: law.effectiveContent
-        //         }}
-        //     );
-        // }
 
-        /// "3.1-5,7.1" => [[301, 500], [701]]
-        const ranges = norge.split(",").map(range => {
-            return range.split("-").map(articleNumber => {
-                const numbers = articleNumber.split(".").map(s => parseInt(s));
-                return numbers[0] * 100 + (numbers[1] || 0);
+        if(norge) {
+            /// "3.1-5,7.1" => [[301, 500], [701]]
+            const ranges = norge.split(",").map(range => {
+                return range.split("-").map(articleNumber => {
+                    const numbers = articleNumber.split(".").map(s => parseInt(s));
+                    return numbers[0] * 100 + (numbers[1] || 0);
+                });
             });
-        });
-        const articles = law.articles.filter(({number}) =>
-            ranges.some(([start, end]) => end
-                ? (number >= start && number <= end)
-                : (start === number)
-            )
-        );
-        articles.forEach(({number, content}) => {
-            const aug = number % 100;
-            number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
-            bodyParts.push({dt: `第 ${number} 條`});
-
-            content = content.split("\r\n").map(line => ({li: line}));
+            const articles = law.articles.filter(({number}) =>
+                ranges.some(([start, end]) => end
+                    ? (number >= start && number <= end)
+                    : (start === number)
+                )
+            );
+            articles.forEach(({number, content}) => {
+                const aug = number % 100;
+                number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
+                bodyParts.push({dt: `第 ${number} 條`});
+                bodyParts.push(
+                    {dd: {$: [
+                        {ol: {
+                            class: (content.length > 1) ? "list-style-upper-roman" : "list-style-circle",
+                            $: createArticleDivisionJSML(content)
+                        }}
+                    ]}}
+                )
+            });
+        }
+        else {
+            bodyParts.push({dt: "類別"});
             bodyParts.push(
                 {dd: {$: [
-                    {ul: {$: content}}
+                    {ul: {$ :
+                        law.category.map(c => ({li: {
+                            style: "display: inline-block; margin-right: 1em",
+                            text: c,
+                        }}))
+                    }}
                 ]}}
             );
-        });
+
+            if(law.foreword) {
+                bodyParts.push({dt: "前言"});
+                bodyParts.push({dd: law.foreword});
+            }
+            if(law.LawEffectiveNote) {
+                bodyParts.push({dt: "生效內容"});
+                bodyParts.push({dd: {$:
+                    law.LawEffectiveNote.split("\r\n").map(n => ({p: n}))
+                }});
+            }
+            if(law.histories) {
+                bodyParts.push({dt: "沿革"});
+                bodyParts.push({dd: {$:
+                    law.histories.map(his => ({p: his}))
+                }});
+            }
+        }
 
         defaultLaw = {pcode, name: law.name};
     }
     return {headers, bodyParts, defaultLaw};
 }
+
+
+function createArticleDivisionJSML(divArr) {
+    console.log(divArr);
+    return divArr.map(div => {
+        if(div.table) return {li: {
+            class: "pre",
+            text: div.table
+        }};
+        const item =
+            {li: {$:
+                div.text.split("\n").map(line => ({p: line}))
+            }}
+        ;
+
+        // 計算縮排： ASCII 的話就半格，其他的就一格。
+        let match;
+        for(let re of articleDivisionDetectors) {
+            if(match = div.text.match(re)) break;
+        }
+        if(match) {
+            let indent = 0;
+            const ordinal = match[0];
+            for(let i = 0; i < ordinal.length; ++i)
+                indent += (ordinal.charCodeAt(i) > 0xff) ? 1 : .5;
+            item.li.style = `margin-left: ${indent}em; text-indent: -${indent}em`;
+        }
+
+        if(div.children) {
+            item.li.$.push(
+                {ol: {
+                    class: "list-style-none",
+                    $: createArticleDivisionJSML(div.children)
+                }}
+            );
+        }
+        if(div.postText) {
+            item.li.$.push({p: postText});
+        }
+        return item;
+    });
+}
+
+
+/**
+ * @private
+ */
+const articleDivisionDetectors = [
+    /^第([一二三四五六七八九十]+)類：/,
+    /^[一二三四五六七八九十]+[\u3000、]/,
+    /^[(（][一二三四五六七八九十]+(）|\)\s?)/,
+    /^\d+[\x20\x2e]/,
+    /[\u2460-\u2473]/, // Cicled Digits 1~20
+    /[\u2776-\u277f]/, // Dingbat Negative Circled Digits 1~10
+];
 
 
 /******** 動態規則們 ********/

@@ -54,7 +54,7 @@ getData("mojAddReferringArticles").then(setting => {
 });
 
 /**
- * 監聽 `div.line-*` 轉換完成的事件，加上 `<details>`
+ * 監聽 `div.line-*` 轉換完成的事件，加上 `<details>` 。
  * @param {Element} line
  *
  * 以監聽方式執行，救不用等到 `createElement` 跑完整頁才觸發。
@@ -101,3 +101,12 @@ function embedArticles(event) {
         });
     });
 }
+
+
+/**
+ * 將「（刪除）」加上 class 以便用 CSS 使之不明顯。
+ */
+$$(".line-0000").forEach(line => {
+    if(line.lastChild.textContent !== "（刪除）") return;
+    line.closest(".row").classList.add("LER-moj-deleted-article");
+});

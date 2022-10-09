@@ -144,3 +144,17 @@ details.LER-article-groups dd {
         padding-left: 1em;
     }
 }
+
+/**
+ * 「（刪除）」
+ */
+div.LER-moj-deleted-article.row {
+    padding: 0;
+}
+.LER-moj-deleted-article a[href] {
+    color: gray;
+}
+.LER-moj-deleted-article .col-data {
+    font-size: smaller;
+    color: gray;
+}

@@ -56,6 +56,7 @@ function searchLaw(string) {
  */
 async function parseElement(element = document.body, defaultLaw) {
     console.time("LawEasyRead" + (++counter));
+    // logger("console.time")(counter);
     const textNodes = getTextNodes(
         element,
         node => (
@@ -77,6 +78,7 @@ async function parseElement(element = document.body, defaultLaw) {
                 const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
                 document.dispatchEvent(event);
                 console.timeEnd("LawEasyRead" + counter);
+                // logger("console.timeEnd")(counter);
                 return resolve(element);
             }
 
@@ -115,8 +117,8 @@ async function parseElement(element = document.body, defaultLaw) {
  */
 function bindPopup(elem) {
     if(!(elem instanceof Element)) return;
-    const {jyi, pcode, norge} = elem.dataset;
-    if(!(jyi || pcode && norge)) return;
+    const {jyi, pcode} = elem.dataset;
+    if(!jyi && !pcode) return;
 
     let popup;
     const onMouseLeave = event => {

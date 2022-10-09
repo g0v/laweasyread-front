@@ -1,72 +1,3 @@
-/* [class^="LER-stratum-"],
-[class*=" LER-stratum-"] {
-    margin: 0 0 0 2em !important;
-    padding: 0;
-    list-style-type: none;
-}
-
-[class^="LER-stratum-"] > li,
-[class*=" LER-stratum-"] > li {
-    margin: 0 0 0.5em 0 !important;
-    padding: 0;
-}
-
-.LER-stratum-0 p {
-    margin: 0.2em 0;
-}
-
-.LER-stratum-0 em {
-    color: inherit;
-}
-
-.LER-stratum-0 > li:not(:only-of-type) {
-    list-style-type: upper-roman;
-}
-
-.LER-stratum-0 > li:only-of-type {
-    list-style-type: circle;
-}
-
-.LER-stratum-1 > li {
-    padding-left: 2.5em;
-}
-
-.LER-stratum-1 > li > p:first-child {
-    text-indent: -4.5em;
-}
-
-.LER-stratum-2 > li {
-    padding-left: 0em;
-}
-.LER-stratum-2 > li > p:first-child {
-    text-indent: -2em;
-}*/
-
-/**
- * 全國法規資料庫的「目」的括號是全形；但立法院法律系統中的括號是半形。
- */
-/* .LER-stratum-3 > li {
-    padding-left: 1em;
-}
-.LER-stratum-3 > li > p:first-child {
-    text-indent: -3em;
-}
-
-.LER-stratum-4 > li {
-    padding-left: 0em;
-}
-.LER-stratum-4 > li > p:first-child {
-    text-indent: -1em;
-}
-
-.LER-stratum-5 > li {
-    padding-left: 0.5em;
-}
-.LER-stratum-5 > li > p:first-child {
-    text-indent: -2.5em;
-} */
-
-
 /**
  * 彈出視窗
  *
@@ -163,7 +94,7 @@
 }
 .LER-popup-body {
     overflow-y: auto;
-    max-height: 16em;
+    max-height: 20em;
 }
 .LER-popup-body a[href] {
     color: #0072bb;
@@ -179,19 +110,25 @@
 .LER-popup-body dt:not(:first-child) {
     margin-top: .6em;
 }
-.LER-popup-body ol {
-    padding-left: 1.75em; /* 須能顯示二位數 */
+.list-style-none {
+    list-style-type: none;
+}
+.list-style-circle {
+    list-style-type: circle;
+    padding-left: 1.5em;
 }
 .list-style-decimal {
     list-style-type: decimal;
+    padding-left: 1.75em; /* 須能顯示二位數 */
 }
 .list-style-upper-roman {
     list-style-type: upper-roman;
+    padding-left: 1.5em;
 }
-.list-style-cjk {
+/* .list-style-cjk {
     list-style-type: cjk-decimal;
     padding-left: 2.5em;
-}
+} */
 .LER-popup-body p,
 .LER-popup-body li {
     margin-bottom: .5em;
