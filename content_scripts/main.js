@@ -56,7 +56,6 @@ function searchLaw(string) {
  */
 async function parseElement(element = document.body, defaultLaw) {
     console.time("LawEasyRead" + (++counter));
-    // logger("console.time")(counter);
     const textNodes = getTextNodes(
         element,
         node => (
@@ -71,14 +70,14 @@ async function parseElement(element = document.body, defaultLaw) {
         defaultLaw = await searchLaw(defaultLaw);
 
     return new Promise(resolve => {
+        const currentCounter = counter;
         const intervalID = setInterval(() => {
             const node = textNodes.shift();
             if(!node) {
                 clearInterval(intervalID);
                 const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
                 document.dispatchEvent(event);
-                console.timeEnd("LawEasyRead" + counter);
-                // logger("console.timeEnd")(counter);
+                console.timeEnd("LawEasyRead" + currentCounter);
                 return resolve(element);
             }
 
@@ -110,21 +109,23 @@ async function parseElement(element = document.body, defaultLaw) {
  * @returns {undefined} undefined
  *
  *  做四件事：
- *  1. 滑鼠首次移入目標時，同步建立彈出窗格，異步載入資料，載入資料後再次定位窗格；
- *  2. 滑鼠移入目標時，顯示並定位窗格；
- *  3. 滑鼠移出目標時，若也不在窗格內，則隱藏窗格；
- *  4. 滑鼠移出窗格時，若也不在目標內，則隱藏窗格。
+ *  1. 滑鼠首次移入目標時，同步建立彈出窗格，異步載入資料。載入資料後若窗格仍處於顯示狀態，則再次定位窗格。
+ *  2. 滑鼠移入目標時，稍後顯示並定位窗格。
+ *  3. 滑鼠移出目標時，若也不在窗格內，則隱藏窗格；若窗格尚未顯示，則取消顯示。
+ *  4. 滑鼠移出窗格時，若也不在目標內，則隱藏窗格；若窗格尚未顯示，則取消顯示。
  */
 function bindPopup(elem) {
     if(!(elem instanceof Element)) return;
     const {jyi, pcode} = elem.dataset;
     if(!jyi && !pcode) return;
 
+    let timeoutID;
     let popup;
     const onMouseLeave = event => {
         if(isEventInElem(elem, event) || isEventInElem(popup, event)) return;
         if($(".LER-popup-pin", popup).checked) return;
         popup.style.display = "none";
+        clearTimeout(timeoutID);
     };
 
     listen(elem, "mouseenter", event => {
@@ -144,13 +145,14 @@ function bindPopup(elem) {
             body.textContent = "";
             body.append(...bodyParts.map(createElement));
             parseElement(body, defaultLaw);
-            setPopupPosition(popup, event); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
+            if(!popup.style.display) setPopupPosition(popup, event); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
     }, {once: true});
 
     listen(elem, "mouseenter", event => {
         if(!popup) throw new ReferenceError("popup does not exist.");
-        setPopupPosition(popup, event);
+        if(!popup.style.display) return;
+        timeoutID = setTimeout(setPopupPosition, 375, popup, event);
     });
 
     listen(elem, "mouseleave", onMouseLeave);
