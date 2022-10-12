@@ -92,7 +92,7 @@ async function loadRules(laws) {
     if(!laws) laws = (await getData("laws")) || [];
     const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
-    return replaceRules = laws
+    replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
         acc.push({
             pattern: name,
@@ -109,7 +109,8 @@ async function loadRules(laws) {
         replacer: {type: "exclude", text}
     })))
     .sort((a, b) => b.pattern.length - a.pattern.length)
-    .concat(dynamicRules);
+
+    return replaceRules = dynamicRules.concat(replaceRules);
 }
 
 /**
@@ -220,6 +221,20 @@ function parseString({string, allowLink = true, defaultLaw}) {
                 result[index] = nodes;
                 break;
             }
+            case "consDecision": {
+                const {year, word, number} = cur;
+                const jsml = {
+                    text: cur.text,
+                    data: {year, word, number}
+                };
+                if(allowLink) Object.assign(jsml, {
+                    tag: "a",
+                    href: `https://cons.judicial.gov.tw/docredirect.aspx?type=2&year=${year}&word=${word}&no=${number}`
+                });
+                else jsml.tag = "span";
+                result[index] = jsml;
+                break;
+            }
             case "exclude": {
                 result[index] = cur.text;
                 break;
@@ -284,19 +299,21 @@ function readFile({file, type}) {
  * @param {DOMStringMap} dataset
  * @returns {Promise.<Object>} {headers, bodyParts}
  */
-async function createPopupJSML({jyi, pcode, norge}) {
+async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
         jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
         headers = [`釋字第 ${jyi.number} 號 `, {time: jyi.date}];
 
         if(jyi.title) bodyParts.push({dd: jyi.title});
-        if(jyi.issue) bodyParts.push({dt: "爭點"},
+        if(jyi.issue) bodyParts.push(
+            {dt: "爭點"},
             {dd: {$:
                 jyi.issue.split("\n").map(para => ({p: para}))
             }}
         );
-        bodyParts.push({dt: "解釋文"},
+        bodyParts.push(
+            {dt: "解釋文"},
             {dd: {$: [
                 {ol: {
                     class: "list-style-decimal",
@@ -304,7 +321,8 @@ async function createPopupJSML({jyi, pcode, norge}) {
                 }}
             ]}}
         );
-        if(jyi.reasoning) bodyParts.push({dt: "理由書"},
+        if(jyi.reasoning) bodyParts.push(
+            {dt: "理由書"},
             {dd: {$: [
                 {ol: {
                     class: "list-style-decimal",
@@ -313,8 +331,8 @@ async function createPopupJSML({jyi, pcode, norge}) {
             ]}}
         );
     }
-    if(pcode) {
-        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`);//, {cache: "no-cache"});
+    else if(pcode) {
+        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
         const date = law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 
         headers = [law.name + " ", {time: date}];
@@ -342,20 +360,20 @@ async function createPopupJSML({jyi, pcode, norge}) {
             articles.forEach(({number, content}) => {
                 const aug = number % 100;
                 number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : "");
-                bodyParts.push({dt: `第 ${number} 條`});
                 bodyParts.push(
+                    {dt: `第 ${number} 條`},
                     {dd: {$: [
                         {ol: {
                             class: (content.length > 1) ? "list-style-upper-roman" : "list-style-circle",
                             $: createArticleDivisionJSML(content)
                         }}
                     ]}}
-                )
+                );
             });
         }
         else {
-            bodyParts.push({dt: "類別"});
             bodyParts.push(
+                {dt: "類別"},
                 {dd: {$: [
                     {ul: {$ :
                         law.category.map(c => ({li: {
@@ -366,25 +384,56 @@ async function createPopupJSML({jyi, pcode, norge}) {
                 ]}}
             );
 
-            if(law.foreword) {
-                bodyParts.push({dt: "前言"});
-                bodyParts.push({dd: law.foreword});
-            }
-            if(law.LawEffectiveNote) {
-                bodyParts.push({dt: "生效內容"});
-                bodyParts.push({dd: {$:
+            if(law.foreword) bodyParts.push(
+                {dt: "前言"},
+                {dd: law.foreword}
+            );
+            if(law.LawEffectiveNote) bodyParts.push(
+                {dt: "生效內容"},
+                {dd: {$:
                     law.LawEffectiveNote.split("\r\n").map(n => ({p: n}))
-                }});
-            }
-            if(law.histories) {
-                bodyParts.push({dt: "沿革"});
-                bodyParts.push({dd: {$:
+                }}
+            );
+            if(law.histories) bodyParts.push(
+                {dt: "沿革"},
+                {dd: {$:
                     law.histories.map(his => ({p: his}))
-                }});
-            }
+                }}
+            );
         }
 
         defaultLaw = {pcode, name: law.name};
+    }
+    else if(year && word && number) {
+        const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
+        headers = [
+            `${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
+            {time: decision['判決日期']}
+        ];
+
+        bodyParts.push({dd: '原 ' + decision['原分案號']});
+        if(decision['標題']) bodyParts.push({dd: decision['標題']});
+
+        bodyParts.push(
+            {dt: '案由'},
+            {dd: decision['案由']},
+
+            {dt: '主文'},
+            {dd: {$: [
+                {ol: {
+                    class: "list-style-decimal",
+                    $: decision['主文'].map(para => ({li: para}))
+                }}
+            ]}},
+
+            {dt: '理由'},
+            {dd: {$: [
+                {ol: {
+                    class: "list-style-decimal",
+                    $: decision['理由'].map(para => ({li: para}))
+                }}
+            ]}}
+        );
     }
     return {headers, bodyParts, defaultLaw};
 }
@@ -470,14 +519,15 @@ const articleDivisionDetectors = [
     articles: "article(\\s*[至到,、及或和與]\\s*(article|(第\\s*number\\s*[項款目])+))*",
 
     jyi: "第?number號?",
-    jyis: "((司法院)?(大法官)?釋字)jyi([,、及]jyi)*"
+    jyis: "((司法院)?(大法官)?釋字)jyi([,、及]jyi)*",
+
+    consDecision: "憲法法庭\\s*number\\s*(年度?)?\\s*([\\u4E00-\\u5b56\\u5b58-\\u9FFF]+)字?第?number號?(裁定|判決)?"
 };
 Object.keys(regexps).forEach((key, i, keys) => {
     for(let j = i - 1; j >= 0; --j)
         regexps[key] = regexps[key].replace(new RegExp(keys[j], "g"), regexps[keys[j]]);
 });
 for(let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
-
 
 /**
  * @private
@@ -534,6 +584,18 @@ const dynamicRules = [
                 }
             }, []).join(",");
             return r;
+        }
+    },
+    {
+        pattern: regexps.consDecision,
+        replacer: match => {
+            return {
+                type: "consDecision",
+                text: match[0],
+                year: match[1],
+                word: match[3],
+                number: match[4]
+            };
         }
     }
 ];

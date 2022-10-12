@@ -1,4 +1,4 @@
-kongUtil.use("$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML");
+kongUtil.use("$", "$$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML");
 kongUtil.use("logger");
 
 /** @type {boolean} */
@@ -34,6 +34,16 @@ getData(["autoParse", "enablePopup"])
             popupTemplate = parseHTML(text);
             /// 拿掉因排版而出現的空白文字節點
             getTextNodes(popupTemplate).forEach(tn => tn.remove());
+        });
+        listen(document, "mousemove", event => {
+            $$(".LER-popup-container").forEach(popup => {
+                if(popup.style.display
+                    || $(".LER-popup-pin", popup).checked
+                    || isEventInElem(popup, event)
+                    || isEventInElem(popup.target, event)
+                ) return;
+                popup.style.display = "none";
+            })
         });
     }
 });
@@ -110,31 +120,23 @@ async function parseElement(element = document.body, defaultLaw) {
  *
  *  做四件事：
  *  1. 滑鼠首次移入目標時，同步建立彈出窗格，異步載入資料。載入資料後若窗格仍處於顯示狀態，則再次定位窗格。
- *  2. 滑鼠移入目標時，稍後顯示並定位窗格。
- *  3. 滑鼠移出目標時，若也不在窗格內，則隱藏窗格；若窗格尚未顯示，則取消顯示。
- *  4. 滑鼠移出窗格時，若也不在目標內，則隱藏窗格；若窗格尚未顯示，則取消顯示。
+ *  2. 滑鼠移入目標時，則設定稍後顯示並定位窗格。
+ *  3. 滑鼠移出目標時，若窗格尚未顯示，則取消前項設定。
+ *  4. 滑鼠移動時，若不在顯示中的窗格或其目標內，且窗格未被釘選，則隱藏窗格。（另處監聽 document 的 mousemove 事件）
  */
 function bindPopup(elem) {
     if(!(elem instanceof Element)) return;
-    const {jyi, pcode} = elem.dataset;
-    if(!jyi && !pcode) return;
+    const {jyi, pcode, word} = elem.dataset;
+    if(!jyi && !pcode && !word) return;
 
-    let timeoutID;
     let popup;
-    const onMouseLeave = event => {
-        if(isEventInElem(elem, event) || isEventInElem(popup, event)) return;
-        if($(".LER-popup-pin", popup).checked) return;
-        popup.style.display = "none";
-        clearTimeout(timeoutID);
-    };
-
     listen(elem, "mouseenter", event => {
         // 為同步建立空白窗格，就不從後端取得 JSML ，而是複製已載入的 DOM 。
         popup = popupTemplate.cloneNode(true);
+        popup.target = elem;
         const body = $(".LER-popup-body", popup);
         body.textContent = "讀取中…";
         document.body.append(popup);
-        listen(popup, "mouseleave", onMouseLeave);
 
         // 異步載入資料。
         browser.runtime.sendMessage(Object.assign(
@@ -149,13 +151,15 @@ function bindPopup(elem) {
         });
     }, {once: true});
 
+    let timeoutID;
     listen(elem, "mouseenter", event => {
         if(!popup) throw new ReferenceError("popup does not exist.");
         if(!popup.style.display) return;
         timeoutID = setTimeout(setPopupPosition, 375, popup, event);
     });
-
-    listen(elem, "mouseleave", onMouseLeave);
+    listen(elem, "mouseleave", () => {
+        clearTimeout(timeoutID);
+    });
 }
 
 
@@ -167,9 +171,11 @@ function bindPopup(elem) {
  */
 function isEventInElem(elem, event) {
     const rect = elem.getBoundingClientRect(); ///< 相對於當前可視範圍，而非相對於文件左上角
-    const x = event.pageX - window.scrollX;
-    const y = event.pageY - window.scrollY;
-    return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+    return event.clientX >= rect.left
+        && event.clientX <= rect.right
+        && event.clientY >= rect.top
+        && event.clientY <= rect.bottom
+    ;
 };
 
 

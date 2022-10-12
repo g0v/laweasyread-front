@@ -22,8 +22,9 @@ listen($("#autoParse"), "click", event => {
 
 // 手動轉換的 button
 listen($("#parseCurrentTab"), "click", event => {
-    sendMessageToCurrentTab({command: "parseDocument"})
     event.target.disabled = true;
+    sendMessageToCurrentTab({command: "parseDocument"})
+    .then(() => event.target.disabled = false);
 });
 
 // 「更新」的 span

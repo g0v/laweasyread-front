@@ -22,7 +22,11 @@ browser.runtime.onInstalled.addListener(() => {
 });
 
 // 鬧鐘響時就檢查是否有更新
-browser.alarms.onAlarm.addListener(LER.checkUpdate);
+browser.alarms.onAlarm.addListener(async() => {
+    const autoUpdate = await getData("autoUpdate");
+    if(autoUpdate) LER.update();
+    else LER.checkUpdate();
+});
 
 // 整個 LER 就是 listener
 browser.runtime.onMessage.addListener((request, sender, callback) => {
