@@ -110,7 +110,12 @@ async function loadRules(laws) {
     })))
     .sort((a, b) => b.pattern.length - a.pattern.length)
 
-    return replaceRules = dynamicRules.concat(replaceRules);
+    replaceRules =
+        dynamicRules.filter(dr => dr.position === "before")
+        .concat(replaceRules)
+        .concat(dynamicRules.filter(dr => dr.position === "after"))
+    ;
+    return replaceRules;
 }
 
 /**
@@ -440,7 +445,6 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
 
 
 function createArticleDivisionJSML(divArr) {
-    console.log(divArr);
     return divArr.map(div => {
         if(div.table) return {li: {
             class: "pre",
@@ -537,6 +541,7 @@ for(let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
 const dynamicRules = [
     {
         pattern: regexps.jyis,
+        position: "after",
         replacer: match => {
             const r = {type: "jyis", text: match[0]};
             r.jyis = [...match[0].matchAll(regexps.jyi)]
@@ -551,6 +556,7 @@ const dynamicRules = [
     },
     {
         pattern: regexps.articles,
+        position: "after",
         replacer: match => {
             const r = {
                 type: "articles",
@@ -588,6 +594,7 @@ const dynamicRules = [
     },
     {
         pattern: regexps.consDecision,
+        position: "before",
         replacer: match => {
             return {
                 type: "consDecision",
@@ -617,6 +624,7 @@ return {
 /**
  * @typedef {Object} ReplaceRule
  * @property {string | RegExp} pattern
+ * @property {string} position - wheather this rule shall apply before or after static rules.
  * @property {function | Object} replacer
  */
 
