@@ -1,4 +1,44 @@
 /**
+ * 各專案通用
+ */
+.text-end {
+    text-align: right;
+}
+.list-style-none {
+    list-style-type: none;
+}
+.list-style-circle {
+    list-style-type: circle;
+    padding-left: 1.5em;
+}
+.list-style-decimal {
+    list-style-type: decimal;
+    padding-left: 1.75em; /* 須能顯示二位數 */
+}
+.list-style-upper-roman {
+    list-style-type: upper-roman;
+    padding-left: 1.5em;
+}
+
+/**
+ * 本專案通用
+ */
+[class|=LER-badge] {
+    font-size: smaller;
+    padding: 0 .2em .1em;
+    border-radius: .25em;
+}
+.LER-badge-discard {
+    background-color: #DC3545;
+    color: #fff;
+}
+.LER-badge-future {
+    background-color: #FFC107;
+    color: #000;
+    cursor: help;
+}
+
+/**
  * 彈出視窗
  *
  * z-index 最讓人擔憂了。已知：
@@ -68,20 +108,6 @@
     border-bottom: 1px dashed #888;
     padding-right: 1em;
 }
-[class|=LER-badge] {
-    font-size: smaller;
-    padding: 0 .2em .1em;
-    border-radius: .25em;
-}
-.LER-badge-discard {
-    background-color: #DC3545;
-    color: #fff;
-}
-.LER-badge-future {
-    background-color: #FFC107;
-    color: #000;
-    cursor: help;
-}
 .LER-popup > header time {
     font-size: smaller;
     color: #666;
@@ -110,96 +136,23 @@
 .LER-popup-body dt:not(:first-child) {
     margin-top: .6em;
 }
-.list-style-none {
-    list-style-type: none;
-}
-.list-style-circle {
-    list-style-type: circle;
-    padding-left: 1.5em;
-}
-.list-style-decimal {
-    list-style-type: decimal;
-    padding-left: 1.75em; /* 須能顯示二位數 */
-}
-.list-style-upper-roman {
-    list-style-type: upper-roman;
-    padding-left: 1.5em;
-}
-/* .list-style-cjk {
-    list-style-type: cjk-decimal;
-    padding-left: 2.5em;
-} */
 .LER-popup-body p,
 .LER-popup-body li {
     margin-bottom: .5em;
 }
 
-
-/* #LER-float-box {
-    position: fixed;
-    background-color: #000;
-    color: #fff;
-    top: 0.5em;
-    right: 2em;
-    padding: 0;
-    height: 60vh;
-    max-height: calc(100vh - 1em);
-    width: 300px;
-    overflow: visible auto;
-    border: solid gray;
-    border-width: 0 .2em .2em;
-    box-sizing: border-box;
-    font-size: 14px;
-    line-height: 150%;
-    z-index: 1031;
-    text-align: left;
-    resize: both;
+/**
+ * 判決書
+ */
+.LER-origin-line {
+    position: relative;
 }
-
-#LER-float-box * {
-    background: none;
-    font: inherit;
-    text-align: inherit;
-    color: inherit;
+.LER-origin-line::before {
+    content: attr(data-line-number);
+    position: absolute;
+    top: -1.25em;
+    left: 0;
+    font-size: smaller;
+    color: gray;
+    text-indent: 0;
 }
-
-#LER-float-box > header {
-    display: flex;
-    justify-content: space-between;
-    padding: 0;
-    cursor: grab;
-    background-color: #ccc;
-    position: sticky;
-    top: 0;
-    z-index: 2;
-    height: calc(1.5em + 1px);
-}
-
-#LER-float-box > header > span:last-of-type {
-    padding: 0 .4em;
-    cursor: pointer;
-    border-radius: .4em;
-    border: 1px solid gray;
-}
-
-#LER-float-box > section:not(:first-of-type) {
-    padding-top: 0.5em;
-    margin-top: 0.5em;
-}
-
-#LER-float-box > section:not(:first-of-type) {
-    border-bottom: 2px solid gray;
-    padding-bottom: 0.5em;
-}
-
-#LER-float-box a[href] {
-    color: yellow;
-}
-
-#LER-float-box .LER-popup-pin {
-    display: none;
-}
-
-#LER-float-box dt {
-    font-weight: bold;
-} */

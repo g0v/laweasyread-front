@@ -338,6 +338,11 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
     }
     else if(pcode) {
         const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
+        /**
+         * 雖然叫做 "no-cache" ，但其實仍會確認快取的資料是否為最新。
+         * 其與 "default" 的差別在於， "no-cache" 無視快取期限，而是直接向伺服器確認快取區的資料是否為最新。
+         * 詳參 [Request.cache - Web APIs | MDN](https://developer.mozilla.org/en-US/docs/Web/API/Request/cache)
+         */
         const date = law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, "$1-$2-$3");
 
         headers = [law.name + " ", {time: date}];

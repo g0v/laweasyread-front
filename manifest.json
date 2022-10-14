@@ -37,8 +37,8 @@
         "css": ["content_scripts/moj.css"]
     },
     {
-        "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
-        "css": ["content_scripts/ly_lawsingle.css"]
+        "matches": ["https://law.judicial.gov.tw/FJUD/*"],
+        "js": ["content_scripts/judicial.js"]
     }
 ]
 }
