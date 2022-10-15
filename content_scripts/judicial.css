@@ -1,0 +1,28 @@
+.LER-origin-line {
+    position: relative;
+}
+.LER-origin-line::before {
+    content: attr(data-line-number);
+    position: absolute;
+    top: -1.25em;
+    left: 0;
+    font-size: smaller;
+    color: #ccc !important; /* to overwrite bootstrap setting */
+    text-indent: 0;
+}
+
+.tab_content {
+    white-space: normal;
+}
+
+.htmlcontent {
+    font-size: 18px;
+    line-height: 200%;
+    min-width: 38em;
+}
+
+div.jud_content {
+    max-width: none;
+
+}
+

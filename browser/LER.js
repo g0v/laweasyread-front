@@ -398,6 +398,16 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
                 {dt: "前言"},
                 {dd: law.foreword}
             );
+
+            const lastNumber = law.articles[law.articles.length - 1].number / 100;
+            const deletedAmount = law.articles.filter(a => a.content.length === 1 && a.content[0].text === "（刪除）").length;
+            bodyParts.push(
+                {dt: {text: "條文數"}},
+                {dd: {$: [
+                    `共 ${law.articles.length.toString()} 條；其中 ${deletedAmount} 條被刪除；最末條為第 ${lastNumber} 條。`
+                ]}}
+            );
+
             if(law.LawEffectiveNote) bodyParts.push(
                 {dt: "生效內容"},
                 {dd: {$:

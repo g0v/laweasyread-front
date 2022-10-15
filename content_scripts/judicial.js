@@ -15,7 +15,7 @@ const lines =
         else if(node.nodeType !== Node.TEXT_NODE) return lines;
 
         lines[lines.length - 1].push(debris.shift());
-        lines.push(...debris.map(d => [d]));
+        lines.push(...debris.filter(d => d).map(d => [d]));
         return lines;
     }, [[]])
 ;
@@ -32,8 +32,9 @@ const listMarkerDetectors = [
     /^[\u3280-\u3289]/,
 ];
 
-let isHead = true;
+let isHead = true, isFoot = false;
 const paras = lines.reduce((paras, leafNodes, lineIndex) => {
+    if(!leafNodes.length) return paras;
     const line =
         {span: {
             class: "LER-origin-line",
@@ -41,9 +42,14 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
             $: leafNodes
         }}
     ;
+
     // console.log(line);
     const plain = (leafNodes[0].textContent || leafNodes[0]).replaceAll(/\s/g, "");
-    if(["主文", "事實", "理由"].includes(plain)) {
+    isFoot = isFoot ||
+        /^中華民國\s*[一二三四五六七八九十百]+\s*年\s*[一二三四五六七八九十]+\s*月\s*[一二三四五六七八九十]+\s*日$/.test(plain)
+    ;
+
+    if(["主文", "事實", "理由", "事實及理由"].includes(plain)) {
         isHead = false;
         paras.push(
             {div: {
@@ -52,11 +58,11 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
             }}
         );
     }
-    else if(isHead) {
+    else if(isHead || isFoot) {
         paras.push({div: {$: [line]}});
     }
     else {
-        if(line.span.$.some(text => /[\u2500-\u257F]/.test(text))) {
+        if(leafNodes.some(text => /[\u2500-\u257F]/.test?.(text))) {
             paras.push(
                 {div: {
                     class: "", // text-nowrap
@@ -65,7 +71,6 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
             );
             return paras;
         }
-
 
         const startingSpaces = (leafNodes[0].textContent || leafNodes[0]).match(/^\s*/)[0];
         const padding = startingSpaces.split("").reduce((length, char) => length + (char === "\u3000" ? 1 : .5), 0);
@@ -88,13 +93,18 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
             );
         }
         else {
-            const inLastPara = paras[paras.length - 1].div.$;
-            const inLastLine = inLastPara[inLastPara.length - 1].span.$;
-            const lastNode = inLastLine[inLastLine.length - 1];
-            if((padding || !(lastNode.textContent || lastNode).match(/[。：]$/))
+            const lastPara = paras[paras.length - 1].div;
+            const lastLine = lastPara.$[lastPara.$.length - 1].span;
+            const lastNode = lastLine.$[lastLine.$.length - 1];
+            if((padding || !lastNode.endsWith("。"))
                 && (paras[paras.length - 1].div.class !== "pre")
+                && (lastPara.class !== "he-h3")
             ) {
-                inLastPara.push(line);
+                // 加入前一段
+                if(typeof leafNodes[0] === "string") leafNodes[0] = leafNodes[0].trimStart();
+                const lastLeaf = leafNodes[leafNodes.length - 1];
+                if(typeof lastLeaf === "string") leafNodes[leafNodes.length - 1] = lastLeaf.trimEnd();
+                lastPara.$.push(line);
             }
             else {
                 paras.push(
@@ -112,10 +122,12 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
 // logger()("paras", paras);
 
 
-// if(container) {
-//     container.textContent = "";
-//     container.append(...paras.map(createElement));
-// }
+$(".htmlcontent")?.append(...paras.map(createElement));
+if(container) {
+    container.textContent = "";
+    $(".tab_linenu").textContent = "";
+    $(".htmlcontent").style.width = null; // 因官方是把 style 寫在元件裡，故沒法用 CSS 檔覆寫之。
+}
 
 
 /**
@@ -129,45 +141,90 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
 
 /** @const paras */
 [
-    {section: {
-        class: "LER-judicial-section",
-        title: "理由",
+    {div: {
+        class: "LER-judicial-para",
+        style: {
+            paddingLeft: "-3em",
+            textIndent: "3em"
+        },
         $: [
-            {header: {
-                class: "LER-judicial-para",
+            {span: {
+                class: "LER-origin-line",
+                data: {lineNumber: 10},
                 $: [
-                    {span: {
-                        class: "LER-origin-line",
-                        data: {lineNumber: 9},
-                        $: ["理由"]
-                    }}
+                    "aaaa",
+                    {abbr: "termmmm"}
                 ]
             }},
-            {div: {
-                class: "LER-judicial-para",
-                style: {
-                    paddingLeft: "-3em",
-                    textIndent: "3em"
-                },
+            {span: {
+                class: "LER-origin-line",
+                data: {lineNumber: 11},
                 $: [
-                    {span: {
-                        class: "LER-origin-line",
-                        data: {lineNumber: 10},
-                        $: [
-                            "aaaa",
-                            {abbr: "termmmm"}
-                        ]
-                    }},
-                    {span: {
-                        class: "LER-origin-line",
-                        data: {lineNumber: 11},
-                        $: [
-                            {abbr: "termmmm"},
-                            "bbb"
-                        ]
-                    }}
+                    {abbr: "termmmm"},
+                    "bbb"
                 ]
             }}
         ]
     }}
 ]
+
+// 未來規劃
+/** @const blocks */
+{div: {$: [
+    {header: {$: [
+        {div: {
+            class: "he-h1",
+            "aria-label": "裁判標題"
+        }},
+        {div: {
+            class: "",
+            "aria-label": "裁判字號"
+        }},
+        {div: {
+            class: "",
+            "aria-label": "當事人列表"
+        }},
+        {div: {
+            "aria-label": "foreword",
+            // text: "上列當事人…"
+        }},
+    ]}},
+    {div: {
+        class: "LER-judicial-main",
+        $: [
+            {section: {
+                "aria-label": "主文",
+                $: [
+                    {header: {
+                        class: "he-h3"
+
+                    }}
+                ]
+            }}
+        ]
+    }},
+    {footer: {$: [
+        {time: {
+            class: "d-block",
+            "aria-label": "裁判日期"
+        }},
+        {div: {
+            "aria-label": "法官、司法事務官列表"
+        }},
+        {div: {
+            "arial-label": "afterword",
+            // text: "與原本無異。如不服…"
+        }},
+        {time: {
+            class: "d-block",
+            "aria-label": "裁判書作成日期"
+        }},
+        {div: {
+            "aria-label": "書記官署名"
+        }}
+    ]}},
+    {section: {
+        class: "LER-judicial-appendix",
+        "aria-label": "附錄"
+    }}
+]}}
