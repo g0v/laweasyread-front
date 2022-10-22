@@ -1,4 +1,4 @@
-kongUtil.use("$", "$$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML");
+kongUtil.use("$", "$$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML", "isEventInElement");
 kongUtil.use("logger");
 
 /** @type {boolean} */
@@ -39,8 +39,8 @@ getData(["autoParse", "enablePopup"])
             $$(".LER-popup-container").forEach(popup => {
                 if(popup.style.display
                     || $(".LER-popup-pin", popup).checked
-                    || isEventInElem(popup, event)
-                    || isEventInElem(popup.target, event)
+                    || kongUtil.isEventInElement(event, popup)
+                    || kongUtil.isEventInElement(event, popup.target)
                 ) return;
                 popup.style.display = "none";
             })
@@ -81,27 +81,24 @@ async function parseElement(element = document.body, defaultLaw) {
 
     return new Promise(resolve => {
         const currentCounter = counter;
-        const intervalID = setInterval(() => {
+        function parseNextTextNode() {
             const node = textNodes.shift();
             if(!node) {
-                clearInterval(intervalID);
-                const event = new CustomEvent("lerParseEnd", {detail: {target: element}});
-                document.dispatchEvent(event);
+                document.dispatchEvent(new CustomEvent("lerParseEnd", {detail: {target: element}}));
                 console.timeEnd("LawEasyRead" + currentCounter);
                 return resolve(element);
             }
-
             browser.runtime.sendMessage({
                 command: "parseString",
                 string: node.textContent,
                 allowLink: !node.parentNode?.closest?.("a"),
                 defaultLaw
             }).then(objects => {
+                requestIdleCallback(parseNextTextNode);
                 objects = objects.flat();
                 if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
                 objects = objects.map(createElement);
                 node.replaceWith(...objects);
-
                 if(enablePopup) objects.forEach(bindPopup);
                 if(!node.nextSibling) {
                     const parent = objects[0].parentNode;
@@ -109,7 +106,8 @@ async function parseElement(element = document.body, defaultLaw) {
                     parent.dispatchEvent(event);
                 }
             });
-        }, 1);
+        }
+        requestIdleCallback(parseNextTextNode);
     });
 }
 
@@ -161,22 +159,6 @@ function bindPopup(elem) {
         clearTimeout(timeoutID);
     });
 }
-
-
-/**
- * 判斷事件座標是否在指定元件內部。
- * @param {Element} elem
- * @param {MouseEvent} event
- * @returns {boolean}
- */
-function isEventInElem(elem, event) {
-    const rect = elem.getBoundingClientRect(); ///< 相對於當前可視範圍，而非相對於文件左上角
-    return event.clientX >= rect.left
-        && event.clientX <= rect.right
-        && event.clientY >= rect.top
-        && event.clientY <= rect.bottom
-    ;
-};
 
 
 /**
