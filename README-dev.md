@@ -7,10 +7,13 @@
 1. 前端將第一個 `TextNode` 的 `textContent` 和 *某些特徵* 傳給後端。
 2. 後端依照 `ReplaceRule[]` 將前述字串拆為 `Fragment[]` 。此步驟只處理字串，每個被拆開的物件和字串彼此獨立。
 3. 後端將前述 `Fragment[]` 轉換為 `JsonElement[]` 並傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
-4. 前端用 `createHtmlElement()` 將前述 `JsonElement[]` 轉為 `HTMLElement[]` 。
+4. 前端用 `createElement()` 將前述 `JsonElement[]` 轉為 `HTMLElement[]` 。
 5. 前端將步驟一的 `TextNode` 置換為前述 `HTMLElement[]` 。
 6. 回到步驟一，但傳送的是下一個 `TextNode` 的資料。
 
+前述「後端」並非指伺服器，而是瀏覽器擴充功能的背景頁。
+原則是：盡量將可反覆進行的事情留在後端，只將「必須放在前端」的事情在前端做。以利用「後端只有一個實體」的機制節省資源。
+開發時須留意後端沒有 DOM ，也就是沒有 `Document` 類別、沒有 `document` 實體，且前後端間只能傳輸可序列化資料。
 
 ## Files
 

@@ -1,84 +1,53 @@
 /**
  * @module LER
- * @desc 各公有方法會直接在 `background.js` 被當成監聽器。欲作為監聽器的，其參數列應為 `request`, `sender`, `sendResponse` 。
  */
-importScripts(
-    "../node_modules/kong-util/dist/debug.js",
-    "../node_modules/kong-util/dist/web.js",
-    "../node_modules/kong-util/dist/string.js",
-    "./lib.js"
-);
-kongUtilDebug.use("logger");
-kongUtilWeb.use("fetchJSON", "fetchText");
-
 const LER = (() => {
 
 /**
  * @private
  * @func pcn
+ * @param {string} chineseNumber
+ * @returns {integer}
  * @desc alias of `kongUtilString.parseChineseNumber()`
  */
 const pcn = kongUtilString.parseChineseNumber;
 
 /**
- * @private
- * @func articleNumberToMojFormat
- * @desc 把數字條號換成全國法規資料庫的格式
- *
- * @example 602 => "6.2" /// 第六條之二
- */
-// const articleNumberToMojFormat = number => {
-//     const r = number % 100;
-//     const n = (number - r) / 100;
-//     return r ? `${n}.${r}` : n;
-// };
-
-/**
- * @private
- * @member {ReplaceRule[]}
+ * @public
+ * @member {ReplaceRule[]} replaceRules
  * @desc 置換規則們，動態建置。法規更新時會整個被替換掉，故用 let 宣告。
  */
 let replaceRules = [];
 
-/**
- * @func checkUpdate
- * @desc 確認是否可更新法規列表。
- * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串
- */
-async function checkUpdate() {
-    const [localDate = "", remoteDate] = await Promise.all([
-        getData("localDate"),
-        fetchText("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"})
-    ]);
-    setData({
-        remoteDate,
-        lastCheck: Date.now()
-    });
-    return (localDate < remoteDate) ? remoteDate : false;
-}
 
 /**
- * @func update
- * @desc 更新法規列表。
- * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串。
+ * @public
+ * @func downloadLaws
+ * @returns {Promise.<Law[]>}
  */
-async function update() {
-    const remoteDate = await checkUpdate();
-    if(!remoteDate) return false;
-
+async function downloadLaws() {
     const [map, aliases] = await Promise.all([
         fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
-        fetchJSON("/data/aliases.json")
+        fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
     ]);
-    const laws = Object.keys(map).map(pcode => {
+    return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
         if(aliases[pcode]) law.aliases = aliases[pcode];
         return law;
     });
-    setData({laws, localDate: remoteDate});
-    loadRules(laws);
-    return remoteDate;
 }
+
+/**
+ * @public
+ * @abstract
+ * @func loadLaws
+ * @returns {Promise.<Law[]>}
+ * @desc overriden in WebExtension to cooperate with version control
+ */
+function loadLaws() {
+    return downloadLaws();
+}
+
 
 /**
  * @func loadRules
@@ -89,7 +58,7 @@ async function update() {
  * 法規名稱與排除名單必須合併在一起，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
  */
 async function loadRules(laws) {
-    if(!laws) laws = (await getData("laws")) || [];
+    if(!laws) laws = await this.loadLaws();
     const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
     replaceRules = laws
@@ -252,6 +221,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
 }
 
 /**
+ * @private
  * @func applyReplaceRule
  * @desc 將字串依照規則拆開。
  * @param {string} string
@@ -280,23 +250,6 @@ function applyReplaceRule(string, {pattern, replacer}) {
         debris.splice(i, 0, replacer);
     return debris;
 }
-
-/**
- * @func readFile
- * @desc 讀取檔案後傳給呼叫此方法的前端。
- * @param {Object} request
- * @param {string} request.file - 路徑。如無指定協定，則讀取擴充元件的檔案。
- * @param {string} request.type - 讀檔方式， `text` 或 `json` 。
- * @returns {Promise}
- */
-function readFile({file, type}) {
-    file = /:\/\//.test(file) ? file : browser.runtime.getURL(file);
-    switch(type) {
-        case "text": return fetchText(file);
-        case "json": return fetchJSON(file);
-    }
-}
-
 
 /**
  * @func createPopupJSML
@@ -458,7 +411,11 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
     return {headers, bodyParts, defaultLaw};
 }
 
-
+/**
+ * @private
+ * @param {Array} divArr
+ * @returns {Array}
+ */
 function createArticleDivisionJSML(divArr) {
     return divArr.map(div => {
         if(div.table) return {li: {
@@ -502,6 +459,8 @@ function createArticleDivisionJSML(divArr) {
 
 /**
  * @private
+ * @const {RegExp[]}
+ * @desc 判斷條文段落結構的表達式。
  */
 const articleDivisionDetectors = [
     /^第([一二三四五六七八九十]+)類：/,
@@ -512,15 +471,12 @@ const articleDivisionDetectors = [
     /[\u2776-\u277f]/, // Dingbat Negative Circled Digits 1~10
 ];
 
-
-/******** 動態規則們 ********/
-
 /**
  * @private
  * @const {Object.<string, RegExp>}
- * @desc 要注意括號的順序。
+ * @desc 動態規則的比對用表達式，需注意括號的順序。
  */
- const regexps = {
+const regexps = {
     number: "([〇\\d零一二三四五六七八九０１２３４５６７８９十百千]+)",
 
     /// 「第5-3條」、「第5條之3」
@@ -626,10 +582,7 @@ const dynamicRules = [
 
 return {
     loadRules,
-    checkUpdate,
-    update,
     parseString,
-    readFile,
     createPopupJSML
 };
 

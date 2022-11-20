@@ -1,4 +1,56 @@
-importScripts("./LER.js");
+importScripts(
+    "../node_modules/kong-util/dist/web.js",
+    "../node_modules/kong-util/dist/string.js"
+);
+kongUtilWeb.use("fetchJSON", "fetchText");
+kongUtilString.use("parseChineseNumber");
+
+importScripts("./lib.js", "./LER.js");
+Object.assign(LER, {
+    /**
+     * @func checkUpdate
+     * @desc 確認是否可更新法規列表。
+     * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串
+     */
+    async checkUpdate() {
+        const [localDate = "", remoteDate] = await Promise.all([
+            getData("localDate"),
+            fetchText("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"})
+        ]);
+        setData({
+            remoteDate,
+            lastCheck: Date.now()
+        });
+        return (localDate < remoteDate) ? remoteDate : false;
+    },
+
+    /**
+     * @func update
+     * @desc 更新法規列表。
+     * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串。
+     */
+    async update() {
+        const remoteDate = await this.checkUpdate();
+        if(!remoteDate) return false;
+
+        const laws = downloadLaws();
+        setData({laws, localDate: remoteDate});
+        this.loadRules(laws);
+        return remoteDate;
+    },
+
+    /**
+     * @public
+     * @func loadLaws
+     * @returns {Promise.<Law[]>}
+     * @desc load laws data in `browser.storage`; comparing this to the same function in `LER` initialization.
+     */
+    loadLaws() {
+        return getData("laws");
+    }
+});
+
+
 
 browser.runtime.onInstalled.addListener(() => {
     // 若是初次安裝，則抓取法規資料。

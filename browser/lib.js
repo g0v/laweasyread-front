@@ -46,6 +46,23 @@ const sendMessageToCurrentTab = message =>
 
 
 /**
+ * @func readFile
+ * @desc 讀取外掛中的或網路上的檔案。在 background 以外的地方用會有同源政策的限制。
+ * @param {Object} request
+ * @param {string} request.file - 路徑。如無指定協定，則讀取擴充元件的檔案。
+ * @param {string} request.type - 讀檔方式， `text` 或 `json` 。
+ * @returns {Promise.<string|Object>}
+ */
+function readFile({file, type}) {
+    file = /:\/\//.test(file) ? file : browser.runtime.getURL(file);
+    switch(type) {
+        case "text": return fetchText(file);
+        case "json": return fetchJSON(file);
+    }
+}
+
+
+/**
  * @func getTextNodes
  * @desc 取得文字節點們。
  * @param {Node} [root = document.body]
