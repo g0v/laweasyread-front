@@ -1,4 +1,7 @@
-kongUtil.use("$", "listen");
+function $(s) { return document.querySelector(s); }
+function listen(target, type, listener) {
+    target.addEventListener(type, listener);
+}
 
 // 顯示專案版本
 $("#version").append(browser.runtime.getManifest().version);
@@ -45,3 +48,18 @@ browser.tabs.query({active: true, currentWindow: true})
     if(tab.url.startsWith("http") || tab.url.startsWith("file")) return;
     $("#parseCurrentTab").remove();
 });
+
+
+/**
+ * @func sendMessageToCurrentTab
+ * @desc 傳送訊息到當前的分頁，但避開瀏覽器自設頁面（如 `chrome://` 開頭）。
+ * @param {Object} message
+ * @returns {Promise} response from the tab
+ */
+const sendMessageToCurrentTab = message =>
+    browser.tabs.query({active: true, currentWindow: true})
+    .then(([tab]) => {
+        if(tab.url.startsWith("http") || tab.url.startsWith("file"))
+            return browser.tabs.sendMessage(tab.id, message);
+    })
+;

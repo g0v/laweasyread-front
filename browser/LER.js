@@ -4,15 +4,6 @@
 const LER = (() => {
 
 /**
- * @private
- * @func pcn
- * @param {string} chineseNumber
- * @returns {integer}
- * @desc alias of `kongUtilString.parseChineseNumber()`
- */
-const pcn = kongUtilString.parseChineseNumber;
-
-/**
  * @public
  * @member {ReplaceRule[]} replaceRules
  * @desc 置換規則們，動態建置。法規更新時會整個被替換掉，故用 let 宣告。
@@ -37,6 +28,7 @@ async function downloadLaws() {
     });
 }
 
+
 /**
  * @public
  * @abstract
@@ -59,7 +51,7 @@ function loadLaws() {
  */
 async function loadRules(laws) {
     if(!laws) laws = await this.loadLaws();
-    const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
+    const exTerms = (await fetch("/data/exclude_terms.txt").then(res => res.text())).split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
@@ -86,6 +78,7 @@ async function loadRules(laws) {
     ;
     return replaceRules;
 }
+
 
 /**
  * @func parseString
@@ -220,6 +213,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
     return result;
 }
 
+
 /**
  * @private
  * @func applyReplaceRule
@@ -250,6 +244,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
         debris.splice(i, 0, replacer);
     return debris;
 }
+
 
 /**
  * @func createPopupJSML
@@ -411,6 +406,7 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
     return {headers, bodyParts, defaultLaw};
 }
 
+
 /**
  * @private
  * @param {Array} divArr
@@ -454,6 +450,26 @@ function createArticleDivisionJSML(divArr) {
         }
         return item;
     });
+}
+
+
+/**
+ * @private
+ * @param {string} chineseNumber
+ * @returns {integer}
+ */
+function pcn(chineseNumber) {
+    return 69;
+}
+
+
+/**
+ * @private
+ * @func
+ */
+async function fetchJSON(...args) {
+    const res = await fetch(...args);
+    return res.ok ? (await res.json()) : (new ReferenceError(response.statusText));
 }
 
 
@@ -503,6 +519,7 @@ Object.keys(regexps).forEach((key, i, keys) => {
         regexps[key] = regexps[key].replace(new RegExp(keys[j], "g"), regexps[keys[j]]);
 });
 for(let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
+
 
 /**
  * @private
@@ -579,8 +596,8 @@ const dynamicRules = [
 ];
 
 
-
 return {
+    downloadLaws,
     loadRules,
     parseString,
     createPopupJSML

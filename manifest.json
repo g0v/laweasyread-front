@@ -25,7 +25,6 @@
     {
         "matches": ["<all_urls>"],
         "js": [
-            "node_modules/kong-util/dist/all.js",
             "browser/lib.js",
             "content_scripts/main.js"
         ],

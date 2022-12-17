@@ -1,10 +1,3 @@
-importScripts(
-    "../node_modules/kong-util/dist/web.js",
-    "../node_modules/kong-util/dist/string.js"
-);
-kongUtilWeb.use("fetchJSON", "fetchText");
-kongUtilString.use("parseChineseNumber");
-
 importScripts("./lib.js", "./LER.js");
 Object.assign(LER, {
     /**
@@ -13,10 +6,9 @@ Object.assign(LER, {
      * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串
      */
     async checkUpdate() {
-        const [localDate = "", remoteDate] = await Promise.all([
-            getData("localDate"),
-            fetchText("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"})
-        ]);
+        const localDate = await getData("localDate");
+        const response = await fetch("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"});
+        const remoteDate = await response.text();
         setData({
             remoteDate,
             lastCheck: Date.now()
@@ -64,7 +56,8 @@ browser.runtime.onInstalled.addListener(() => {
     setData({version: browser.runtime.getManifest().version});
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
-    fetchJSON("/data/options_default.json")
+    fetch("/data/options_default.json")
+    .then(res => res.json())
     .then(getData)
     .then(setData);
 

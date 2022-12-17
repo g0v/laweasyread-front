@@ -1,61 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh-tw">
+<html lang="zh-Hant-tw">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>法規亦毒氣::使用範例</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/kong-util/dist/string.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/kong-util/dist/string.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/kong-util/dist/all.js"></script>
     <script>
         kongUtil.use();
     </script>
     <script src="./browser/lib.js"></script>
     <script src="./browser/LER.js"></script>
-    <script src="./content_scripts/LER.js"></script>
-    <!-- <script src="./content_scripts/main.js"></script> -->
-    <script>
-// const LER = {
-//     __state: 'pending',
-//     __promise: null,
-//     __version: '2.0-alpha',
-
-//     __lastUpdate: '',
-//     __laws: {},
-//     __aliases: {},
-
-//     initialize() {
-//         const self = this;
-//         this.__promise = Promise.all([
-//             fetchText('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt', {cache: 'no-cache'}),
-//             fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', {cache: 'no-cache'}),
-//             fetchJSON('https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/data/aliases.json', {cache: 'no-cache'})
-//         ]).then(([lastUpdate, laws, aliases]) => {
-//             self.__lastUpdate = lastUpdate;
-//             self.__laws = laws;
-//             self.__aliases = aliases;
-//             self.__state = 'fulfilled';
-//         }).catch(reason => {
-//             console.error(reason);
-//             self.__state = 'rejected';
-//         });
-//     },
-
-//     get state() { return this.__state; },
-//     get promise() { return this.__promise; },
-//     get version() { return this.__version; },
-//     get lastUpdate() { return this.__lastUpdate; },
-//     get laws() { return this.__laws; },
-
-//     getLaw(pcode) {
-
-//     },
-//     parseNode(node, options) {
-
-//     }
-// };
-// LER.initialize();
-
-    </script>
+    <script src="./content_scripts/main.js"></script>
 </head>
 <body>
     <h1>法規亦毒氣::使用範例</h1>

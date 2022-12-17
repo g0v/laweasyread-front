@@ -37,15 +37,26 @@ counter: 0,
  */
 async parseElement(element = document.body, defaultLaw) {
     console.time("LawEasyRead" + (++this.counter));
-    const textNodes = getTextNodes(
+
+    // 取得所有要處理的文字節點
+    const textNodes = [];
+    const walker = document.createTreeWalker(
         element,
-        node => (
-            (node.nodeType === Node.TEXT_NODE)
-            ? /[\u4E00-\u9FFF]{2}/.test(node.textContent) // 有連續中日韓字元
-            : !/(^|\x20)LER-/.test(node.className)
-        ),
-        "BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA"
+        NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+        node => {
+            if(node.nodeType === Node.TEXT_NODE) {
+                return /[\u4E00-\u9FFF]{2}/.test(node.textContent) // 有連續中日韓字元
+                    ? NodeFilter.FILTER_ACCEPT
+                    : NodeFilter.FILTER_REJECT;
+            }
+            return node.matches('a,button,code,script,select,style,template,textarea')
+                ? NodeFilter.FILTER_REJECT
+                : NodeFilter.FILTER_SKIP
+            ;
+        }
     );
+    let node;
+    while(node = walker.nextNode()) textNodes.push(node);
 
     if(typeof defaultLaw === "string" && defaultLaw)
         defaultLaw = await searchLaw(defaultLaw);

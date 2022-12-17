@@ -27,6 +27,10 @@
 * `package.json`: Node.js 專案設定
 * `manifest.json`: 瀏覽器擴充元件設定
 
+### codes
+* `browser/LER.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
+* `content_scripts/LER.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
+
 ### for either case
 * `LER.js`
 
@@ -34,7 +38,6 @@
 * `demo.html`
 * `icon.*`
 * `data/`:
-  * ~~`data/aliases.json`: 法規的簡稱、暱稱對照。~~
   * `data/options_default.json`: 預設的使用者設定。
   * `data/exclude_terms.txt`: 不要匹配的詞彙清單。
 * `options_ui/`: 設定 UI 頁面
