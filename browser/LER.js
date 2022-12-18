@@ -17,10 +17,13 @@ let replaceRules = [];
  * @returns {Promise.<Law[]>}
  */
 async function downloadLaws() {
-    const [map, aliases] = await Promise.all([
-        fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
-        fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
-    ]);
+    console.debug('LER.downloadLaws()');
+    // const [map, aliases] = await Promise.all([
+    //     fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
+    //     fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
+    // ]);
+    const map = await fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" });
+    const aliases = {};
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
         if(aliases[pcode]) law.aliases = aliases[pcode];
@@ -34,9 +37,10 @@ async function downloadLaws() {
  * @abstract
  * @func loadLaws
  * @returns {Promise.<Law[]>}
- * @desc overriden in WebExtension to cooperate with version control
+ * @desc overwritten in WebExtension to cooperate with version control
  */
 function loadLaws() {
+    console.debug('LER.loadLaws() in `browser/LER.js`');
     return downloadLaws();
 }
 
@@ -47,11 +51,13 @@ function loadLaws() {
  * @param {Object[]} laws
  * @returns {Promise.<ReplaceRule[]>} 置換規則陣列。
  *
- * 法規名稱與排除名單必須合併在一起，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
+ * 法規名稱與排除名單必須混在一起排列，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
  */
 async function loadRules(laws) {
+    console.debug('LER.loadRules()');
+
     if(!laws) laws = await this.loadLaws();
-    const exTerms = (await fetch("/data/exclude_terms.txt").then(res => res.text())).split(/\s+/).filter(s => s);
+    const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
@@ -465,16 +471,6 @@ function pcn(chineseNumber) {
 
 /**
  * @private
- * @func
- */
-async function fetchJSON(...args) {
-    const res = await fetch(...args);
-    return res.ok ? (await res.json()) : (new ReferenceError(response.statusText));
-}
-
-
-/**
- * @private
  * @const {RegExp[]}
  * @desc 判斷條文段落結構的表達式。
  */
@@ -598,6 +594,7 @@ const dynamicRules = [
 
 return {
     downloadLaws,
+    loadLaws,
     loadRules,
     parseString,
     createPopupJSML

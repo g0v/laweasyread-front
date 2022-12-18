@@ -1,4 +1,10 @@
-importScripts("./lib.js", "./LER.js");
+importScripts(
+    "../node_modules/kong-util/dist/all.js",
+    "./lib.js",
+    "./LER.js"
+);
+kongUtil.use();
+
 Object.assign(LER, {
     /**
      * @func checkUpdate
@@ -6,6 +12,8 @@ Object.assign(LER, {
      * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串
      */
     async checkUpdate() {
+        console.debug('LER.checkUpdate()');
+
         const localDate = await getData("localDate");
         const response = await fetch("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"});
         const remoteDate = await response.text();
@@ -22,10 +30,12 @@ Object.assign(LER, {
      * @returns {Promise.<(false | string)>} 若有更新，則回傳該版本的日期字串。
      */
     async update() {
+        console.debug('LER.update()');
+
         const remoteDate = await this.checkUpdate();
         if(!remoteDate) return false;
 
-        const laws = downloadLaws();
+        const laws = this.downloadLaws();
         setData({laws, localDate: remoteDate});
         this.loadRules(laws);
         return remoteDate;
@@ -35,25 +45,27 @@ Object.assign(LER, {
      * @public
      * @func loadLaws
      * @returns {Promise.<Law[]>}
-     * @desc load laws data in `browser.storage`; comparing this to the same function in `LER` initialization.
+     * @desc
+     *   overwrites the method defined in `background/LER.js`.
+     *   loads laws data in `browser.storage`; or downloads if no such data yet.
      */
-    loadLaws() {
-        return getData("laws");
+    async loadLaws() {
+        console.debug('LER.loadLaws() in `browser/background.js`');
+
+        let laws = await getData("laws");
+        if(!laws) {
+            laws = await this.downloadLaws();
+            await setData({laws});
+        }
+        return laws;
     }
 });
 
+LER.loadRules();
 
 
 browser.runtime.onInstalled.addListener(() => {
-    // 若是初次安裝，則抓取法規資料。
-    getData("version")
-    .then(version => {
-        if(version) LER.loadRules();
-        else LER.update();
-    });
-
-    // 把 manifest.json 裡的版本資訊儲存到瀏覽器。
-    setData({version: browser.runtime.getManifest().version});
+    console.debug('browser.runtime.onInstalled');
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
     fetch("/data/options_default.json")
@@ -80,5 +92,3 @@ browser.runtime.onMessage.addListener((request, sender, callback) => {
         return !!result.then(callback); // return true for callback to be called async
     callback(result);
 });
-
-LER.loadRules();

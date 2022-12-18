@@ -1,0 +1,16 @@
+["div", {
+        "class": "LER-popup-container",
+        "style": "display: none;"
+    },
+    ["div", {"class": "LER-popup-before"}],
+    ["div", {"class": "LER-popup"},
+        ["input", {
+            "class": "LER-popup-pin",
+            "type": "checkbox",
+            "title": "固定"
+        }],
+        ["header"],
+        ["dl", {"class": "LER-popup-body"}]
+    ],
+    ["div", {"class": "LER-popup-after"}]
+]

@@ -1,6 +1,3 @@
-kongUtil.use("$", "$$", "createElement", "listen", "fetchJSON", "fetchDOM", "parseHTML", "isEventInElement");
-kongUtil.use("logger");
-
 /**
  * @module LER
  * @desc 各公有方法會直接在 `background.js` 被當成監聽器。欲作為監聽器的，其參數列應為 `request`, `sender`, `sendResponse` 。
@@ -24,7 +21,7 @@ counter: 0,
  * @param {string} string
  * @returns {Promise}
  */
- searchLaw(string) {
+searchLaw(string) {
     const key = /^[A-Z]\d{7}$/.test(string) ? "pcode" : "name";
     return getData("laws").then(laws => laws.find(law => law[key] === string));
 },
