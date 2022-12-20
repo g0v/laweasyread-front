@@ -1,9 +1,4 @@
-importScripts(
-    "../node_modules/kong-util/dist/all.js",
-    "./lib.js",
-    "./LER.js"
-);
-kongUtil.use();
+importScripts('./lib.js', './LER.js');
 
 Object.assign(LER, {
     /**
@@ -13,10 +8,10 @@ Object.assign(LER, {
      */
     async checkUpdate() {
         console.debug('LER.checkUpdate()');
-
-        const localDate = await getData("localDate");
-        const response = await fetch("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt", {cache: "no-cache"});
-        const remoteDate = await response.text();
+        const [localDate, remoteDate] = await Promise.all([
+            getData('localDate'),
+            fetch('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt', {cache: 'no-cache'}).then(res => res.text())
+        ]);
         setData({
             remoteDate,
             lastCheck: Date.now()
@@ -31,7 +26,6 @@ Object.assign(LER, {
      */
     async update() {
         console.debug('LER.update()');
-
         const remoteDate = await this.checkUpdate();
         if(!remoteDate) return false;
 
@@ -51,8 +45,7 @@ Object.assign(LER, {
      */
     async loadLaws() {
         console.debug('LER.loadLaws() in `browser/background.js`');
-
-        let laws = await getData("laws");
+        let laws = await getData('laws');
         if(!laws) {
             laws = await this.downloadLaws();
             await setData({laws});
@@ -68,7 +61,7 @@ browser.runtime.onInstalled.addListener(() => {
     console.debug('browser.runtime.onInstalled');
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
-    fetch("/data/options_default.json")
+    fetch('/data/options_default.json')
     .then(res => res.json())
     .then(getData)
     .then(setData);
@@ -80,7 +73,7 @@ browser.runtime.onInstalled.addListener(() => {
 
 // 鬧鐘響時就檢查是否有更新
 browser.alarms.onAlarm.addListener(async() => {
-    const autoUpdate = await getData("autoUpdate");
+    const autoUpdate = await getData('autoUpdate');
     if(autoUpdate) LER.update();
     else LER.checkUpdate();
 });

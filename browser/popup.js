@@ -1,7 +1,4 @@
-function $(s) { return document.querySelector(s); }
-function listen(target, type, listener) {
-    target.addEventListener(type, listener);
-}
+kongUtil.use('$', 'listen');
 
 // 顯示專案版本
 $("#version").append(browser.runtime.getManifest().version);

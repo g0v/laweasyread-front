@@ -28,11 +28,17 @@
 * `manifest.json`: 瀏覽器擴充元件設定
 
 ### codes
+
+|name|for website?|for content scripts?|for options UI?|for popup?|for background?|
+|----|----|----|----|----|----|
+|`kong-util`|o|o|o|o|x|
+|`browser/lib.js`|x|x|o|o|o|
+|`browser/LER.js`|o|x|x|x|o|
+|`content_scripts/LER.js`|o|o|x|x|x|
+|`content_scripts/main.js`|x|o|x|x|x|
+
 * `browser/LER.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
 * `content_scripts/LER.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
-
-### for either case
-* `LER.js`
 
 ### only for browser extension
 * `demo.html`
@@ -44,15 +50,10 @@
 * `content_scripts/`: 要內嵌於不同網頁的
 * `browser/`: 後台執行
 
-### only for embed JS
-
-
-
 ## Data Sources
 
 * [mojLawSplitJSON](https://github.com/kong0107/mojLawSplitJSON/tree/arranged)
 * [jyi](https://github.com/kong0107/jyi)
-
 
 ## Important Cases
 
@@ -67,7 +68,6 @@
 * 表格
 * 原始資料缺漏一些標點符號：
   * 中央研究院組織法第7條第1款
-
 
 ## To-Do List
 

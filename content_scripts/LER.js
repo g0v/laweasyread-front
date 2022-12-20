@@ -28,7 +28,7 @@ searchLaw(string) {
 
 /**
  * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
- * @param {Element} element
+ * @param {Element} [element=document.body]
  * @param {string} [defaultLawPcode]
  * @returns {Promise}
  */
@@ -59,8 +59,8 @@ async parseElement(element = document.body, defaultLaw) {
         defaultLaw = await searchLaw(defaultLaw);
 
     return new Promise(resolve => {
+        const LER = this;
         const currentCounter = this.counter;
-        const parseString = browser?.runtime?.sendMessage || this.parseString;
         async function parseNextTextNode() {
             const node = textNodes.shift();
             if(!node) {
@@ -68,7 +68,7 @@ async parseElement(element = document.body, defaultLaw) {
                 console.timeEnd("LawEasyRead" + currentCounter);
                 return resolve(element);
             }
-            let objects = await parseString({
+            let objects = await LER.parseString({
                 command: "parseString",
                 string: node.textContent,
                 allowLink: !node.parentNode?.closest?.("a"),
@@ -184,6 +184,37 @@ setPopupPosition(popup, event) {
         popup.offsetWidth - arrow.offsetWidth - 8   // 彈出窗格右緣，再扣掉原角框的範圍
     );
     arrow.style.marginLeft = Math.max(arrowLeft, 8) + "px";
+},
+
+getShadowRoot() {
+    let host = kongUtil.$('#LER-shadow-host');
+    if(!host) {
+        host = kongUtil.createElementFromJsonML([
+            'div', {
+                id: 'LER-shadow-host',
+                style: 'position: static; width: 0; height: 0;'
+            }
+        ]);
+        document.body?.append(host);
+
+        const root = host.attachShadow({mode: 'open'});
+        let cssRef = 'content_scripts/main.css';
+        cssRef = (globalThis?.browser || globalThis?.chrome)?.runtime?.getURL(cssRef)
+            || ('https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/' + cssRef);
+        console.debug(cssRef);
+        kongUtil.fetchText(cssRef).then(css => {
+            root.append(kongUtil.createElementFromJsonML([
+                'style', css
+            ]));
+        });
+        // root.append(kongUtil.createElementFromJsonML([
+        //     'link', {
+        //         rel: 'stylesheet',
+        //         href: cssRef
+        //     }
+        // ]));
+    }
+    return host.shadowRoot;
 }
 
 });

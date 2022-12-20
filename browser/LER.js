@@ -18,12 +18,10 @@ let replaceRules = [];
  */
 async function downloadLaws() {
     console.debug('LER.downloadLaws()');
-    // const [map, aliases] = await Promise.all([
-    //     fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
-    //     fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
-    // ]);
-    const map = await fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" });
-    const aliases = {};
+    const [map, aliases] = await Promise.all([
+        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
+        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
+    ]);
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
         if(aliases[pcode]) law.aliases = aliases[pcode];
@@ -34,7 +32,6 @@ async function downloadLaws() {
 
 /**
  * @public
- * @abstract
  * @func loadLaws
  * @returns {Promise.<Law[]>}
  * @desc overwritten in WebExtension to cooperate with version control
@@ -57,7 +54,7 @@ async function loadRules(laws) {
     console.debug('LER.loadRules()');
 
     if(!laws) laws = await this.loadLaws();
-    const exTerms = (await fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
+    const exTerms = (await kongUtil.fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
@@ -261,7 +258,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
 async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
-        jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
+        jyi = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
         headers = [`釋字第 ${jyi.number} 號 `, {time: jyi.date}];
 
         if(jyi.title) bodyParts.push({dd: jyi.title});
@@ -291,7 +288,7 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
         );
     }
     else if(pcode) {
-        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
+        const law = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
         /**
          * 雖然叫做 "no-cache" ，但其實仍會確認快取的資料是否為最新。
          * 其與 "default" 的差別在於， "no-cache" 無視快取期限，而是直接向伺服器確認快取區的資料是否為最新。
@@ -379,7 +376,7 @@ async function createPopupJSML({jyi, pcode, norge, year, word, number}) {
         defaultLaw = {pcode, name: law.name};
     }
     else if(year && word && number) {
-        const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
+        const decision = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
         headers = [
             `${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
             {time: decision['判決日期']}

@@ -31,27 +31,27 @@ const artNumberParserOptions = [
         example: "§91-1 Ⅱ⑤"   // 羅馬數字：U+2160~216B ；圓圈數字：U+2460~2473
     }*/
 ].map(option => {
-    return createElement(
-        {tr: {children: [
-            {td: {children: [
-                {label: {children: [
-                    {input: {
-                        type: "radio",
-                        name: "artNumberParserMethod",
+    return createElementFromJsonML(
+        ['tr',
+            ['td',
+                ['label',
+                    ['input', {
+                        type: 'radio',
+                        name: 'artNumberParserMethod',
                         id: `artNumberParserMethod-${option.value}`,
                         value: option.value,
                         onchange: () => setData({artNumberParserMethod: option.value})
-                    }},
+                    }],
                     option.title
-                ]}}
-            ]}},
-            {td: {children: [
-                {label: {
-                    for: `artNumberParserMethod-${option.value}`,
-                    text: option.example
-                }}
-            ]}}
-        ]}}
+                ]
+            ],
+            ['td',
+                ['label',
+                    {for: `artNumberParserMethod-${option.value}`},
+                    option.example
+                ]
+            ]
+        ]
     );
 });
 $("#artNumberParserOptions").append(...artNumberParserOptions);
