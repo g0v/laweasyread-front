@@ -31,7 +31,6 @@
 
 |name|for website?|for content scripts?|for options UI?|for popup?|for background?|
 |----|----|----|----|----|----|
-|`kong-util`|o|o|o|o|x|
 |`browser/lib.js`|x|x|o|o|o|
 |`browser/LER.js`|o|x|x|x|o|
 |`content_scripts/LER.js`|o|o|x|x|x|

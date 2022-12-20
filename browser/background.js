@@ -1,4 +1,8 @@
-importScripts('./lib.js', './LER.js');
+importScripts(
+    '../node_modules/kong-util/dist/all.js',
+    './lib.js',
+    './LER.js'
+);
 
 Object.assign(LER, {
     /**
