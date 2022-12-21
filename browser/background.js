@@ -1,7 +1,7 @@
 importScripts(
     '../node_modules/kong-util/dist/all.js',
-    './lib.js',
-    './LER.js'
+    '../lib.js',
+    './LER.back.js'
 );
 
 Object.assign(LER, {
@@ -44,7 +44,7 @@ Object.assign(LER, {
      * @func loadLaws
      * @returns {Promise.<Law[]>}
      * @desc
-     *   overwrites the method defined in `background/LER.js`.
+     *   overwrites the method defined in `browser/LER.back.js`.
      *   loads laws data in `browser.storage`; or downloads if no such data yet.
      */
     async loadLaws() {

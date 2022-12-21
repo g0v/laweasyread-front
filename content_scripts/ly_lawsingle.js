@@ -1,5 +1,3 @@
-"use strict";
-
 /**
  * 適用於 `https://lis.ly.gov.tw/lglawc/lawsingle?*`
  * 目前僅發現四種頁面：

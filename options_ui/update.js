@@ -1,5 +1,3 @@
-"use strict";
-
 getData(["localDate", "remoteDate", "lastCheck"])
 .then(({localDate, remoteDate, lastCheck}) => {
     if(localDate) setContent($("#localDate"), localDate);

@@ -1,4 +1,5 @@
-kongUtil.use("$$", "fetchDOM", "createElement");
+kongUtil.use('$', '$$', 'fetchDOM');
+const createElement = kongUtil.createElementFromJsonML;
 
 /**
  * 排除首頁的「熱門法規瀏覽」（排版考量）
@@ -16,7 +17,7 @@ pageDefaultLaw = (new URLSearchParams(location.search)).get("pcode");
 const height = 36;
 const depths = [];
 $$(".law-reg-content .h3").forEach((h3, index, list) => {
-    const section = createElement({tag: "section"});
+    const section = createElementFromJsonML(['section']);
     while(h3.nextElementSibling?.className === "row")
         section.append(h3.nextElementSibling);
     h3.replaceWith(section);
@@ -38,7 +39,7 @@ const css = depths.map((depth, index) => {
         .char-${depth} ~ .row > .col-no { top: ${(index+1)*height}px; }
     `;
 }).join("\n");
-document.head.appendChild(createElement({style: css}));
+document.head.appendChild(ce(['style', css]));
 
 
 /**
@@ -62,11 +63,11 @@ getData("mojAddReferringArticles").then(setting => {
 function addDetails(line) {
     listen(line, "lerParseEnd", () => {
         if(!$("[data-norge]", line)) return;
-        const details = createElement({
-            tag: "details",
-            class: "LER-article-groups",
-            children: [{tag: "summary"}]
-        });
+        const details = createElementFromJsonML(
+            ['details', {class: 'LER-article-groups'},
+                ['summary']
+            ]
+        );
         line.append(details);
         listen(details, "toggle", embedArticles, {once: true});
     }, {once: true});
@@ -79,19 +80,18 @@ function addDetails(line) {
 function embedArticles(event) {
     const details = event.target;
     $$("[data-norge]", details.parentNode).forEach(anchor => {
-        const loadingNode = createElement({p: "讀取中…"});
+        const loadingNode = createElementFromJsonML(['p', '讀取中…']);
         details.append(loadingNode);
         fetchDOM(anchor.href).then(doc => {
             const body = $(".law-reg", doc);
             if(!body) body = "找不到法條。";
-            const section = createElement(
-                {section: {$: [
-                    {header: {
-                        class: "table-title",
-                        $: $$(".table-title td > *:not(.law-vaildMemo)", doc)
-                    }},
+            const section = createElementFromJsonML(
+                ['section',
+                    ['header', {class: 'table-title'},
+                        $$(".table-title td > *:not(.law-vaildMemo)", doc)
+                    ],
                     body
-                ]}}
+                ]
             );
             $$("div[class|=line]", section).forEach(addDetails);
             parseElement(section.lastChild, anchor.dataset.pcode);

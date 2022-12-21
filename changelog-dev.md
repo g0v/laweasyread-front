@@ -19,7 +19,7 @@
 
 ## 2.0.0910
 2022-10-06
-* 將常用函式庫獨立出去為 [JSML](https://www.npmjs.com/package/jsml-parser) 和 [kong-util](https://www.npmjs.com/package/kong-util) 。
+* 將常用函式庫獨立出去為 [kong-util](https://www.npmjs.com/package/kong-util) 。
 * 因應法規資料來源格式變更。
 
 ## 2.0.0832

@@ -31,13 +31,13 @@
 
 |name|for website?|for content scripts?|for options UI?|for popup?|for background?|
 |----|----|----|----|----|----|
-|`browser/lib.js`|x|x|o|o|o|
-|`browser/LER.js`|o|x|x|x|o|
-|`content_scripts/LER.js`|o|o|x|x|x|
+|`lib.js`|x|x|o|o|o|
+|`browser/LER.back.js`|o|x|x|x|o|
+|`content_scripts/LER.front.js`|o|o|x|x|x|
 |`content_scripts/main.js`|x|o|x|x|x|
 
-* `browser/LER.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
-* `content_scripts/LER.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
+* `browser/LER.back.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
+* `content_scripts/LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
 
 ### only for browser extension
 * `demo.html`

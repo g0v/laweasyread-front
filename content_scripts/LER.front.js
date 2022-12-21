@@ -2,6 +2,12 @@
  * @module LER
  * @desc 各公有方法會直接在 `background.js` 被當成監聽器。欲作為監聽器的，其參數列應為 `request`, `sender`, `sendResponse` 。
  */
+var LER = LER || {
+    parseString(request) {
+        return (browser || chrome).runtime?.sendMessage(request);
+    }
+};
+
 Object.assign(LER, {
 
 /** @type {boolean} */
@@ -78,7 +84,7 @@ async parseElement(element = document.body, defaultLaw) {
             requestIdleCallback(parseNextTextNode);
             objects = objects.flat();
             if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-            objects = objects.map(createElement);
+            objects = objects.map(kongUtil.createElementFromJsonML);
             node.replaceWith(...objects);
             if(enablePopup) objects.forEach(bindPopup);
             if(!node.nextSibling) {
@@ -118,12 +124,12 @@ bindPopup(elem) {
 
         // 異步載入資料。
         browser.runtime.sendMessage(Object.assign(
-            {command: "createPopupJSML"},
+            {command: "preparePopup"},
             elem.dataset
         )).then(({headers, bodyParts, defaultLaw}) => {
-            $("header", popup).append(...headers.map(createElement));
+            $("header", popup).append(...headers.map(kongUtil.createElementFromJsonML));
             body.textContent = "";
-            body.append(...bodyParts.map(createElement));
+            body.append(...bodyParts.map(kongUtil.createElementFromJsonML));
             parseElement(body, defaultLaw);
             if(!popup.style.display) setPopupPosition(popup, event); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
@@ -203,21 +209,25 @@ getShadowRoot() {
             || ('https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/' + cssRef);
         console.debug(cssRef);
         kongUtil.fetchText(cssRef).then(css => {
-            root.append(kongUtil.createElementFromJsonML([
-                'style', css
-            ]));
+            root.append(kongUtil.createElementFromJsonML(
+                ['style', css]
+            ));
         });
-        // root.append(kongUtil.createElementFromJsonML([
-        //     'link', {
+        // root.append(kongUtil.createElementFromJsonML(
+        //     ['link', {
         //         rel: 'stylesheet',
         //         href: cssRef
-        //     }
-        // ]));
+        //     }]
+        // ));
     }
     return host.shadowRoot;
 }
 
 });
+
+
+console.log(LER);
+
 // globalThis.LER = Object.assign(globalThis.LER || {}, (() => {
 //     return {
 //         x: 3

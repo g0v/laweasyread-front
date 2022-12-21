@@ -26,9 +26,8 @@
         "matches": ["<all_urls>"],
         "js": [
             "node_modules/kong-util/dist/all.js",
-            "browser/lib.js",
-            "browser/LER.js",
-            "content_scripts/LER.js",
+            "lib.js",
+            "content_scripts/LER.front.js",
             "content_scripts/main.js"
         ],
         "all_frames": true
