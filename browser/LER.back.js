@@ -14,11 +14,11 @@ let replaceRules = [];
 
 /**
  * @public
- * @desc 支援 content scripts 載入其他外掛資料夾的檔案。
+ * @desc 支援 content scripts 載入其他本外掛的檔案。
  * @param {Object} request
  * @returns {string}
  */
-function fetchText({command, resource, ...options}) {
+async function fetchText({command, resource, ...options}) {
     try {
         new URL(resource);
     }
@@ -29,8 +29,8 @@ function fetchText({command, resource, ...options}) {
         if(location.host.startsWith('localhost') || location.host.startsWith('127.')) baseHref = ''; // for debug
         resource = baseHref + resource;
     }
-    console.log(command, resource, options);
-    return globalThis.fetch(resource, options).then(res => res.text());
+    const response = await fetch(resource, options);
+    return await response.text();
 }
 
 
@@ -78,7 +78,9 @@ async function loadRules(laws) {
     // console.debug('LER.loadRules()');
     if(replaceRules.length) return replaceRules;
     if(!(laws instanceof Array)) laws = await this.loadLaws();
-    const exTerms = (await fetchText('data/exclude_terms.txt')).split(/\s+/).filter(s => s);
+
+    let exTerms = await fetchText({resource: 'data/exclude_terms.txt'});
+    exTerms = exTerms.split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
