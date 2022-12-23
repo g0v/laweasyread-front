@@ -1,23 +1,20 @@
 /**
  * @module LER
- * @desc 各公有方法會直接在 `background.js` 被當成監聽器。欲作為監聽器的，其參數列應為 `request`, `sender`, `sendResponse` 。
+ * @desc
+ *  部分與 `LER.back.js` 同名的函數，在作為瀏覽器掛時會被定義，用於呼叫後端。
  */
-var LER = LER || {
-    fetchText(request) {
-        return (browser || chrome).runtime?.sendMessage(request);
-    },
-    loadRules() {
-        return (browser || chrome).runtime?.sendMessage({command: 'loadRules'});
-    },
-    parseString(request) {
-        // console.debug('LER.parseString() in `content_scripts/LER.front.js`');
-        return (browser || chrome).runtime?.sendMessage(request);
-    },
-    preparePopup(request) {
-        // console.debug('LER.preparePopup() in `content_scripts/LER.front.js`');
-        return (browser || chrome).runtime?.sendMessage(request);
-    }
-};
+var LER = LER || (() => {
+    const obj = {};
+    const browser = globalThis?.browser || globalThis?.chrome;
+    ['fetchText', 'loadRules', 'parseString', 'preparePopup']
+    .forEach(method => {
+        obj[method] = function(options = {}) {
+            return browser?.runtime?.sendMessage({method, ...options});
+        };
+    });
+    return obj;
+})();
+
 
 Object.assign(LER, {
 
@@ -107,7 +104,6 @@ async parseElement(element, defaultLaw) {
                 return resolve(element);
             }
             let objects = await LER.parseString({
-                command: "parseString",
                 string: node.textContent,
                 allowLink: !node.parentNode?.closest?.("a"),
                 defaultLaw
@@ -161,7 +157,7 @@ bindPopup(elem) {
     elem.addEventListener('mouseenter', event => {
         // console.debug('mouseenter', event);
         const fakeEvent = {target: event.target, clientX: event.clientX, pageX: event.pageX};
-        // 為同步建立空白窗格，就不從後端取得 JSML ，而是複製已載入的 DOM 。
+        // 為同步建立空白窗格，就不從後端取得 JsonML ，而是複製已載入的 DOM 。
         popup = this.popupTemplate.cloneNode(true);
         popup.target = elem;
         popup.addEventListener('mouseleave', e => {
@@ -171,14 +167,12 @@ bindPopup(elem) {
             popup.style.display = 'none';
         });
         const body = popup.querySelector('.LER-popup-body');
-        body.textContent = "讀取中…";
+        body.textContent = '讀取中…';
         this.getShadowRoot().append(popup);
 
         // 異步載入資料。
-        this.preparePopup(Object.assign(
-            {command: "preparePopup"},
-            elem.dataset
-        )).then(({headers, bodyParts, defaultLaw}) => {
+        this.preparePopup(elem.dataset)
+        .then(({headers, bodyParts, defaultLaw}) => {
             popup.querySelector('header').append(...headers.map(kongUtil.createElementFromJsonML));
             body.textContent = '';
             body.append(...bodyParts.map(kongUtil.createElementFromJsonML));
@@ -264,7 +258,7 @@ getShadowRoot() {
         document.body?.append(host);
 
         const root = host.attachShadow({mode: 'open'});
-        this.fetchText({command: 'fetchText', resource: 'content_scripts/main.css'})
+        this.fetchText({resource: 'content_scripts/main.css'})
         .then(css => {
             root.append(kongUtil.createElementFromJsonML(
                 ['style', css]

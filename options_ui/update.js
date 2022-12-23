@@ -31,7 +31,7 @@ listen($("#updateButton"), "click", event => {
     cl.remove("btn-primary", "btn-info");
     cl.add("btn-warning");
     hide($("#lastCheckContainer"));
-    browser.runtime.sendMessage({command: "update"})
+    browser.runtime.sendMessage({method: "update"})
     .then(newDate => {
         if(newDate) { // 有更新且已安裝
             setContent($("#localDate"), newDate);

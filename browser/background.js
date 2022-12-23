@@ -84,7 +84,8 @@ browser.alarms.onAlarm.addListener(async() => {
 
 // 整個 LER 就是 listener
 browser.runtime.onMessage.addListener((request, sender, callback) => {
-    const result = LER[request.command]?.(request, sender);
+    const {method, ...options} = request;
+    const result = LER[method]?.(options, sender);
     if(result instanceof Promise)
         return !!result.then(callback); // return true for callback to be called async
     callback(result);

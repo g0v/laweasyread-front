@@ -1,5 +1,8 @@
 /**
  * @module LER
+ * @desc
+ *  各公有方法會直接在 `background.js` 被當成監聽器。
+ *  欲作為監聽器的，其參數列應為 `request`, `sender`。
  */
 var LER = (() => {
 
@@ -18,7 +21,7 @@ let replaceRules = [];
  * @param {Object} request
  * @returns {string}
  */
-async function fetchText({command, resource, ...options}) {
+async function fetchText({resource, ...options}) {
     try {
         new URL(resource);
     }
@@ -43,8 +46,8 @@ async function downloadLaws() {
     // console.debug('LER.downloadLaws()');
     const [map, aliases] = await Promise.all([
         kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
-        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
-        // kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
+        // kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
+        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
     ]);
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};

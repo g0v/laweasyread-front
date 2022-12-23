@@ -17,13 +17,13 @@ getData(["autoParse", "localDate", "remoteDate"])
 listen($("#autoParse"), "click", event => {
     const checked = event.target.checked;
     setData({autoParse: checked});
-    if(checked) sendMessageToCurrentTab({command: "parseDocument"});
+    if(checked) sendMessageToCurrentTab({method: 'parseDocument'});
 });
 
 // 手動轉換的 button
 listen($("#parseCurrentTab"), "click", event => {
     event.target.disabled = true;
-    sendMessageToCurrentTab({command: "parseDocument"})
+    sendMessageToCurrentTab({method: 'parseDocument'})
     .then(() => event.target.disabled = false);
 });
 
@@ -32,7 +32,7 @@ listen($("#update"), "click", event => {
     const self = event.target;
     self.firstChild.replaceWith("更新中…");
     self.disabled = true;
-    browser.runtime.sendMessage({command: "update"})
+    browser.runtime.sendMessage({method: 'update'})
     .then(
         () => self.remove(),
         () => self.replaceWith("更新失敗")
