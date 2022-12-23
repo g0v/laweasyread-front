@@ -19,10 +19,11 @@ let replaceRules = [];
  * @returns {Promise.<Law[]>}
  */
 async function downloadLaws() {
-    console.debug('LER.downloadLaws()');
+    // console.debug('LER.downloadLaws()');
     const [map, aliases] = await Promise.all([
-        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json", { cache: "no-cache" }),
-        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json", { cache: "no-cache" })
+        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
+        // kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
+        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
     ]);
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
@@ -39,7 +40,7 @@ async function downloadLaws() {
  * @desc overwritten in WebExtension to cooperate with version control
  */
 function loadLaws() {
-    console.debug('LER.loadLaws() in `browser/LER.back.js`');
+    // console.debug('LER.loadLaws() in `browser/LER.back.js`');
     return downloadLaws();
 }
 
@@ -53,10 +54,11 @@ function loadLaws() {
  * 法規名稱與排除名單必須混在一起排列，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
  */
 async function loadRules(laws) {
-    console.debug('LER.loadRules()');
+    // console.debug('LER.loadRules()');
+    if(replaceRules.length) return replaceRules;
 
     if(!laws) laws = await this.loadLaws();
-    const exTerms = (await kongUtil.fetchText("/data/exclude_terms.txt")).split(/\s+/).filter(s => s);
+    const exTerms = (await kongUtil.fetchText('https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/data/exclude_terms.txt')).split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
@@ -95,9 +97,11 @@ async function loadRules(laws) {
  * @returns {JsonML[]}
  */
 function parseString({string, allowLink = true, defaultLaw}) {
+    // console.debug('LER.parseString() in `browser/LER.back.js`');
     const result = replaceRules.reduce((acc, rule) =>
         acc.flatMap(strOrObj => {
             if(typeof strOrObj !== "string") return strOrObj;
+            if(strOrObj.length < rule.pattern.length ?? 3) return strOrObj;
             return applyReplaceRule(strOrObj, rule).filter(x => x);
         })
     , [string]);
@@ -124,7 +128,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
                     const prev = result[index - 1];
                     if(prev?.[1]?.data.pcode) pcode = prev[1].data.pcode;
                 }
-                if(pcode) jsonml.data.pcode = pcode;
+                if(pcode) jsonml[1].data.pcode = pcode;
                 if(allowLink && pcode) {
                     jsonml[0] = 'a';
                     jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${pcode}&norge=${cur.norge}`;
@@ -198,6 +202,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
  * 跟 `String#replaceAll` 的邏輯一樣，只是匹配到的子字串會被轉成物件。
  */
 function applyReplaceRule(string, {pattern, replacer}) {
+    // console.debug('LER.applyReplaceRule()');
     if(pattern instanceof RegExp && replacer instanceof Function) {
         console.assert(pattern.global);
         const debris = [], rei = string.matchAll(pattern);
@@ -226,6 +231,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
  * @returns {Promise.<Object>} {headers, bodyParts}
  */
 async function preparePopup({jyi, pcode, norge, year, word, number}) {
+    console.debug('LER.preparePopup() in `browser/LER.back.js`');
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
         jyi = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
