@@ -37,6 +37,17 @@
     color: #000;
     cursor: help;
 }
+.LER-popup ul,
+.LER-popup ol,
+.LER-popup dl,
+.LER-popup dt,
+.LER-popup dd {
+    margin: 0;
+    padding: 0;
+}
+.LER-popup p {
+    margin: .5em 0;
+}
 
 /**
  * 彈出視窗
@@ -55,14 +66,6 @@
     padding: 0;
     z-index: 1031;
     color: #222;
-}
-.LER-popup-container * {
-    font-size: inherit;
-    margin: 0;
-    padding: 0;
-    list-style-type: inherit;
-    line-height: 1.75;
-    background: #eee;
 }
 .LER-popup-before,
 .LER-popup-after {
@@ -83,6 +86,8 @@
     margin-right: .5em;
 }
 .LER-popup {
+    line-height: 1.5;
+    background: #eee;
     min-height: 2em;
     padding: .2em .5em .1em;
     border: 1px solid #44444488;
@@ -131,7 +136,8 @@
 .LER-popup-body dt {
     position: sticky;
     top: 0;
-    background: linear-gradient(to right, #eeeeeeff, #eeeeee00);
+    background: linear-gradient(to right, #eeeeeeff, #eeeeeeff, 10em, #eeeeee00);
+    font-weight: bold;
 }
 .LER-popup-body dt:not(:first-child) {
     margin-top: .6em;

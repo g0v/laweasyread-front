@@ -3,12 +3,18 @@
  * @desc 各公有方法會直接在 `background.js` 被當成監聽器。欲作為監聽器的，其參數列應為 `request`, `sender`, `sendResponse` 。
  */
 var LER = LER || {
+    fetchText(request) {
+        return (browser || chrome).runtime?.sendMessage(request);
+    },
+    loadRules() {
+        return (browser || chrome).runtime?.sendMessage({command: 'loadRules'});
+    },
     parseString(request) {
-        console.debug('LER.parseString() in `content_scripts/LER.front.js`');
+        // console.debug('LER.parseString() in `content_scripts/LER.front.js`');
         return (browser || chrome).runtime?.sendMessage(request);
     },
     preparePopup(request) {
-        console.debug('LER.preparePopup() in `content_scripts/LER.front.js`');
+        // console.debug('LER.preparePopup() in `content_scripts/LER.front.js`');
         return (browser || chrome).runtime?.sendMessage(request);
     }
 };
@@ -87,7 +93,7 @@ async parseElement(element, defaultLaw) {
     while(node = walker.nextNode()) textNodes.push(node);
 
     if(typeof defaultLaw === "string" && defaultLaw)
-        defaultLaw = await searchLaw(defaultLaw);
+        defaultLaw = await this.searchLaw(defaultLaw);
 
     return new Promise(resolve => {
         const LER = this;
@@ -153,13 +159,14 @@ bindPopup(elem) {
 
     let popup;
     elem.addEventListener('mouseenter', event => {
-        console.debug('mouseenter', event);
+        // console.debug('mouseenter', event);
         const fakeEvent = {target: event.target, clientX: event.clientX, pageX: event.pageX};
         // 為同步建立空白窗格，就不從後端取得 JSML ，而是複製已載入的 DOM 。
         popup = this.popupTemplate.cloneNode(true);
         popup.target = elem;
         popup.addEventListener('mouseleave', e => {
             if(kongUtil.isEventInElement(e, elem)) return;
+            if(kongUtil.isEventInElement(e, popup)) return;
             if(popup.querySelector('[type=checkbox]').checked) return;
             popup.style.display = 'none';
         });
@@ -182,14 +189,14 @@ bindPopup(elem) {
 
     let timeoutID;
     elem.addEventListener('mouseenter', event => {
-        console.debug('mouseenter', event);
+        // console.debug('mouseenter', event);
         const fakeEvent = {target: event.target, clientX: event.clientX, pageX: event.pageX};
         if(!popup) throw new ReferenceError("popup does not exist.");
         if(!popup.style.display) return;
         timeoutID = setTimeout(this.setPopupPosition, 375, popup, fakeEvent);
     });
     elem.addEventListener('mouseleave', event => {
-        console.debug('mouseleave', elem);
+        // console.debug('mouseleave', elem);
         clearTimeout(timeoutID);
 
         if(kongUtil.isEventInElement(event, popup)) return;
@@ -205,7 +212,7 @@ bindPopup(elem) {
  * @returns {undefined}
  */
 setPopupPosition(popup, event) {
-    console.debug('LER.setPopupPosition()', event);
+    // console.debug('LER.setPopupPosition()', event);
     let arrow; ///< 稍後判斷箭頭是上面還是下面
     const rect = event.target.getBoundingClientRect(); ///< 相對於當前可視範圍，而非相對於文件左上角
 
@@ -246,7 +253,6 @@ setPopupPosition(popup, event) {
 },
 
 getShadowRoot() {
-    // console.debug('LER.getShadowRoot()');
     let host = kongUtil.$('#LER-shadow-host');
     if(!host) {
         host = kongUtil.createElementFromJsonML([
@@ -257,27 +263,13 @@ getShadowRoot() {
         ]);
         document.body?.append(host);
 
-        let baseHref, browser = globalThis?.browser || globalThis?.chrome;
-        if(location.host.startsWith('localhost') || location.host.startsWith('127.'))
-            baseHref = '';
-        else if(browser) baseHref = browser?.runtime?.getURL('');
-        else baseHref = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/';
-        console.debug('baseHref', baseHref);
-
         const root = host.attachShadow({mode: 'open'});
-        // const cssHref = 'content_scripts/main.css';
-        kongUtil.fetchText(baseHref + 'content_scripts/main.css')
+        this.fetchText({command: 'fetchText', resource: 'content_scripts/main.css'})
         .then(css => {
             root.append(kongUtil.createElementFromJsonML(
                 ['style', css]
             ));
         });
-        // root.append(kongUtil.createElementFromJsonML(
-        //     ['link', {
-        //         rel: 'stylesheet',
-        //         href: cssRef
-        //     }]
-        // ));
     }
     return host.shadowRoot;
 }

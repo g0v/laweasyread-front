@@ -12,6 +12,27 @@ const pcn = kongUtil.parseChineseNumber;
  */
 let replaceRules = [];
 
+/**
+ * @public
+ * @desc 支援 content scripts 載入其他外掛資料夾的檔案。
+ * @param {Object} request
+ * @returns {string}
+ */
+function fetchText({command, resource, ...options}) {
+    try {
+        new URL(resource);
+    }
+    catch(err) {
+        let baseHref, browser = globalThis?.browser || globalThis?.chrome;
+        if(browser) baseHref = browser?.runtime?.getURL('');
+        else baseHref = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/';
+        if(location.host.startsWith('localhost') || location.host.startsWith('127.')) baseHref = ''; // for debug
+        resource = baseHref + resource;
+    }
+    console.log(command, resource, options);
+    return globalThis.fetch(resource, options).then(res => res.text());
+}
+
 
 /**
  * @public
@@ -22,8 +43,8 @@ async function downloadLaws() {
     // console.debug('LER.downloadLaws()');
     const [map, aliases] = await Promise.all([
         kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
-        // kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
-        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
+        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
+        // kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
     ]);
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
@@ -56,9 +77,8 @@ function loadLaws() {
 async function loadRules(laws) {
     // console.debug('LER.loadRules()');
     if(replaceRules.length) return replaceRules;
-
-    if(!laws) laws = await this.loadLaws();
-    const exTerms = (await kongUtil.fetchText('https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/data/exclude_terms.txt')).split(/\s+/).filter(s => s);
+    if(!(laws instanceof Array)) laws = await this.loadLaws();
+    const exTerms = (await fetchText('data/exclude_terms.txt')).split(/\s+/).filter(s => s);
 
     replaceRules = laws
     .reduce((acc, {pcode, name, aliases}) => {
@@ -126,7 +146,7 @@ function parseString({string, allowLink = true, defaultLaw}) {
                 let pcode = defaultLaw?.pcode;
                 if(!pcode) {
                     const prev = result[index - 1];
-                    if(prev?.[1]?.data.pcode) pcode = prev[1].data.pcode;
+                    if(prev?.[1]?.data?.pcode) pcode = prev[1].data.pcode;
                 }
                 if(pcode) jsonml[1].data.pcode = pcode;
                 if(allowLink && pcode) {
@@ -231,7 +251,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
  * @returns {Promise.<Object>} {headers, bodyParts}
  */
 async function preparePopup({jyi, pcode, norge, year, word, number}) {
-    console.debug('LER.preparePopup() in `browser/LER.back.js`');
+    // console.debug('LER.preparePopup() in `browser/LER.back.js`');
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
         jyi = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
@@ -503,8 +523,7 @@ const dynamicRules = [
                         return acc;
                     }
                     default:
-                        console.debug(articles);
-                        throw new RangeError("too many articles");
+                        console.error(articles); // too many articles
                 }
             }, []).join(",");
             return r;
@@ -527,6 +546,7 @@ const dynamicRules = [
 
 
 return {
+    fetchText,
     downloadLaws,
     loadLaws,
     loadRules,

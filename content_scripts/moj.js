@@ -4,20 +4,20 @@ const createElement = kongUtil.createElementFromJsonML;
 /**
  * 排除首頁的「熱門法規瀏覽」（排版考量）
  */
-$(".section-hot")?.classList.add("LER-skip");
+$('.section-hot')?.classList.add('LER-skip');
 
 /**
  * 設定預設法規。
  */
-pageDefaultLaw = (new URLSearchParams(location.search)).get("pcode");
+pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
 
 /**
  * 將編章節（及各自後接的條文們）重新調整為巢狀結構，並計算 sticky 的 top 值。
  */
 const height = 36;
 const depths = [];
-$$(".law-reg-content .h3").forEach((h3, index, list) => {
-    const section = createElementFromJsonML(['section']);
+$$('.law-reg-content .h3').forEach((h3, index, list) => {
+    const section = createElement(['section']);
     while(h3.nextElementSibling?.className === "row")
         section.append(h3.nextElementSibling);
     h3.replaceWith(section);
@@ -39,7 +39,7 @@ const css = depths.map((depth, index) => {
         .char-${depth} ~ .row > .col-no { top: ${(index+1)*height}px; }
     `;
 }).join("\n");
-document.head.appendChild(ce(['style', css]));
+document.head.appendChild(createElement(['style', css]));
 
 
 /**
@@ -49,9 +49,9 @@ document.head.appendChild(ce(['style', css]));
  * 載入的是全國法規資料庫自己的網頁，這樣就不用擔心版本更新問題了。
  * 載入後要再次呼叫 `parseElement` 處理其內容，並且呼叫 `addDetails` 讓內嵌條文提及其他條文時能有巢狀結構。
  */
-getData("mojAddReferringArticles").then(setting => {
+getData('mojAddReferringArticles').then(setting => {
     if(!setting) return;
-    $$("div[class|=line]").forEach(addDetails);
+    $$('div[class|=line]').forEach(addDetails);
 });
 
 /**
@@ -61,15 +61,15 @@ getData("mojAddReferringArticles").then(setting => {
  * 以監聽方式執行，救不用等到 `createElement` 跑完整頁才觸發。
  */
 function addDetails(line) {
-    listen(line, "lerParseEnd", () => {
-        if(!$("[data-norge]", line)) return;
-        const details = createElementFromJsonML(
+    line.addEventListener('lerParseEnd', () => {
+        if(!$('[data-norge][href]', line)) return;
+        const details = createElement(
             ['details', {class: 'LER-article-groups'},
                 ['summary']
             ]
         );
         line.append(details);
-        listen(details, "toggle", embedArticles, {once: true});
+        details.addEventListener('toggle', embedArticles, {once: true});
     }, {once: true});
 }
 
@@ -79,24 +79,24 @@ function addDetails(line) {
  */
 function embedArticles(event) {
     const details = event.target;
-    $$("[data-norge]", details.parentNode).forEach(anchor => {
-        const loadingNode = createElementFromJsonML(['p', '讀取中…']);
+    $$('[data-norge][href]', details.parentNode).forEach(anchor => {
+        const loadingNode = createElement(['p', '讀取中…']);
         details.append(loadingNode);
         fetchDOM(anchor.href).then(doc => {
             const body = $(".law-reg", doc);
             if(!body) body = "找不到法條。";
-            const section = createElementFromJsonML(
+            const section = createElement(
                 ['section',
                     ['header', {class: 'table-title'},
-                        $$(".table-title td > *:not(.law-vaildMemo)", doc)
+                        ...$$(".table-title td > *:not(.law-vaildMemo)", doc)
                     ],
                     body
                 ]
             );
-            $$("div[class|=line]", section).forEach(addDetails);
-            parseElement(section.lastChild, anchor.dataset.pcode);
+            $$('div[class|=line]', section).forEach(addDetails);
+            LER.parseElement(section.lastChild, anchor.dataset.pcode);
 
-            $$("[id]", section).forEach(elem => elem.removeAttribute("id"));
+            $$('[id]', section).forEach(elem => elem.removeAttribute("id"));
             loadingNode.replaceWith(section);
         });
     });
@@ -106,7 +106,7 @@ function embedArticles(event) {
 /**
  * 將「（刪除）」加上 class 以便用 CSS 使之不明顯。
  */
-$$(".line-0000").forEach(line => {
+$$('.line-0000').forEach(line => {
     if(line.lastChild.textContent !== "（刪除）") return;
     line.closest(".row").classList.add("LER-moj-deleted-article");
 });
