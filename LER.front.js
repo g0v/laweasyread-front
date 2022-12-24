@@ -1,7 +1,6 @@
 /**
  * @module LER
- * @desc
- *  部分與 `LER.back.js` 同名的函數，在作為瀏覽器掛時會被定義，用於呼叫後端。
+ * @desc 於本專案被用為瀏覽器掛時，某些宣告於 `LER.back.js` 的函數會在此有同名的函數，用以呼叫之。
  */
 var LER = LER || (() => {
     const obj = {};
@@ -17,9 +16,6 @@ var LER = LER || (() => {
 
 
 Object.assign(LER, {
-
-/** @type {boolean} */
-enablePopup: true,
 
 /** @type {Element} */
 popupTemplate: kongUtil.createElementFromJsonML(
@@ -42,7 +38,7 @@ popupTemplate: kongUtil.createElementFromJsonML(
 ),
 
 /** @type {Object} */
-// pageDefaultLaw: null,
+pageDefaultLaw: null,
 
 /** @type {integer} */
 counter: 0,
@@ -52,19 +48,26 @@ counter: 0,
  * @param {string} string
  * @returns {Promise}
  */
-searchLaw(string) {
-    console.debug('LER.searchLaw()');
+async searchLaw(string) {
+    // console.debug('LER.searchLaw()');
     const key = /^[A-Z]\d{7}$/.test(string) ? "pcode" : "name";
-    return getData("laws").then(laws => laws.find(law => law[key] === string));
+    const laws = await getData('laws');
+    return laws.find(law => law[key] === string);
 },
 
 /**
  * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
- * @param {Element} [element]
- * @param {string} [defaultLawPcode]
+ * @param {Element} element
+ * @param {Object} [options]
  * @returns {Promise.<Element>}
  */
-async parseElement(element, defaultLaw) {
+async parseElement(
+    element, {
+        defaultLaw,
+        articleNumberFormat = this.articleNumberFormat,
+        enablePopup = true
+    }
+) {
     // console.debug('LER.parseElement()');
     console.time("LawEasyRead" + (++this.counter));
     await this.loadRules();
@@ -106,6 +109,7 @@ async parseElement(element, defaultLaw) {
             let objects = await LER.parseString({
                 string: node.textContent,
                 allowLink: !node.parentNode?.closest?.("a"),
+                articleNumberFormat,
                 defaultLaw
             });
 
@@ -114,7 +118,7 @@ async parseElement(element, defaultLaw) {
             if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
             objects = objects.map(kongUtil.createElementFromJsonML);
             node.replaceWith(...objects);
-            if(LER.enablePopup) objects.forEach(LER.bindPopup.bind(LER));
+            if(enablePopup) objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
             if(!node.nextSibling) {
                 const parent = objects[0].parentNode;
                 const event = new CustomEvent("lerParseEnd");
@@ -130,9 +134,13 @@ async parseElement(element, defaultLaw) {
  * @param {Object} options
  * @returns {Promise.<HTMLBodyElement>}
  */
-parseDocument({articleNumberFormat = 'unchanged', enablePopup = true}) {
+parseDocument(options) {
     // console.debug('LER.parseDocument()');
-    return this.parseElement(document.body);
+    this.articleNumberFormat = options.articleNumberFormat || 'unchanged';
+    return this.parseElement(
+        document.body,
+        Object.assign({defaultLaw: this.pageDefaultLaw}, options)
+    );
 },
 
 /**
@@ -151,7 +159,7 @@ parseDocument({articleNumberFormat = 'unchanged', enablePopup = true}) {
  *  * https://stackoverflow.com/questions/57963312/
  *  * https://stackoverflow.com/questions/62181537/
  */
-bindPopup(elem) {
+bindPopup(elem, articleNumberFormat) {
     // console.debug('LER.bindPopup()');
     if(!(elem instanceof Element)) return;
     const {jyi, pcode, word} = elem.dataset;
@@ -180,7 +188,7 @@ bindPopup(elem) {
             popup.querySelector('header').append(...headers.map(kongUtil.createElementFromJsonML));
             body.textContent = '';
             body.append(...bodyParts.map(kongUtil.createElementFromJsonML));
-            this.parseElement(body, defaultLaw);
+            this.parseElement(body, {defaultLaw, articleNumberFormat});
             if(!popup.style.display) this.setPopupPosition(popup, fakeEvent); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
     }, {once: true});

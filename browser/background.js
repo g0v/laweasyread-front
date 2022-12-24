@@ -1,7 +1,7 @@
 importScripts(
     '../node_modules/kong-util/dist/all.js',
     '../lib.js',
-    './LER.back.js'
+    '../LER.back.js'
 );
 
 Object.assign(LER, {
@@ -44,7 +44,7 @@ Object.assign(LER, {
      * @func loadLaws
      * @returns {Promise.<Law[]>}
      * @desc
-     *   overwrites the method defined in `browser/LER.back.js`.
+     *   overwrites the method defined in `LER.back.js`.
      *   loads laws data in `browser.storage`; or downloads if no such data yet.
      */
     async loadLaws() {
@@ -65,8 +65,7 @@ browser.runtime.onInstalled.addListener(() => {
     console.debug('browser.runtime.onInstalled');
 
     // 讀取資料庫的選項，補上預設的後就再存進去。
-    fetch('/data/options_default.json')
-    .then(res => res.json())
+    kongUtil.fetchJSON('/data/options_default.json')
     .then(getData)
     .then(setData);
 

@@ -88,6 +88,10 @@ details.LER-article-groups dd {
     padding-left: 1em;
 }
 
+details.LER-article-groups .law-reg.law-content {
+    padding: 0 .5em;
+}
+
 .law-reg-content .law-reg-content {
     margin-left: 0;
 }

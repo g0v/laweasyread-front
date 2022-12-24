@@ -9,7 +9,7 @@ $('.section-hot')?.classList.add('LER-skip');
 /**
  * 設定預設法規。
  */
-pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
+LER.pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
 
 /**
  * 將編章節（及各自後接的條文們）重新調整為巢狀結構，並計算 sticky 的 top 值。
@@ -94,7 +94,7 @@ function embedArticles(event) {
                 ]
             );
             $$('div[class|=line]', section).forEach(addDetails);
-            LER.parseElement(section.lastChild, anchor.dataset.pcode);
+            LER.parseElement(section.lastChild, {defaultLaw: anchor.dataset.pcode});
 
             $$('[id]', section).forEach(elem => elem.removeAttribute("id"));
             loadingNode.replaceWith(section);

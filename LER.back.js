@@ -46,8 +46,7 @@ async function downloadLaws() {
     // console.debug('LER.downloadLaws()');
     const [map, aliases] = await Promise.all([
         kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
-        // kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
-        kongUtil.fetchJSON("https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@9ffdca3/aliases.json", { cache: "no-cache" })
+        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
     ]);
     return Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
@@ -64,7 +63,7 @@ async function downloadLaws() {
  * @desc overwritten in WebExtension to cooperate with version control
  */
 function loadLaws() {
-    // console.debug('LER.loadLaws() in `browser/LER.back.js`');
+    // console.debug('LER.loadLaws() in `LER.back.js`');
     return downloadLaws();
 }
 
@@ -121,8 +120,8 @@ async function loadRules(laws) {
  * @param {Object} [defaultLaw]
  * @returns {JsonML[]}
  */
-function parseString({string, allowLink = true, defaultLaw}) {
-    // console.debug('LER.parseString() in `browser/LER.back.js`');
+function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}) {
+    // console.debug('LER.parseString() in `LER.back.js`');
     const result = replaceRules.reduce((acc, rule) =>
         acc.flatMap(strOrObj => {
             if(typeof strOrObj !== "string") return strOrObj;
@@ -148,16 +147,27 @@ function parseString({string, allowLink = true, defaultLaw}) {
             }
             case "articles": {
                 const jsonml = ['span', {data: {norge: cur.norge}}, cur.text];
-                let pcode = defaultLaw?.pcode;
-                if(!pcode) {
-                    const prev = result[index - 1];
-                    if(prev?.[1]?.data?.pcode) pcode = prev[1].data.pcode;
-                }
+
+                let pcode;
+                const prev = result[index - 1];
+                if(prev?.[1]?.data?.pcode) pcode = prev[1].data.pcode;
+                if(!pcode) pcode = defaultLaw?.pcode;
+
                 if(pcode) jsonml[1].data.pcode = pcode;
                 if(allowLink && pcode) {
                     jsonml[0] = 'a';
                     jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${pcode}&norge=${cur.norge}`;
                 }
+
+                // 條號格式
+                if(articleNumberFormat !== 'unchanged') {
+                    jsonml[1].data.originText = cur.text;
+                    let formatted = cur.text.replace(/[零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
+                    if(articleNumberFormat === 'hyphen')
+                        formatted = formatted.replace(/第 (\d+) 條之 (\d+)\s*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`);
+                    jsonml[2] = formatted;
+                }
+
                 result[index] = jsonml;
                 break;
             }
@@ -253,10 +263,10 @@ function applyReplaceRule(string, {pattern, replacer}) {
  * @func preparePopup
  * @desc 讀取並整理資料，準備建立彈出窗格。
  * @param {DOMStringMap} dataset
- * @returns {Promise.<Object>} {headers, bodyParts}
+ * @returns {Promise.<Object>} {headers, bodyParts, defaultLaw}
  */
 async function preparePopup({jyi, pcode, norge, year, word, number}) {
-    // console.debug('LER.preparePopup() in `browser/LER.back.js`');
+    // console.debug('LER.preparePopup() in `LER.back.js`');
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
         jyi = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
@@ -326,12 +336,13 @@ async function preparePopup({jyi, pcode, norge, year, word, number}) {
             });
         }
         else {
+            const items = law.category.map(c =>
+                ['li', {style: 'margin-right: 1em;'}, c]
+            );
             bodyParts.push(
                 ['dt', '類別'],
                 ['dd',
-                    ['ul', ...law.category.map(c =>
-                        ['li', {style: 'display: inline-block; margin-right: 1em;'}, c]
-                    )]
+                    ['ul', {class: 'list-style-none d-flex'}, ...items]
                 ]
             );
 

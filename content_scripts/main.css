@@ -1,11 +1,13 @@
 /**
  * 各專案通用
  */
+.d-flex { display: flex; }
 .text-end {
     text-align: right;
 }
 .list-style-none {
     list-style-type: none;
+    padding-left: 0;
 }
 .list-style-circle {
     list-style-type: circle;
@@ -43,7 +45,6 @@
 .LER-popup dt,
 .LER-popup dd {
     margin: 0;
-    padding: 0;
 }
 .LER-popup p {
     margin: .5em 0;
