@@ -1,5 +1,5 @@
 {
-    "artNumberParserMethod": "hyphen",
+    "articleNumberFormat": "hyphen",
     "autoParse": true,
     "autoUpdate": true,
     "enablePopup": true,

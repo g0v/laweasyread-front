@@ -6,12 +6,12 @@ const booleanOptions = ["autoParse", "enablePopup", "mojAddReferringArticles", "
 const artNumberParserOptions = [
     {
         title: "不轉換",
-        value: "none",
+        value: "unchanged",
         example: "第九十一條之一第二項第五款"
     },
     {
         title: "把中文數字轉成阿拉伯數字",
-        value: "parseInt",
+        value: "decimal",
         example: "第 91 條之 1 第 2 項第 5 款"
     },
     {
@@ -36,17 +36,17 @@ const artNumberParserOptions = [
                 ['label',
                     ['input', {
                         type: 'radio',
-                        name: 'artNumberParserMethod',
-                        id: `artNumberParserMethod-${option.value}`,
+                        name: 'articleNumberFormat',
+                        id: `articleNumberFormat-${option.value}`,
                         value: option.value,
-                        onchange: () => setData({artNumberParserMethod: option.value})
+                        onchange: () => setData({articleNumberFormat: option.value})
                     }],
                     option.title
                 ]
             ],
             ['td',
                 ['label',
-                    {for: `artNumberParserMethod-${option.value}`},
+                    {for: `articleNumberFormat-${option.value}`},
                     option.example
                 ]
             ]
@@ -55,9 +55,9 @@ const artNumberParserOptions = [
 });
 $("#artNumberParserOptions").append(...artNumberParserOptions);
 
-getData(booleanOptions.concat("artNumberParserMethod"))
+getData(booleanOptions.concat("articleNumberFormat"))
 .then(storage => {
-    $("#artNumberParserMethod-" + storage.artNumberParserMethod).checked = true;
+    $("#articleNumberFormat-" + storage.articleNumberFormat).checked = true;
     booleanOptions.forEach(option => {
         const checkbox = document.getElementById(option);
         checkbox.checked = storage[option];

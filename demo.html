@@ -15,7 +15,10 @@
     <script src="./browser/LER.back.js"></script>
     <script src="./content_scripts/LER.front.js"></script>
     <script>
-        LER.parseDocument();
+        LER.parseDocument({
+            articleNumberFormat: 'hyphen',
+            enablePopup: true,
+        });
     </script>
 </body>
 </html>

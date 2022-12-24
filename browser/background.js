@@ -33,7 +33,7 @@ Object.assign(LER, {
         const remoteDate = await this.checkUpdate();
         if(!remoteDate) return false;
 
-        const laws = this.downloadLaws();
+        const laws = await this.downloadLaws();
         setData({laws, localDate: remoteDate});
         this.loadRules(laws);
         return remoteDate;

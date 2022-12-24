@@ -62,7 +62,7 @@ searchLaw(string) {
  * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
  * @param {Element} [element]
  * @param {string} [defaultLawPcode]
- * @returns {Promise}
+ * @returns {Promise.<Element>}
  */
 async parseElement(element, defaultLaw) {
     // console.debug('LER.parseElement()');
@@ -99,7 +99,7 @@ async parseElement(element, defaultLaw) {
             const node = textNodes.shift();
             // console.debug('parseNextTextNode()');
             if(!node) {
-                document.dispatchEvent(new CustomEvent("lerParseEnd", {detail: {target: element}}));
+                // document.dispatchEvent(new CustomEvent("lerParseEnd", {detail: {target: element}}));
                 console.timeEnd("LawEasyRead" + currentCounter);
                 return resolve(element);
             }
@@ -110,7 +110,6 @@ async parseElement(element, defaultLaw) {
             });
 
             requestIdleCallback(parseNextTextNode);
-            // objects = objects.flat();
             // console.debug(objects);
             if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
             objects = objects.map(kongUtil.createElementFromJsonML);
@@ -126,9 +125,14 @@ async parseElement(element, defaultLaw) {
     });
 },
 
-parseDocument(defaultLaw) {
+/**
+ *
+ * @param {Object} options
+ * @returns {Promise.<HTMLBodyElement>}
+ */
+parseDocument({articleNumberFormat = 'unchanged', enablePopup = true}) {
     // console.debug('LER.parseDocument()');
-    return this.parseElement(document.body, defaultLaw);
+    return this.parseElement(document.body);
 },
 
 /**
