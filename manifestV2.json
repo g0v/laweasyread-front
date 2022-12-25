@@ -1,0 +1,52 @@
+{
+"manifest_version": 2,
+"name": "法規亦毒氣",
+"description": "將網頁中的法規與條號都轉變成連結，以利快速查閱指定條文。",
+"version": "2.0.0",
+"author": "kong0107",
+"homepage_url": "https://g0v.github.io/laweasyread-front/",
+"options_ui": {
+    "page": "options_ui/index.html",
+    "open_in_tab": true
+},
+"icons": { "128": "icon.png" },
+"permissions": [
+    "activeTab",
+    "alarms",
+    "storage"
+],
+"background": {
+    "scripts": [
+        "node_modules/kong-util/dist/all.js",
+        "lib.js",
+        "LER.back.js",
+        "browser/background.js"
+    ]
+},
+"browser_action": {
+    "default_popup": "browser/popup.html"
+},
+"content_scripts": [
+    {
+        "matches": ["<all_urls>"],
+        "js": [
+            "node_modules/kong-util/dist/all.js",
+            "lib.js",
+            "LER.front.js",
+            "content_scripts/main.js"
+        ],
+        "all_frames": true
+    },
+    {
+        "matches": ["https://law.moj.gov.tw/*"],
+        "js": ["content_scripts/moj.js"],
+        "css": ["content_scripts/moj.css"]
+    },
+    {
+        "matches": ["https://law.judicial.gov.tw/FJUD/*"],
+        "js": ["content_scripts/judicial.js"],
+        "css": ["content_scripts/judicial.css"],
+        "all_frames": true
+    }
+]
+}

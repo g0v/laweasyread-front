@@ -43,20 +43,9 @@ pageDefaultLaw: null,
 /** @type {integer} */
 counter: 0,
 
-/**
- * 用 `pcode` 或名稱找法規。
- * @param {string} string
- * @returns {Promise}
- */
-async searchLaw(string) {
-    // console.debug('LER.searchLaw()');
-    const key = /^[A-Z]\d{7}$/.test(string) ? "pcode" : "name";
-    const laws = await getData('laws');
-    return laws.find(law => law[key] === string);
-},
 
 /**
- * 轉換指定元素內的文字節點，但排除 class 名稱有 "LER-" 開頭的。
+ * 轉換指定元素內的文字節點。
  * @param {Element} element
  * @param {Object} [options]
  * @returns {Promise.<Element>}
@@ -83,17 +72,13 @@ async parseElement(
                     ? NodeFilter.FILTER_ACCEPT
                     : NodeFilter.FILTER_REJECT;
             }
-            return node.matches('a,button,code,script,select,style,template,textarea')
+            return 'A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tegName)
                 ? NodeFilter.FILTER_REJECT
-                : NodeFilter.FILTER_SKIP
-            ;
+                : NodeFilter.FILTER_SKIP;
         }
     );
     let node;
     while(node = walker.nextNode()) textNodes.push(node);
-
-    if(typeof defaultLaw === "string" && defaultLaw)
-        defaultLaw = await this.searchLaw(defaultLaw);
 
     return new Promise(resolve => {
         const LER = this;
@@ -267,7 +252,7 @@ getShadowRoot() {
                 style: 'position: static; width: 0; height: 0;'
             }
         ]);
-        document.body?.append(host);
+        document.body.append(host);
 
         const root = host.attachShadow({mode: 'open'});
         this.fetchText({resource: 'content_scripts/main.css'})

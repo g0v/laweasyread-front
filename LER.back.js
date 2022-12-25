@@ -9,11 +9,19 @@ var LER = (() => {
 const pcn = kongUtil.parseChineseNumber;
 
 /**
- * @public
+ * @private
+ * @member {Law[]} laws
+ * @desc 所有法規，後續才讀取。
+ */
+let laws = [];
+
+/**
+ * @private
  * @member {ReplaceRule[]} replaceRules
  * @desc 置換規則們，動態建置。法規更新時會整個被替換掉，故用 let 宣告。
  */
 let replaceRules = [];
+
 
 /**
  * @public
@@ -48,7 +56,7 @@ async function downloadLaws() {
         kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
         kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
     ]);
-    return Object.keys(map).map(pcode => {
+    return laws = Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
         if(aliases[pcode]) law.aliases = aliases[pcode];
         return law;
@@ -60,7 +68,7 @@ async function downloadLaws() {
  * @public
  * @func loadLaws
  * @returns {Promise.<Law[]>}
- * @desc overwritten in WebExtension to cooperate with version control
+ * @desc overwritten in `browser/background.js` for WebExtension to cooperate with version control
  */
 function loadLaws() {
     // console.debug('LER.loadLaws() in `LER.back.js`');
@@ -129,7 +137,6 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
             return applyReplaceRule(strOrObj, rule).filter(x => x);
         })
     , [string]);
-    // if(result.length > 1 || result[0].type) logger()(string, result);
 
     for(let index = 0; index < result.length; ++index) {
         const cur = result[index];
@@ -148,10 +155,12 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
             case "articles": {
                 const jsonml = ['span', {data: {norge: cur.norge}}, cur.text];
 
-                let pcode;
-                const prev = result[index - 1];
-                if(prev?.[1]?.data?.pcode) pcode = prev[1].data.pcode;
-                if(!pcode) pcode = defaultLaw?.pcode;
+                // 確認所屬法規：若前一個元件是法規名，則使用之；若否，則看是否有預設法規。
+                let pcode = result[index - 1]?.[1]?.data?.pcode;
+                if(!pcode && defaultLaw) {
+                    if(typeof defaultLaw === 'object') pcode = defaultLaw.pcode;
+                    else if(/^[A-Z]/.test(defaultLaw)) pcode = defaultLaw;
+                }
 
                 if(pcode) jsonml[1].data.pcode = pcode;
                 if(allowLink && pcode) {
@@ -163,8 +172,10 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
                 if(articleNumberFormat !== 'unchanged') {
                     jsonml[1].data.originText = cur.text;
                     let formatted = cur.text.replace(/[零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
-                    if(articleNumberFormat === 'hyphen')
-                        formatted = formatted.replace(/第 (\d+) 條之 (\d+)\s*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`);
+                    if(articleNumberFormat === 'hyphen') formatted = formatted
+                        .replace(/第\s*(\d+)\s*條之\s*(\d+)\x20*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
+                        .replace(/第\s*(\d+)\s*之\s*(\d+)\s*條*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
+                    ;
                     jsonml[2] = formatted;
                 }
 

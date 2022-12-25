@@ -1,4 +1,4 @@
-importScripts(
+if(typeof importScripts === 'function') importScripts(
     '../node_modules/kong-util/dist/all.js',
     '../lib.js',
     '../LER.back.js'
@@ -14,13 +14,14 @@ Object.assign(LER, {
         console.debug('LER.checkUpdate()');
         const [localDate, remoteDate] = await Promise.all([
             getData('localDate'),
-            fetch('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt', {cache: 'no-cache'}).then(res => res.text())
+            kongUtil.fetchText('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt', {cache: 'no-cache'})
         ]);
         setData({
             remoteDate,
             lastCheck: Date.now()
         });
-        return (localDate < remoteDate) ? remoteDate : false;
+        if(localDate === remoteDate) return false;
+        return remoteDate;
     },
 
     /**
@@ -50,11 +51,10 @@ Object.assign(LER, {
     async loadLaws() {
         console.debug('LER.loadLaws() in `browser/background.js`');
         let laws = await getData('laws');
-        if(!laws) {
-            laws = await this.downloadLaws();
-            await setData({laws});
-        }
-        return laws;
+        if(laws instanceof Array) return laws;
+
+        await this.update();
+        return await getData('laws');
     }
 });
 

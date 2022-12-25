@@ -18,16 +18,6 @@ listen($("#editButton"), "click", () => {
     $("#exclude_matches").disabled = false;
 });
 
-const testRules = () => {
-    const sb = $("#sandbox");
-    if(!sb.value) return setContent($("#testResult"), "");
-    if(!/^https?:\/\//.test(sb.value)) return setContent($("#testResult"), "網址格式不正確");
-    isExcluded(sb.value, $("#exclude_matches").value)
-    .then(rule => setContent($("#testResult"), rule
-        ? ("這個網址符合規則 " + rule)
-        : "沒有比對到任何規則，這個網址將套用「自動轉換」的設定。"
-    ));
-};
 listen($("#sandbox"), "input", testRules);
 
 listen($("#exclude_matches"), "input", () => {
@@ -52,3 +42,27 @@ listen($("#saveButton"), "click", event => {
         em.value = value;
     });
 });
+
+
+/**
+ * 函數宣告
+ */
+function testRules() {
+    const input = $('#sandbox').value.trim();
+    const testResult = $('#testResult');
+    clearElement(testResult);
+
+    if(!input) return;
+    try { new URL(input); }
+    catch(err) { return setContent(testResult, '測試網址的格式不正確'); }
+
+    const list = $('#exclude_matches').value.split('\n').filter(x => x);
+    const matchedRule = list.find(rule => {
+        const regexp = rule.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
+        return (new RegExp(`^${regexp}$`)).test(input);
+    });
+    setContent(testResult, matchedRule
+        ? '這個網址符合路徑規則 ' + matchedRule
+        : '沒有比對到任何路徑規則，這個網址將套用「自動轉換」的設定。'
+    );
+};
