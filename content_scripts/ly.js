@@ -30,17 +30,18 @@ const getStratum = text => {
 
 /**
  * 主程式
- * 會先把包住關鍵字的 `<font />` 當成純文字來分析，最後再用 `domCrawler` 的功能替換回來。
  */
 $$('td').forEach(td => {
     if(!td.hasChildNodes() || !/^\n?　　/.test(td.firstChild.textContent)) return;
 
-    const paras = []; // 每一行文字，即各項款目，未分層
+    const lines = []; // 每一行文字，即各項款目，未分層
+    const paras = []; // 最底層的項目們的 JsonML ，已分層
     const others = []; // 原本頁面中有、不打算處理但仍要保留的元件，如「相關條文」圖鈕
 
     let specimen = td;
     let keyword = '';
 
+    // 先把包住關鍵字的 `<font />` 換成純文字，最後再替換回來。
     if(keyword = $('font', td)) {
         keyword = keyword.textContent;
         specimen = td.cloneNode(true);
@@ -55,10 +56,10 @@ $$('td').forEach(td => {
                 if(!text) break;
                 const stratum = getStratum(child.textContent);
                 if(stratum < 0) {
-                    paras[paras.length - 1].text += "\n" + text;
+                    lines[lines.length - 1].text += "\n" + text;
                     break;
                 }
-                paras.push({
+                lines.push({
                     stratum: stratum,
                     text: text,
                     children: []
@@ -72,29 +73,28 @@ $$('td').forEach(td => {
         }
     });
 
-    const nested = [];
-    for(let i = paras.length - 1; i >= 0; --i) {
-        const item = ['li', {data: {stratum: paras[i].stratum}}, paras[i].text];
-        if(paras[i].children.length) item.push(
-            ['ol', ...paras[i].children]
+    for(let i = lines.length - 1; i >= 0; --i) {
+        const item = ['li', {data: {stratum: lines[i].stratum}}, lines[i].text];
+        if(lines[i].children.length) item.push(
+            ['ol', ...lines[i].children]
         );
 
-        if(paras[i].stratum) {
+        if(lines[i].stratum) {
             let j = -1;
             for(j = i - 1; j >= 0; --j) {
-                if(paras[j].stratum < paras[i].stratum) {
-                    paras[j].children.unshift(item);
+                if(lines[j].stratum < lines[i].stratum) {
+                    lines[j].children.unshift(item);
                     break;
                 }
             }
-            if(j < 0) nested.unshift(item);
+            if(j < 0) paras.unshift(item);
         }
-        else nested.unshift(item);
+        else paras.unshift(item);
     }
 
     const newTd = createElementFromJsonML(
         ['td', {class: td.className},
-            ['ol', ...nested],
+            ['ol', ...paras],
             ...others
         ]
     );

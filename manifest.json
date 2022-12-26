@@ -45,8 +45,8 @@
     },
     {
         "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
-        "js": ["content_scripts/ly_lawsingle.js"],
-        "css": ["content_scripts/ly_lawsingle.css"]
+        "js": ["content_scripts/ly.js"],
+        "css": ["content_scripts/ly.css"]
     }
 ]
 }
