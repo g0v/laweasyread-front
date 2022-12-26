@@ -6,6 +6,7 @@
  * * 「異動條文及理由」頁面
  * * 「相關條文」頁面
  */
+kongUtil.use('$', '$$', 'createElementFromJsonML');
 
 /**
  * 跟 lawtext2obj 像，但排版機制不太一樣，這邊要連同空格一起考量。
@@ -31,19 +32,19 @@ const getStratum = text => {
  * 主程式
  * 會先把包住關鍵字的 `<font />` 當成純文字來分析，最後再用 `domCrawler` 的功能替換回來。
  */
-document.querySelectorAll("td").forEach(td => {
+$$('td').forEach(td => {
     if(!td.hasChildNodes() || !/^\n?　　/.test(td.firstChild.textContent)) return;
 
     const paras = []; // 每一行文字，即各項款目，未分層
     const others = []; // 原本頁面中有、不打算處理但仍要保留的元件，如「相關條文」圖鈕
 
     let specimen = td;
-    let keyword = "";
+    let keyword = '';
 
-    if(keyword = td.querySelector("font")) {
+    if(keyword = $('font', td)) {
         keyword = keyword.textContent;
         specimen = td.cloneNode(true);
-        specimen.querySelectorAll("font").forEach(fe => fe.replaceWith(keyword));
+        $$('font', specimen).forEach(fe => fe.replaceWith(keyword));
         specimen.normalize();
     }
 
@@ -71,15 +72,39 @@ document.querySelectorAll("td").forEach(td => {
         }
     });
 
-    const newTd = domCrawler.createElement("td", {className: td.className},
-        createList(lawtext2obj.arr2nested(paras)),
-        ...others
+    const nested = [];
+    for(let i = paras.length - 1; i >= 0; --i) {
+        const item = ['li', {data: {stratum: paras[i].stratum}}, paras[i].text];
+        if(paras[i].children.length) item.push(
+            ['ol', ...paras[i].children]
+        );
+
+        if(paras[i].stratum) {
+            let j = -1;
+            for(j = i - 1; j >= 0; --j) {
+                if(paras[j].stratum < paras[i].stratum) {
+                    paras[j].children.unshift(item);
+                    break;
+                }
+            }
+            if(j < 0) nested.unshift(item);
+        }
+        else nested.unshift(item);
+    }
+
+    const newTd = createElementFromJsonML(
+        ['td', {class: td.className},
+            ['ol', ...nested],
+            ...others
+        ]
     );
-    if(keyword) domCrawler.replaceTexts({
-        pattern: keyword,
-        replacer: domCrawler.createElement("FONT", {className: "red"}, keyword),
-        minLength: keyword.length
-    }, newTd);
+    if(keyword) {
+        // domCrawler.replaceTexts({
+        //     pattern: keyword,
+        //     replacer: domCrawler.createElement("FONT", {className: "red"}, keyword),
+        //     minLength: keyword.length
+        // }, newTd);
+    }
 
     td.replaceWith(newTd);
 });
@@ -88,9 +113,4 @@ document.querySelectorAll("td").forEach(td => {
 /**
  * 設定預設法規
  */
-try {
-    const lawName = document.querySelector("td.law_NA, td.law_n").firstChild.textContent;
-    if(lawName) LER.loadLaws.then(() => {
-        LER.defaultLaw = LER.getLaw({name: lawName});
-    });
-} catch(e){}
+LER.pageDefaultLaw = $('td.law_NA, td.law_n')?.firstChild.textContent;

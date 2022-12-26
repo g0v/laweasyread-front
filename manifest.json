@@ -42,6 +42,11 @@
         "js": ["content_scripts/judicial.js"],
         "css": ["content_scripts/judicial.css"],
         "all_frames": true
+    },
+    {
+        "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
+        "js": ["content_scripts/ly_lawsingle.js"],
+        "css": ["content_scripts/ly_lawsingle.css"]
     }
 ]
 }

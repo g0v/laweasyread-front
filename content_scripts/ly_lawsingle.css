@@ -1,20 +1,48 @@
-.LER-stratum-3 > li {
-    padding-left: 0.5em;
-}
-.LER-stratum-3 > li > p:first-child {
-    text-indent: -1.5em;
+ol:has(> li[data-stratum]) {
+    margin-top: 0;
+    padding-top: 0;
+    list-style-type: none;
 }
 
-.LER-stratum-4 > li {
-    padding-left: 0em;
+ol:has(> li[data-stratum="0"]:only-child) {
+    list-style-type: disc;
 }
-.LER-stratum-4 > li > p:first-child {
+
+ol:has(> li[data-stratum="0"]:not(:only-child)) {
+    list-style-type: upper-roman;
+}
+
+ol:has(> li[data-stratum="1"]) {
+    padding-left: 4em;
+    text-indent: -4em;
+}
+
+ol:has(> li[data-stratum="2"]) {
+    padding-left: 2em;
+    text-indent: -2em;
+}
+
+ol:has(> li[data-stratum="3"]) {
+    padding-left: 3em;
+    text-indent: -3em;
+}
+
+ol:has(> li[data-stratum="4"]) {
+    padding-left: 1em;
     text-indent: -1em;
 }
 
-.LER-stratum-5 > li {
-    padding-left: 0em;
+ol:has(> li[data-stratum="5"]) {
+    padding-left: 2em;
+    text-indent: -2em;
 }
-.LER-stratum-5 > li > p:first-child {
-    text-indent: -1em;
+
+ol:has(> li[data-stratum="6"]) {
+    padding-left: 2em;
+    text-indent: -2em;
+}
+
+ol:has(> li[data-stratum="7"]) {
+    padding-left: 2em;
+    text-indent: -2em;
 }

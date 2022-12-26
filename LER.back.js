@@ -160,6 +160,7 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
                 if(!pcode && defaultLaw) {
                     if(typeof defaultLaw === 'object') pcode = defaultLaw.pcode;
                     else if(/^[A-Z]/.test(defaultLaw)) pcode = defaultLaw;
+                    else pcode = laws.find(l => l.name === defaultLaw)?.pcode;
                 }
 
                 if(pcode) jsonml[1].data.pcode = pcode;
