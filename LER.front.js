@@ -72,9 +72,8 @@ async parseElement(
                     ? NodeFilter.FILTER_ACCEPT
                     : NodeFilter.FILTER_REJECT;
             }
-            return 'A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tegName)
-                ? NodeFilter.FILTER_REJECT
-                : NodeFilter.FILTER_SKIP;
+            if('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tegName)) return NodeFilter.FILTER_REJECT;
+            return node.classList.contains('LER-skip') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
         }
     );
     let node;

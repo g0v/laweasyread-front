@@ -1,5 +1,12 @@
+/**
+ * 處理「以換行排版的裁判書」
+ *
+ * 司法院有對關鍵字加上連結，故關於「換行」的判斷會比較麻煩：
+ * 1. 遍歷每一個 node ，可能是 text node ，也可能是 <a> ，有時有 comment 。
+ */
+
 kongUtil.use('$');
-const container = $("td.tab_content div.text-pre");
+const container = $('div.text-pre');
 
 const lines =
     [...(container?.childNodes || [])]
