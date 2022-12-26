@@ -39,14 +39,24 @@
     },
     {
         "matches": ["https://law.moj.gov.tw/*"],
-        "js": ["content_scripts/moj.js"],
-        "css": ["content_scripts/moj.css"]
+        "js": ["content_scripts/moj.law.js"],
+        "css": ["content_scripts/moj.law.css"]
     },
     {
-        "matches": ["https://law.judicial.gov.tw/FJUD/*"],
-        "js": ["content_scripts/judicial.js"],
-        "css": ["content_scripts/judicial.css"],
+        "matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],
+        "js": ["content_scripts/ly.lis.js"],
+        "css": ["content_scripts/ly.lis.css"]
+    },
+    {
+        "matches": ["https://judgment.judicial.gov.tw/FJUD/*"],
+        "js": ["content_scripts/judicial.judgement.js"],
+        "css": ["content_scripts/judicial.judgement.css"],
         "all_frames": true
+    },
+    {
+        "matches": ["https://legal.judicial.gov.tw/FINT/*"],
+        "js": ["content_scripts/judicial.legal.js"],
+        "css": ["content_scripts/judicial.legal.css"]
     }
 ]
 }

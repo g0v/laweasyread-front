@@ -1,8 +1,28 @@
 /**
  * 處理「以換行排版的裁判書」
  *
- * 司法院有對關鍵字加上連結，故關於「換行」的判斷會比較麻煩：
- * 1. 遍歷每一個 node ，可能是 text node ，也可能是 <a> ，有時有 comment 。
+ * 由於官方有對法律用語關鍵字加上連結，故關於「換行」的判斷會比較麻煩：
+ * 原本的 DOM 裡，換行只是個字元， `div.text-pre` 是由文字節點和 <abbr> 穿插而成的。
+ * 而換行字元可能出現在每一個文字節點（包含 <abbr> 內部）裡頭。
+ *
+ * 先把每一行（'\n' 為界）裡頭原有的東西建成一個陣列。
+ * * 多數情形下，是一個陣列（代表一行）裡面只有一個元素，該元素為字串。
+ * * 若是那一行中間有關鍵詞 <abbr /> ，則那一行轉換成的陣列至少會有二個元素。
+ * * 若剛好在關鍵詞裡換行，則必須在兩個陣列創建各別的 <abbr /> 。
+ *
+ * 官方原始頁面結構：
+    <tr>
+        <td class="tab_content">
+            <div class="htmlcontent">一般 HTML 顯示的裁判書，較新的才會有。</div>
+            <div class="text-pre text-pre-in">用換行字元進行排版的裁判書（較舊的才會有），以及 HTML 註解</div>
+        </td>
+        <td class="tab_linenu">
+            <div class="text-pre text-pre-in">行號，較舊的才會有。</div>
+        </td>
+    </tr>
+
+ * 處理邏輯：
+ * 將 `div.text-pre` 裡的內容，每一行用一個 inline 容器包起來，再依序塞進 `div.htmlcontent` 裡頭。
  */
 
 kongUtil.use('$');
@@ -11,7 +31,7 @@ const container = $('div.text-pre');
 const lines =
     [...(container?.childNodes || [])]
     .reduce((lines, node) => {
-        let debris = node.textContent.split("\n");
+        let debris = node.textContent.split('\n');
         if(node.nodeType === Node.ELEMENT_NODE) {
             debris = debris.map(d => {
                 const elem = node.cloneNode(true);
@@ -88,22 +108,18 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
             ]
         );
         else {
-
-            // todo !!!
-
-
-            const lastPara = paras[paras.length - 1].div;
-            const lastLine = lastPara.$[lastPara.$.length - 1].span;
-            const lastNode = lastLine.$[lastLine.$.length - 1];
+            const lastPara = paras[paras.length - 1];
+            const lastLine = lastPara[lastPara.length - 1];
+            const lastNode = lastLine[lastLine.length - 1];
             if((padding || !lastNode.endsWith('。'))
-                && (paras[paras.length - 1].div.class !== 'pre')
+                && (paras[paras.length - 1][1].class !== 'pre')
                 && (lastPara.class !== 'he-h3')
             ) {
                 // 加入前一段
                 if(typeof leafNodes[0] === 'string') leafNodes[0] = leafNodes[0].trimStart();
                 const lastLeaf = leafNodes[leafNodes.length - 1];
                 if(typeof lastLeaf === "string") leafNodes[leafNodes.length - 1] = lastLeaf.trimEnd();
-                lastPara.$.push(line);
+                lastPara.push(line);
             }
             else paras.push(
                 ['div', {style: `padding-left: ${padding}em`}, line]
@@ -112,14 +128,14 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
     }
     return paras;
 }, []);
-// logger()("paras", paras);
+console.debug(paras);
 
-
-$(".htmlcontent")?.append(...paras.map(kongUtil.createElementFronJsonML));
 if(container) {
     container.textContent = "";
-    $(".tab_linenu").textContent = "";
-    $(".htmlcontent").style.width = null; // 因官方是把 style 寫在元件裡，故沒法用 CSS 檔覆寫之。
+    $('.tab_linenu').textContent = '';
+    $('.htmlcontent').append(...paras.map(kongUtil.createElementFromJsonML));
+    $('.htmlcontent').style.width = null;
+    // $('.jud_content table').replaceWith($('.htmlcontent'));
 }
 
 

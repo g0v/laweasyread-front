@@ -18,11 +18,9 @@
 .htmlcontent {
     font-size: 18px;
     line-height: 200%;
-    min-width: 38em;
+    /* min-width: 38em; */
 }
 
 div.jud_content {
     max-width: none;
-
 }
-
