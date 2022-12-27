@@ -4,45 +4,44 @@
         <dt><input type="checkbox" id="autoParse"></dt>
         <dd>
             <label for="autoParse">開啟自動轉換</label>
-            <ul class="text-muted small list-unstyled">
-                <li>即使關閉自動轉換，仍會對<em>全國法規資料庫</em>與<em>立法院法律系統</em>的頁面進行排版。</li>
-                <li>此功能在動態讀取的網頁（如臉書）上未必有作用。</li>
-            </ul>
+            <p class="text-muted mb-0">即使關閉自動轉換，仍會對<em>全國法規資料庫</em>與<em>立法院法律系統</em>的頁面進行排版。</p>
+            <p class="text-muted mb-0">此功能在動態讀取的網頁（如臉書）上未必有作用。</p>
         </dd>
     </dl>
     <dl class="d-flex">
         <dt><input type="checkbox" id="enablePopup"></dt>
         <dd>
-            <label for="enablePopup">滑鼠移過時顯示條文內容或大法官解釋內容</label>
-            <ul class="text-muted small list-unstyled">
-                <li>必須先「轉換」（無論手動或自動）後才會顯示。</li>
-                <li>條文內容與大法官解釋是從網路抓取資料，可能不會即時顯示內容。</li>
-            </ul>
+            <label for="enablePopup">滑鼠移過時顯示條文內容或憲法判決內容</label>
+            <p class="text-muted mb-0">必須先「轉換」（無論手動或自動）後才會顯示。</p>
+            <p class="text-muted mb-0">條文、大法官解釋、憲法判決是從網路抓取資料，可能會因網路狀況而有延遲或未能顯示。</p>
         </dd>
     </dl>
     <dl class="d-flex">
         <dt><input type="checkbox" id="mojAddReferringArticles"></dt>
         <dd>
             <label for="mojAddReferringArticles">在全國法規資料庫啟用「提及條文」功能</label>
-            <ul class="text-muted small list-unstyled">
-                <li>在全國法規資料庫瀏覽條文時，若該條/項/款/目有提及其他條文，則可以顯示在該段落下方，而不是浮動視窗。</li>
-            </ul>
+            <p class="text-muted mb-0">在<a href="https://law.moj.gov.tw/">法務部全國法規資料庫</a>瀏覽條文時，若該條/項/款/目有提及其他條文，則可以顯示在該段落下方，而不是浮動視窗。</p>
+        </dd>
+    </dl>
+    <dl class="d-flex">
+        <dt><input type="checkbox" id="typesetDockets"></dt>
+        <dd>
+            <label for="typesetDockets">調整<a href="https://judgment.judicial.gov.tw/FJUD/default.aspx">司法院裁判書系統</a>的排版</label>
+            <p class="text-muted mb-0">拿掉排版用的換行與空格，以方便閱讀與複製。</p>
         </dd>
     </dl>
     <dl class="d-flex">
         <dt><input type="checkbox" id="autoUpdate"></dt>
         <dd>
             <label for="autoUpdate">自動更新法規清單</label>
-            <ul class="text-muted small list-unstyled">
-                <li>每週最多一次，約 700KB 。</li>
-            </ul>
+            <p class="text-muted mb-0">每週最多一次，約 700KB 。</p>
         </dd>
     </dl>
 </div>
 
 <div>
     <h3>條號轉換</h3>
-    <p class="text-muted small">為避免您在閱讀與法律無關的文章時受到干擾，只有在網頁中偵測到法規<em>名稱</em>的情形，才會進行條號轉換。</p>
+    <p class="text-muted">為避免您在閱讀與法律無關的文章時受到干擾，只有在網頁中偵測到法規<em>名稱</em>的情形，才會進行條號轉換。</p>
     <table class="table table-sm col-lg-8 col-xl-6">
         <thead>
             <tr>

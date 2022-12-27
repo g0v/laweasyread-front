@@ -10,14 +10,14 @@
  * * 若是那一行中間有關鍵詞 <abbr /> ，則那一行轉換成的陣列至少會有二個元素。
  * * 若剛好在關鍵詞裡換行，則必須在兩個陣列創建各別的 <abbr /> 。
  *
- * 官方原始頁面結構：
+ * 官方原始頁面結構（元素都會在，但未必有內容）：
     <tr>
         <td class="tab_content">
-            <div class="htmlcontent">一般 HTML 顯示的裁判書，較新的才會有。</div>
+            <div class="htmlcontent">一般 HTML 顯示的裁判書，較新的才會有內容。</div>
             <div class="text-pre text-pre-in">用換行字元進行排版的裁判書（較舊的才會有），以及 HTML 註解</div>
         </td>
         <td class="tab_linenu">
-            <div class="text-pre text-pre-in">行號，較舊的才會有。</div>
+            <div class="text-pre text-pre-in">行號，較新的才可能有內容。</div>
         </td>
     </tr>
 
@@ -26,28 +26,45 @@
  */
 
 kongUtil.use('$');
+const createElement = kongUtil.createElementFromJsonML;
+
 const container = $('div.text-pre');
+const target = $('.htmlcontent');
 
 const lines =
     [...(container?.childNodes || [])]
     .reduce((lines, node) => {
         let debris = node.textContent.split('\n');
-        if(node.nodeType === Node.ELEMENT_NODE) {
-            debris = debris.map(d => {
-                const elem = node.cloneNode(true);
-                elem.removeAttribute("id");
-                elem.textContent = d;
-                return elem;
-            });
+        switch(node.nodeType) {
+            case Node.ELEMENT_NODE: {
+                // 若是 element 且裡面有換行，那就要做兩個該元件，塞進不同行裡；否則就用原本的元件。
+                if(debris.length === 1) debris = [node];
+                else debris = debris.map(d => {
+                    const elem = node.cloneNode(true);
+                    elem.removeAttribute("id");
+                    elem.textContent = d;
+                    return elem;
+                });
+                break;
+            }
+            case Node.TEXT_NODE: break;
+            default: return lines; // 例如 Node.COMMENT_NODE
         }
-        else if(node.nodeType !== Node.TEXT_NODE) return lines;
 
         lines[lines.length - 1].push(debris.shift());
-        lines.push(...debris.filter(d => d).map(d => [d]));
+        lines.push(...debris.map(d => [d]));
         return lines;
     }, [[]])
 ;
-// logger()("lines", lines);
+while(!lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
+console.debug(lines);
+
+if(container && target) {
+    container.textContent = '';
+    target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
+
+    $('div.col-td.jud_content').replaceChildren(target, container);
+}
 
 const listMarkerDetectors = [
     /^[壹貳參肆伍陸柒捌玖拾]+、/,
@@ -58,6 +75,7 @@ const listMarkerDetectors = [
     /^[A-Z]\.\s*/,
     /^[\u3220-\u3229]/,
     /^[\u3280-\u3289]/,
+    /^[\u2488-\u249B]/,
 ];
 
 let isHead = true, isFoot = false;
@@ -72,17 +90,20 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
         ]
     ;
 
-    // console.log(line);
     const plain = (leafNodes[0].textContent || leafNodes[0]).replaceAll(/\s/g, '');
     isFoot = isFoot ||
-        /^中華民國\s*[一二三四五六七八九十百]+\s*年\s*[一二三四五六七八九十]+\s*月\s*[一二三四五六七八九十]+\s*日$/.test(plain)
+        /^中華民國\s*[\d一二三四五六七八九十百]+\s*年\s*[\d一二三四五六七八九十]+\s*月\s*[\d一二三四五六七八九十]+\s*日$/.test(plain)
     ;
 
     if(['主文', '事實', '理由', '事實及理由'].includes(plain)) {
         isHead = false;
         paras.push(['div', {class: 'he-h3'}, line]);
     }
-    else if(isHead || isFoot) paras.push(['div', line]);
+    else if(isHead) paras.push(['div', line]);
+    else if(isFoot) {
+        container.append(createElement(['div', line]));
+        // paras.push(['div', line]);
+    }
     else {
         if(leafNodes.some(text => /[\u2500-\u257F]/.test?.(text))) {
             paras.push(['div', line]);
@@ -128,15 +149,17 @@ const paras = lines.reduce((paras, leafNodes, lineIndex) => {
     }
     return paras;
 }, []);
+
 console.debug(paras);
 
-if(container) {
-    container.textContent = "";
-    $('.tab_linenu').textContent = '';
-    $('.htmlcontent').append(...paras.map(kongUtil.createElementFromJsonML));
-    $('.htmlcontent').style.width = null;
-    // $('.jud_content table').replaceWith($('.htmlcontent'));
-}
+target?.append(...paras.map(createElement));
+
+
+/**
+ * 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
+ */
+if($('iframe')) $('iframe').style.height =
+    $('iframe').contentDocument.body.offsetHeight + 10 + 'px';
 
 
 /**

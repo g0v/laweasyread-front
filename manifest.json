@@ -43,7 +43,10 @@
         "css": ["content_scripts/ly.lis.css"]
     },
     {
-        "matches": ["https://judgment.judicial.gov.tw/FJUD/*"],
+        "matches": [
+            "https://judgment.judicial.gov.tw/FJUD/default*.aspx*",
+            "https://judgment.judicial.gov.tw/FJUD/data.aspx?*"
+        ],
         "js": ["content_scripts/judicial.judgement.js"],
         "css": ["content_scripts/judicial.judgement.css"],
         "all_frames": true

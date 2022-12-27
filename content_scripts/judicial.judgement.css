@@ -15,12 +15,37 @@
     white-space: normal;
 }
 
-.htmlcontent {
+
+/**
+ * 裁判書文字容器的寬度等調整
+ * 司法院在多個地方設定了 CSS ：
+ * * 在 HTML 裡用 jQuery 對 .htmlcontent 設定了 width:673px 和 font-size
+ * * 在 he10.css 裡對 .htmlcontent 設定了：
+ *   * width: 672px
+ *   * transform: scale(0.8, 0.8), -webkit-transform, -moz-transform, ...
+ * * 在 jub.css 裡對 .jud_content 設定了 max-width:600px
+ *
+ * 除第一個部分只能用 JavaScript 解決外，其他於此覆寫。
+ */
+div.htmlcontent {
+    width: auto;
     font-size: 18px;
-    line-height: 200%;
-    /* min-width: 38em; */
+    font-family: Helvetica, sans-serif;
+    line-height: 2em;
+    margin-right: 1.5em; /* 不然橫向軸卷軸會出現？ */
+    overflow-y: hidden;
+    transform: none;
+    -ms-transform: none;
+    -webkit-transform: none;
+    -moz-transform: none;
+    -o-transform: none;
 }
 
 div.jud_content {
+    overflow-x: auto;
     max-width: none;
+}
+
+div.row {
+    margin: 0; /* 官方給了左右負值，造成頁面會有橫向卷軸 */
 }
