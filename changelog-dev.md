@@ -3,6 +3,10 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
+
+//     統一用語：浮動視窗、彈出窗格、…
+// 註解的呈現，用 bootstrap 的 tooltip？
+
 ## 2.0.1101
 2022-11-xx
 * 為了方便開發除錯不用每次都重新載入套件，也為了初衷的網站嵌入，決定再次重新規劃結構。

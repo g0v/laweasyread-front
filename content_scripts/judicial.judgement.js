@@ -21,19 +21,53 @@
         </td>
     </tr>
 
+ *
+ * 裁判書內容可分為三大區：
+ * 1. 頭：
+ *    1.1. 標題
+ *    1.2. 案號（可能有多個）
+ *    1.3. 當事人及關係人列表（可能有地址）
+ *    1.4. 前言（上／左列當事人間XXXXXX事件…）
+ * 2. 身：
+ *    2.1. 主文。未必會出現「主文」二字，例如支付命令即直接分一二三
+ *    2.2. 事實、理由、事實及理由
+ * 3. 尾：
+ *    3.1. 宣判日
+ *    3.2. 庭別、法官列表；或司法事務官署名
+ *    3.4. 書記官註記
+ *         3.4.1. 「以上正本證明與原本無異。」
+ *         3.4.2. 救濟說明
+ *         3.4.3. 書記官署名
+ *    3.5. 裁判正本做成日
+ *    3.6. 附錄
+ *         3.6.1. 刑事案件論罪條文
+ *         3.6.2. 各附表；可能是文字排版，也可能是 <table>
+ *
+ * 本專案原則上只處理「身」，不管頭尾。但還是需要一些方法去判斷哪裡是頭／尾。
+ *
  * 處理邏輯：
- * 將 `div.text-pre` 裡的內容，每一行用一個 inline 容器包起來，再依序塞進 `div.htmlcontent` 裡頭。
+ * 1. 若 .tab_content .text-pre 沒東西，就不處理。
+ * 2. 將 `div.text-pre` 裡的內容，每一行用一個 inline 容器包起來。
+ * 3. 把整個 <table> 拿掉，換成
+ *    <div class="htmlcontent">
+ *      <header></header>
+ *      <main></main>
+ *      <footer></footer>
+ *    </div>
+ *
  */
 
 kongUtil.use('$');
 const createElement = kongUtil.createElementFromJsonML;
 
-const container = $('div.text-pre');
+const source = $('div.text-pre');
 const target = $('.htmlcontent');
+const [header, main, footer] = ['header', 'main', 'footer'].map(tag => [tag, {}]);
 
 const lines =
-    [...(container?.childNodes || [])]
+    [...(source?.childNodes || [])]
     .reduce((lines, node) => {
+        // 每個 node 以換行字元切開後，第一個碎片（包含空字串）塞進前一行的結尾，其他的碎片各成一行（包含最後一份）。
         let debris = node.textContent.split('\n');
         switch(node.nodeType) {
             case Node.ELEMENT_NODE: {
@@ -42,7 +76,7 @@ const lines =
                 else debris = debris.map(d => {
                     const elem = node.cloneNode(true);
                     elem.removeAttribute("id");
-                    elem.textContent = d;
+                    elem.textContent = d.trim();
                     return elem;
                 });
                 break;
@@ -56,15 +90,8 @@ const lines =
         return lines;
     }, [[]])
 ;
-while(!lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
-console.debug(lines);
-
-if(container && target) {
-    container.textContent = '';
-    target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
-
-    $('div.col-td.jud_content').replaceChildren(target, container);
-}
+while(lines.length && !lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
+// console.debug(lines);
 
 const listMarkerDetectors = [
     /^[壹貳參肆伍陸柒捌玖拾]+、/,
@@ -79,87 +106,88 @@ const listMarkerDetectors = [
 ];
 
 let isHead = true, isFoot = false;
-const paras = lines.reduce((paras, leafNodes, lineIndex) => {
-    if(!leafNodes.length) return paras;
-    const line =
-        ['span', {
-                class: 'LER-origin-line',
-                data: {lineNumber: (lineIndex + 1).toString()}
-            },
-            ...leafNodes
+lines.forEach((line, lineIndex) => {
+    const span = ['span', {'data-line-number': lineIndex + 1}, ...line];
+    if(isHead) {
+        header.push(['div', {}, span]);
+        const lastLeaf = line[line.length - 1];
+        if(typeof lastLeaf === 'string' && /如[左下]：$/.test(lastLeaf)) {
+            isHead = false;
+        }
+        else if(lineIndex && line.length === 1) {
+            const prev = lines[lineIndex - 1];
+            const lastNode = prev[prev.length - 1];
+            if(typeof lastNode === 'string')
+                isHead = !/如[左下]：$/.test(lastNode + line[0]);
+        }
+        return;
+    }
+
+    const plain = line.map(n => n?.textContent ?? n).join('').replaceAll(/\s/g, '');
+    isFoot = isFoot || /^中華民國[\d一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
+    if(isFoot) return footer.push(['div', {}, span]);
+
+    if(['主文', '事實', '理由', '事實及理由'].includes(plain))
+        return main.push(['div', {class: 'he-h3'}, span]);
+
+    let padding = 0;
+    if(typeof line[0] === 'string') {
+        for(let i = 0; i < line[0].length; ++i) {
+            const c = line[0].charCodeAt(i);
+            if(c === 0x20) padding += .5;
+            else if(c === 0x3000) padding += 1;
+            else break;
+        }
+        span[2] = line[0] = line[0].trimStart();
+    }
+
+    let indent = 0;
+    for(let d of listMarkerDetectors) {
+        const match = plain.match(d);
+        if(match) {
+            for(let i = 0; i < match[0].length; ++i) {
+                const c = match[0].charCodeAt(i);
+                indent += (c < 0x100) ? .5 : 1;
+            }
+            break;
+        }
+    }
+
+    const lastPara = main[main.length - 1];
+    if(indent) main.push(
+        ['div',
+            {style: `padding-left: ${padding+indent}em; text-indent: -${indent}em;`},
+            span
         ]
-    ;
+    );
+    else if(main.length === 2) // <main> 裡還沒有東西時。
+        main.push(['div', {}, span]);
+    else if(main[main.length - 1][1].class === 'he-h3' // 「主文」、「事實」、…
+        || (!padding && lastPara[2][lastPara[2].length - 1].endsWith('。'))
+        // 主文之中不分一二三，而是用換行來分段。故若前一行末尾是句號，且當前沒有縮排的話，那就當成是在主文內，並新開一個段落。
+    ) main.push(
+        ['div', {style: `padding-left: ${padding}em;`}, span]
+    );
+    else main[main.length - 1].push(span);
+});
+console.debug(header, main, footer);
 
-    const plain = (leafNodes[0].textContent || leafNodes[0]).replaceAll(/\s/g, '');
-    isFoot = isFoot ||
-        /^中華民國\s*[\d一二三四五六七八九十百]+\s*年\s*[\d一二三四五六七八九十]+\s*月\s*[\d一二三四五六七八九十]+\s*日$/.test(plain)
-    ;
 
-    if(['主文', '事實', '理由', '事實及理由'].includes(plain)) {
-        isHead = false;
-        paras.push(['div', {class: 'he-h3'}, line]);
-    }
-    else if(isHead) paras.push(['div', line]);
-    else if(isFoot) {
-        container.append(createElement(['div', line]));
-        // paras.push(['div', line]);
-    }
-    else {
-        if(leafNodes.some(text => /[\u2500-\u257F]/.test?.(text))) {
-            paras.push(['div', line]);
-            return paras;
-        }
-
-        const startingSpaces = (leafNodes[0].textContent || leafNodes[0]).match(/^\s*/)[0];
-        const padding = startingSpaces.split('').reduce((length, char) => length + (char === '\u3000' ? 1 : .5), 0);
-        let indent = 0;
-        for(let d of listMarkerDetectors) {
-            const match = plain.match(d);
-            if(match) {
-                indent = match[0].split('').reduce((length, char) => {
-                    return length + (/[\w\.\x20]/.test(char) ? .5 : 1);
-                }, 0);
-                break;
-            }
-        }
-        if(indent) paras.push(
-            ['div',
-                {style: `padding-left: ${padding+indent}em; text-indent: -${indent}em`},
-                line
-            ]
-        );
-        else {
-            const lastPara = paras[paras.length - 1];
-            const lastLine = lastPara[lastPara.length - 1];
-            const lastNode = lastLine[lastLine.length - 1];
-            if((padding || !lastNode.endsWith('。'))
-                && (paras[paras.length - 1][1].class !== 'pre')
-                && (lastPara.class !== 'he-h3')
-            ) {
-                // 加入前一段
-                if(typeof leafNodes[0] === 'string') leafNodes[0] = leafNodes[0].trimStart();
-                const lastLeaf = leafNodes[leafNodes.length - 1];
-                if(typeof lastLeaf === "string") leafNodes[leafNodes.length - 1] = lastLeaf.trimEnd();
-                lastPara.push(line);
-            }
-            else paras.push(
-                ['div', {style: `padding-left: ${padding}em`}, line]
-            );
-        }
-    }
-    return paras;
-}, []);
-
-console.debug(paras);
-
-target?.append(...paras.map(createElement));
+if(target) target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
+if(lines.length) {
+    target.replaceChildren(
+        ...[header, main, footer].map(kongUtil.createElementFromJsonML)
+    );
+    $('div.col-td.jud_content').replaceChildren(target);
+}
 
 
 /**
  * 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
  */
 if($('iframe')) $('iframe').style.height =
-    $('iframe').contentDocument.body.offsetHeight + 10 + 'px';
+    $('iframe').contentDocument.body.offsetHeight + 'px';
+
 
 
 /**
@@ -171,92 +199,19 @@ if($('iframe')) $('iframe').style.height =
     ["texttext", HTMLElement, "texttext"]
 ]
 
-/** @const paras */
-[
-    {div: {
-        class: "LER-judicial-para",
-        style: {
-            paddingLeft: "-3em",
-            textIndent: "3em"
-        },
-        $: [
-            {span: {
-                class: "LER-origin-line",
-                data: {lineNumber: 10},
-                $: [
-                    "aaaa",
-                    {abbr: "termmmm"}
-                ]
-            }},
-            {span: {
-                class: "LER-origin-line",
-                data: {lineNumber: 11},
-                $: [
-                    {abbr: "termmmm"},
-                    "bbb"
-                ]
-            }}
-        ]
-    }}
+/** @const main */
+["main", {},
+    ["div", {"class": "he-h3"},
+        ["span", {"data-line-number": 10}, "事實及理由"]
+    ],
+    ["div", {"style": "padding-left: 2em; text-indent: -2em;"},
+        ["span", {"data-line-number": 11}, "一、第十一行第十一行第十一行"],
+        ["span", {"data-line-number": 12}, "第十二行第十二行第十二行"],
+        ["span", {"data-line-number": 13}, "第十三行第十三行第十三行"]
+    ],
+    ["div", {"style": "padding-left: 2em; text-indent: -2em;"},
+        ["span", {"data-line-number": 14}, "二、第十四行第十四行第十四行"],
+        ["span", {"data-line-number": 15}, "第十五行第十五行第十五行"],
+        ["span", {"data-line-number": 16}, "第十六行第十六行第十六行"]
+    ]
 ]
-
-// 未來規劃
-/** @const blocks */
-{div: {$: [
-    {header: {$: [
-        {div: {
-            class: "he-h1",
-            "aria-label": "裁判標題"
-        }},
-        {div: {
-            class: "",
-            "aria-label": "裁判字號"
-        }},
-        {div: {
-            class: "",
-            "aria-label": "當事人列表"
-        }},
-        {div: {
-            "aria-label": "foreword",
-            // text: "上列當事人…"
-        }},
-    ]}},
-    {div: {
-        class: "LER-judicial-main",
-        $: [
-            {section: {
-                "aria-label": "主文",
-                $: [
-                    {header: {
-                        class: "he-h3"
-
-                    }}
-                ]
-            }}
-        ]
-    }},
-    {footer: {$: [
-        {time: {
-            class: "d-block",
-            "aria-label": "裁判日期"
-        }},
-        {div: {
-            "aria-label": "法官、司法事務官列表"
-        }},
-        {div: {
-            "arial-label": "afterword",
-            // text: "與原本無異。如不服…"
-        }},
-        {time: {
-            class: "d-block",
-            "aria-label": "裁判書作成日期"
-        }},
-        {div: {
-            "aria-label": "書記官署名"
-        }}
-    ]}},
-    {section: {
-        class: "LER-judicial-appendix",
-        "aria-label": "附錄"
-    }}
-]}}

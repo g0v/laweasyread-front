@@ -27,9 +27,9 @@
         "js": [
             "node_modules/kong-util/dist/all.js",
             "lib.js",
-            "LER.front.js",
-            "content_scripts/main.js"
+            "LER.front.js"
         ],
+        "run_at": "document_end",
         "all_frames": true
     },
     {
@@ -55,6 +55,11 @@
         "matches": ["https://legal.judicial.gov.tw/FINT/*"],
         "js": ["content_scripts/judicial.judgement.js"],
         "css": ["content_scripts/judicial.judgement.css"]
+    },
+    {
+        "matches": ["<all_urls>"],
+        "js": ["content_scripts/main.js"],
+        "all_frames": true
     }
 ]
 }

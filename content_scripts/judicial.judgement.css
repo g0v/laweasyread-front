@@ -1,18 +1,31 @@
-.LER-origin-line {
+.htmlcontent > header,
+.htmlcontent > footer {
+    white-space: pre;
+    font-family: "細明體";
+    font-size: 14px;
+    font-weight: bold;
+    line-height: 1.75em;
+}
+.htmlcontent .he-h3 {
+    font-size: 20px;
+    font-weight: bold;
+}
+.htmlcontent > main > div {
+    margin: 1em 0;
+}
+
+
+[data-line-number] {
     position: relative;
 }
-.LER-origin-line::before {
+[data-line-number]::before {
     content: attr(data-line-number);
     position: absolute;
-    top: -1.25em;
+    top: -1.375em;
     left: 0;
     font-size: smaller;
     color: #ccc !important; /* to overwrite bootstrap setting */
     text-indent: 0;
-}
-
-.tab_content {
-    white-space: normal;
 }
 
 
