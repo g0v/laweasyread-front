@@ -57,7 +57,31 @@
  *
  */
 
-kongUtil.use('$');
+kongUtil.use('$', '$$');
+
+/**
+ * 常數
+ */
+const listMarkerDetectors = [
+    /^[壹貳參肆伍陸柒捌玖拾]+、/,
+    /^[一二三四五六七八九十]+、/,
+    /^[甲乙丙丁戊己庚辛壬癸]、/,
+    /^[子丑寅卯辰巳午未申酉戌亥]、/,
+    /^\d+\.\s?/,
+    /^[A-Z]\.\s?/,
+    /^[(（][一二三四五六七八九十]+[）)]/,
+    /^\(\d+\.\)\s?/,
+    /^\([A-Z]\.\)\s?/,
+    /^[\u2460-\u249B]/,
+    /^[\u3220-\u3229]/,
+    /^[\u3280-\u3289]/,
+    // /^[\uE000-\uF8FF]/ // https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPPP,91%2c%e5%86%8d%e5%af%a9%2c1239%2c20020621
+];
+
+const termTypes = {
+    M: '刑事', V: '民事', F: '家事', A: '行政', G: '一般'
+};
+
 
 const source = $('div.text-pre');
 const target = $('.htmlcontent');
@@ -70,14 +94,14 @@ const lines =
         let debris = node.textContent.split('\n');
         switch(node.nodeType) {
             case Node.ELEMENT_NODE: {
-                // 若是 element 且裡面有換行，那就要做兩個該元件，塞進不同行裡；否則就用原本的元件。
-                if(debris.length === 1) debris = [node];
-                else debris = debris.map(d => {
-                    const elem = node.cloneNode(true);
-                    elem.removeAttribute("id");
-                    elem.textContent = d.trim();
-                    return elem;
-                });
+                // 若非純文字，則拆解成多個相同元件，只有內文不同。
+                debris = debris.map(d =>
+                    [node.tagName, {
+                        rel: node.getAttribute('rel') || '',
+                        class: node.className,
+                        data: {term: decodeURI(node.id)}
+                    }, d.trim()]
+                );
                 break;
             }
             case Node.TEXT_NODE: break;
@@ -92,21 +116,6 @@ const lines =
 while(lines.length && !lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
 // console.debug(lines);
 
-const listMarkerDetectors = [
-    /^[壹貳參肆伍陸柒捌玖拾]+、/,
-    /^[一二三四五六七八九十]+、/,
-    /^[甲乙丙丁戊己庚辛壬癸]、/,
-    /^[子丑寅卯辰巳午未申酉戌亥]、/,
-    /^\d+\.\s?/,
-    /^[A-Z]\.\s?/,
-    /^[(（][一二三四五六七八九十]+[）)]/,
-    /^\(\d+\.\)\s?/,
-    /^\([A-Z]\.\)\s?/,
-    /^[\u3220-\u3229]/,
-    /^[\u3280-\u3289]/,
-    /^[\u2488-\u249B]/,
-];
-
 let isHead = true, isFoot = false;
 lines.forEach((line, lineIndex) => {
     const span = ['span', {'data-line-number': lineIndex + 1}, ...line];
@@ -115,7 +124,7 @@ lines.forEach((line, lineIndex) => {
     if(isHead) {
         header.push(['div', {}, span]);
         const lastLeaf = line[line.length - 1];
-        if(typeof lastLeaf === 'string' && /如[左下]：$/.test(lastLeaf)) {
+        if(typeof lastLeaf === 'string' && /如[左下]：?$/.test(lastLeaf)) {
             isHead = false;
         }
         else if(lineIndex && line.length === 1) {
@@ -131,7 +140,7 @@ lines.forEach((line, lineIndex) => {
     isFoot = isFoot || /^中華民國[\d一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
     if(isFoot) return footer.push(['div', {}, span]);
 
-    if(['主文', '事實', '理由', '事實及理由'].includes(plain))
+    if(['主文', '事實', '犯罪事實', '理由', '事實及理由'].includes(plain))
         return main.push(['div', {class: 'he-h3'}, span]);
 
     // 用於後續各判斷
@@ -180,28 +189,79 @@ lines.forEach((line, lineIndex) => {
     );
     else lastPara.push(span);
 });
-console.debug(header, main, footer);
+// console.debug(header, main, footer);
 
 
-if(target) target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
-if(lines.length) {
+if(target) {
+    target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
+    $('div.col-td.jud_content').replaceChildren(target);
+}
+
+if(lines.length) { // 較舊的裁判書
     target.replaceChildren(
         ...[header, main, footer].map(kongUtil.createElementFromJsonML)
     );
-    $('div.col-td.jud_content').replaceChildren(target);
+
+    // 裁判易讀小幫手
+    $$('abbr.termhover[rel]', target).forEach(elem => {
+        const term = elem.dataset.term;
+        const typeid = elem.getAttribute('rel');
+        if(!term || !typeid) return;
+
+        const resource = `https://judgment.judicial.gov.tw/controls/GetJudTerms.ashx?TRMID=${term}&ty=${typeid}&name=${term}`;
+        elem.addEventListener('mouseover', async () => {
+            if(elem.title) return;
+            const explainList = await kongUtil.fetchJSON(resource);
+            const title = explainList.map(obj => obj.TRMCONTENT).join('\n');
+            // console.debug(resource, title);
+            $$(`abbr[data-term="${term}"]`, target).forEach(same => same.title = title); // 把其他相同關鍵字的也一起設定。
+        }, {once: true});
+        elem.addEventListener('click', () => {
+            window.open(`https://terms.judicial.gov.tw/TermContent.aspx?TRMTERM=${term}&SYS=${typeid}`);
+        });
+    });
+
+}
+else { // 較新的裁判書
+
+    // 調整縮排，因官方是設定 'font-size: 24px' ，但我改成 18px 。
+    $$('[id*=_paragraph_]', target).forEach(div => {
+        const s = div.style;
+        if(s.textIndent) s.textIndent = parseInt(s.textIndent) * 18 / 24 + 'px';
+        if(s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
+    });
+
+    // 字體放大後表格會引致水平卷軸，故把表格後的東西挪到另一個容器。
+    const firstTable = $('[ref="tableWrapper"]');
+    if(firstTable) {
+        const movees = [];
+        for(let cur = firstTable; cur; cur = cur.nextSibling) movees.push(cur);
+
+        const row = target.closest('.row');
+        const container = row.cloneNode(true);
+        $('.htmlcontent', container).replaceChildren(...movees);
+        row.insertAdjacentElement('afterend', container);
+    }
+
+    // 關鍵字的字體
+    $$('abbr.termhover[rel]', target).forEach(elem => elem.style.fontFamily = null);
 }
 
 
 /**
  * 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
  */
-if($('iframe')) $('iframe').style.height =
-    $('iframe').contentDocument.body.offsetHeight + 'px';
+const iframe = $('iframe');
+if(iframe) {
+    iframe.addEventListener('load', () => {
+        iframe.style.height = iframe.contentDocument.body.offsetHeight + 'px';
+    });
+}
 
 
 
 /**
- * Structure example, not necesary to execute.
+ * 資料結構範例
  */
 /** @const lines */
 [

@@ -45,8 +45,8 @@ div.htmlcontent {
     font-size: 18px;
     font-family: Helvetica, sans-serif;
     line-height: 2em;
-    margin-right: 1.5em; /* 不然橫向軸卷軸會出現？ */
-    overflow-y: hidden;
+    margin: 0 .6em;
+    padding: 0 .6em;
     transform: none;
     -ms-transform: none;
     -webkit-transform: none;

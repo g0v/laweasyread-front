@@ -7,10 +7,6 @@
 //     統一用語：浮動視窗、彈出窗格、…
 // 註解的呈現，用 bootstrap 的 tooltip？
 
-檢查：
-* https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=SLDM,88%2c%e8%a8%b4%2c609%2c20000822
-* https://judgment.judicial.gov.tw/FJUD/data.aspx?ty=JD&id=TPSM,85%2c%e5%8f%b0%e4%b8%8a%2c2917%2c19960614
-
 
 ## 2.0.1101
 2022-11-xx
