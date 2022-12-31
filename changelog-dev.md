@@ -3,9 +3,6 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
-## to-do
-* `options_ui/general` 註解的呈現，用 bootstrap 的 tooltip？
-
 ## 2.0.0
 2023-01-xx
 * 重建專案結構。

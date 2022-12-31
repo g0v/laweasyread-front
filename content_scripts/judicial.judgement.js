@@ -119,7 +119,6 @@ while(lines.length && !lines[lines.length - 1].some(x => x)) lines.pop(); // 拿
 let isHead = true, isFoot = false;
 lines.forEach((line, lineIndex) => {
     const span = ['span', {'data-line-number': lineIndex + 1}, ...line];
-    if(typeof line[0] === 'string') span[2] = line[0].trimStart();
 
     if(isHead) {
         header.push(['div', {}, span]);
@@ -140,6 +139,7 @@ lines.forEach((line, lineIndex) => {
     isFoot = isFoot || /^中華民國[\d一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
     if(isFoot) return footer.push(['div', {}, span]);
 
+    if(typeof line[0] === 'string') span[2] = line[0].trimStart(); // 頭部跟尾部的行首空白不要拿掉
     if(['主文', '事實', '犯罪事實', '理由', '事實及理由'].includes(plain))
         return main.push(['div', {class: 'he-h3'}, span]);
 
@@ -257,6 +257,7 @@ const iframe = $('iframe');
 if(iframe) {
     iframe.addEventListener('load', () => requestIdleCallback(() => {
         iframe.style.height = iframe.contentDocument.body.offsetHeight + 'px';
+        // console.debug(iframe.contentDocument.body.offsetHeight);
     }));
 }
 
