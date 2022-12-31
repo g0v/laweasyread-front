@@ -58,7 +58,6 @@
  */
 
 kongUtil.use('$');
-const createElement = kongUtil.createElementFromJsonML;
 
 const source = $('div.text-pre');
 const target = $('.htmlcontent');
@@ -98,8 +97,11 @@ const listMarkerDetectors = [
     /^[一二三四五六七八九十]+、/,
     /^[甲乙丙丁戊己庚辛壬癸]、/,
     /^[子丑寅卯辰巳午未申酉戌亥]、/,
-    /^\d+\.\s*/,
-    /^[A-Z]\.\s*/,
+    /^\d+\.\s?/,
+    /^[A-Z]\.\s?/,
+    /^[(（][一二三四五六七八九十]+[）)]/,
+    /^\(\d+\.\)\s?/,
+    /^\([A-Z]\.\)\s?/,
     /^[\u3220-\u3229]/,
     /^[\u3280-\u3289]/,
     /^[\u2488-\u249B]/,
@@ -108,6 +110,8 @@ const listMarkerDetectors = [
 let isHead = true, isFoot = false;
 lines.forEach((line, lineIndex) => {
     const span = ['span', {'data-line-number': lineIndex + 1}, ...line];
+    if(typeof line[0] === 'string') span[2] = line[0].trimStart();
+
     if(isHead) {
         header.push(['div', {}, span]);
         const lastLeaf = line[line.length - 1];
@@ -130,45 +134,51 @@ lines.forEach((line, lineIndex) => {
     if(['主文', '事實', '理由', '事實及理由'].includes(plain))
         return main.push(['div', {class: 'he-h3'}, span]);
 
-    let padding = 0;
-    if(typeof line[0] === 'string') {
+    // 用於後續各判斷
+    const lastPara = main[main.length - 1];
+
+    // 判斷是否為新段落
+    let isNewPara = true;
+    if(lineIndex && lastPara[1].class !== 'he-h3') {
+        const prev = lines[lineIndex - 1];
+        const lastNode = prev[prev.length - 1];
+        isNewPara = (typeof lastNode === 'string') && /[。：]$/.test(lastNode);
+    }
+
+    // 偵測縮排
+    let padding = 0, indent = 0;
+    if(isNewPara) {
         for(let i = 0; i < line[0].length; ++i) {
             const c = line[0].charCodeAt(i);
             if(c === 0x20) padding += .5;
             else if(c === 0x3000) padding += 1;
             else break;
         }
-        span[2] = line[0] = line[0].trimStart();
-    }
 
-    let indent = 0;
-    for(let d of listMarkerDetectors) {
-        const match = plain.match(d);
-        if(match) {
-            for(let i = 0; i < match[0].length; ++i) {
-                const c = match[0].charCodeAt(i);
-                indent += (c < 0x100) ? .5 : 1;
+        for(let d of listMarkerDetectors) {
+            const match = plain.match(d);
+            if(match) {
+                for(let i = 0; i < match[0].length; ++i) {
+                    const c = match[0].charCodeAt(i);
+                    indent += (c < 0x100) ? .5 : 1;
+                }
+                break;
             }
-            break;
         }
     }
 
-    const lastPara = main[main.length - 1];
-    if(indent) main.push(
+    // 某些情形下，推測為其實並非新段落。
+    if(padding && !indent && lastPara
+        && lastPara[1].style?.includes(`padding-left: ${padding}em`)
+    ) isNewPara = false;
+
+    if(isNewPara) main.push(
         ['div',
             {style: `padding-left: ${padding+indent}em; text-indent: -${indent}em;`},
             span
         ]
     );
-    else if(main.length === 2) // <main> 裡還沒有東西時。
-        main.push(['div', {}, span]);
-    else if(main[main.length - 1][1].class === 'he-h3' // 「主文」、「事實」、…
-        || (!padding && lastPara[2][lastPara[2].length - 1].endsWith('。'))
-        // 主文之中不分一二三，而是用換行來分段。故若前一行末尾是句號，且當前沒有縮排的話，那就當成是在主文內，並新開一個段落。
-    ) main.push(
-        ['div', {style: `padding-left: ${padding}em;`}, span]
-    );
-    else main[main.length - 1].push(span);
+    else lastPara.push(span);
 });
 console.debug(header, main, footer);
 
