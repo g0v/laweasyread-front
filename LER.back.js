@@ -273,7 +273,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
 
 /**
  * @func preparePopup
- * @desc 讀取並整理資料，準備建立彈出窗格。
+ * @desc 讀取並整理資料，準備建立彈出式視窗。
  * @param {DOMStringMap} dataset
  * @returns {Promise.<Object>} {headers, bodyParts, defaultLaw}
  */

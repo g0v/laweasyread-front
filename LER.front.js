@@ -128,15 +128,15 @@ parseDocument(options) {
 },
 
 /**
- * 綁定滑鼠移過時的彈出窗格。
+ * 綁定滑鼠移過時的彈出式視窗。
  * @param {Element} elem
  * @returns {void}
  *
  *  做四件事：
- *  1. 滑鼠首次移入目標時，同步建立彈出窗格，異步載入資料。載入資料後若窗格仍處於顯示狀態，則再次定位窗格。
- *  2. 滑鼠移入目標時，則設定稍後顯示並定位窗格。
- *  3. 滑鼠移出目標時，若窗格尚未顯示，則取消前項設定。
- *  4. 滑鼠移動時，若不在顯示中的窗格或其目標內，且窗格未被釘選，則隱藏窗格。（另處監聽 document 的 mousemove 事件）
+ *  1. 滑鼠首次移入目標時，同步建立彈出式視窗，異步載入資料。載入資料後若視窗仍處於顯示狀態，則再次定位視窗。
+ *  2. 滑鼠移入目標時，則設定稍後顯示並定位視窗。
+ *  3. 滑鼠移出目標時，若視窗尚未顯示，則取消前項設定。
+ *  4. 滑鼠移動時，若不在顯示中的視窗或其目標內，且視窗未被釘選，則隱藏視窗。（另處監聽 document 的 mousemove 事件）
  *
  *  備註：由於在 shadow tree 裡的 Event.target 在事件結束後會被清掉，所以先複製需要的資料出來。
  *  參考：
@@ -153,7 +153,7 @@ bindPopup(elem, articleNumberFormat) {
     elem.addEventListener('mouseenter', event => {
         // console.debug('mouseenter', event);
         const fakeEvent = {target: event.target, clientX: event.clientX, pageX: event.pageX};
-        // 為同步建立空白窗格，就不從後端取得 JsonML ，而是複製已載入的 DOM 。
+        // 為同步建立元件，就不從後端取得 JsonML ，而是複製已載入的 DOM 。
         popup = this.popupTemplate.cloneNode(true);
         popup.target = elem;
         popup.addEventListener('mouseleave', e => {
@@ -196,7 +196,7 @@ bindPopup(elem, articleNumberFormat) {
 },
 
 /**
- * 設定彈出窗格位置。
+ * 設定彈出式視窗位置。
  * @param {Element} popup
  * @param {MouseEvent} event
  * @returns {undefined}
@@ -225,19 +225,19 @@ setPopupPosition(popup, event) {
     }
     popup.style.top = top + "px";
 
-    /// X軸：視滑鼠在目標元素的水平位置，依比例。但不能讓彈出窗格超過畫面寬度。
+    /// X軸：視滑鼠在目標元素的水平位置，依比例。但不能讓彈出式視窗超過畫面寬度。
     let left = rect.left + window.scrollX; // 目標元素的左緣
     left += (event.clientX - rect.left)
         * Math.max(rect.width - popup.offsetWidth, 0) / rect.width
-    ; // 如果目標元素比彈出窗格還要寬，那就依滑鼠在目標元素的相對位置來調整彈出窗格的X軸位置。
-    if(left + popup.offsetWidth > document.body.clientWidth) // 不能讓彈出窗格超過畫面寬度
+    ; // 如果目標元素比彈出式視窗還要寬，那就依滑鼠在目標元素的相對位置來調整彈出式視窗的X軸位置。
+    if(left + popup.offsetWidth > document.body.clientWidth) // 不能讓彈出式視窗超過畫面寬度
         left = document.body.clientWidth - popup.offsetWidth;
     popup.style.left = Math.max(left, 0) + "px";
 
-    // 箭頭的位置：跟著滑鼠座標的X值，但不能超出彈出窗格本身。
+    // 箭頭的位置：跟著滑鼠座標的X值，但不能超出彈出式視窗本身。
     const arrowLeft = Math.min(
         event.pageX - left - arrow.offsetWidth / 2, // 理想位置
-        popup.offsetWidth - arrow.offsetWidth - 8   // 彈出窗格右緣，再扣掉原角框的範圍
+        popup.offsetWidth - arrow.offsetWidth - 8   // 彈出式視窗右緣，再扣掉原角框的範圍
     );
     arrow.style.marginLeft = Math.max(arrowLeft, 8) + "px";
 },

@@ -6,10 +6,6 @@ const booleanOptions = [
     "autoUpdate"
 ];
 
-// todo:
-// 統一用語：浮動視窗、彈出窗格、…
-// 註解的呈現，用 bootstrap 的 tooltip？
-
 /**
  * 條號轉換方式的選擇
  */

@@ -4,5 +4,6 @@
     "autoUpdate": true,
     "enablePopup": true,
     "exclude_matches": [],
-    "mojAddReferringArticles": true
+    "mojAddReferringArticles": true,
+    "typesetDockets": true
 }

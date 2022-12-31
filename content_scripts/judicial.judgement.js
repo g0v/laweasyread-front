@@ -193,71 +193,72 @@ lines.forEach((line, lineIndex) => {
 
 
 if(target) {
-    target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
-    $('div.col-td.jud_content').replaceChildren(target);
-}
+    getData('typesetDockets').then(typesetDockets => {
+        if(!typesetDockets) return;
+        target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
+        $('div.col-td.jud_content').replaceChildren(target);
 
-if(lines.length) { // 較舊的裁判書
-    target.replaceChildren(
-        ...[header, main, footer].map(kongUtil.createElementFromJsonML)
-    );
+        if(lines.length) { // 較舊的裁判書
+            target.replaceChildren(
+                ...[header, main, footer].map(kongUtil.createElementFromJsonML)
+            );
 
-    // 裁判易讀小幫手
-    $$('abbr.termhover[rel]', target).forEach(elem => {
-        const term = elem.dataset.term;
-        const typeid = elem.getAttribute('rel');
-        if(!term || !typeid) return;
+            // 裁判易讀小幫手
+            $$('abbr.termhover[rel]', target).forEach(elem => {
+                const term = elem.dataset.term;
+                const typeid = elem.getAttribute('rel');
+                if(!term || !typeid) return;
 
-        const resource = `https://judgment.judicial.gov.tw/controls/GetJudTerms.ashx?TRMID=${term}&ty=${typeid}&name=${term}`;
-        elem.addEventListener('mouseover', async () => {
-            if(elem.title) return;
-            const explainList = await kongUtil.fetchJSON(resource);
-            const title = explainList.map(obj => obj.TRMCONTENT).join('\n');
-            // console.debug(resource, title);
-            $$(`abbr[data-term="${term}"]`, target).forEach(same => same.title = title); // 把其他相同關鍵字的也一起設定。
-        }, {once: true});
-        elem.addEventListener('click', () => {
-            window.open(`https://terms.judicial.gov.tw/TermContent.aspx?TRMTERM=${term}&SYS=${typeid}`);
-        });
+                const resource = `https://judgment.judicial.gov.tw/controls/GetJudTerms.ashx?TRMID=${term}&ty=${typeid}&name=${term}`;
+                elem.addEventListener('mouseover', async () => {
+                    if(elem.title) return;
+                    const explainList = await kongUtil.fetchJSON(resource);
+                    const title = explainList.map(obj => obj.TRMCONTENT).join('\n');
+                    // console.debug(resource, title);
+                    $$(`abbr[data-term="${term}"]`, target).forEach(same => same.title = title); // 把其他相同關鍵字的也一起設定。
+                }, {once: true});
+                elem.addEventListener('click', () => {
+                    window.open(`https://terms.judicial.gov.tw/TermContent.aspx?TRMTERM=${term}&SYS=${typeid}`);
+                });
+            });
+
+        }
+        else { // 較新的裁判書
+
+            // 調整縮排，因官方是設定 'font-size: 24px' ，但我改成 18px 。
+            $$('[id*=_paragraph_]', target).forEach(div => {
+                const s = div.style;
+                if(s.textIndent) s.textIndent = parseInt(s.textIndent) * 18 / 24 + 'px';
+                if(s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
+            });
+
+            // 字體放大後表格會引致水平卷軸，故把表格後的東西挪到另一個容器。
+            const firstTable = $('[ref="tableWrapper"]');
+            if(firstTable) {
+                const movees = [];
+                for(let cur = firstTable; cur; cur = cur.nextSibling) movees.push(cur);
+
+                const row = target.closest('.row');
+                const container = row.cloneNode(true);
+                $('.htmlcontent', container).replaceChildren(...movees);
+                row.insertAdjacentElement('afterend', container);
+            }
+
+            // 關鍵字的字體
+            $$('abbr.termhover[rel]', target).forEach(elem => elem.style.fontFamily = null);
+        }
+
     });
-
-}
-else { // 較新的裁判書
-
-    // 調整縮排，因官方是設定 'font-size: 24px' ，但我改成 18px 。
-    $$('[id*=_paragraph_]', target).forEach(div => {
-        const s = div.style;
-        if(s.textIndent) s.textIndent = parseInt(s.textIndent) * 18 / 24 + 'px';
-        if(s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
-    });
-
-    // 字體放大後表格會引致水平卷軸，故把表格後的東西挪到另一個容器。
-    const firstTable = $('[ref="tableWrapper"]');
-    if(firstTable) {
-        const movees = [];
-        for(let cur = firstTable; cur; cur = cur.nextSibling) movees.push(cur);
-
-        const row = target.closest('.row');
-        const container = row.cloneNode(true);
-        $('.htmlcontent', container).replaceChildren(...movees);
-        row.insertAdjacentElement('afterend', container);
-    }
-
-    // 關鍵字的字體
-    $$('abbr.termhover[rel]', target).forEach(elem => elem.style.fontFamily = null);
 }
 
 
-/**
- * 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
- */
+// 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
 const iframe = $('iframe');
 if(iframe) {
-    iframe.addEventListener('load', () => {
+    iframe.addEventListener('load', () => requestIdleCallback(() => {
         iframe.style.height = iframe.contentDocument.body.offsetHeight + 'px';
-    });
+    }));
 }
-
 
 
 /**
