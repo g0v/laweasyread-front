@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>法規亦毒氣 2.0版 示範頁面</title>
+  </head>
+  <body>
+    <div>
+      <h1>法規亦毒氣 2.0版 示範頁面</h1>
+      <dl>
+        <dt>原文</dt>
+        <dd><textarea readonly style="height: 10em; width: 95vw;"></textarea></dd>
+        <dt>轉換後</dt>
+        <dd>
+          <div id="content">
+<p>釋字第617號對刑法第235條做了限縮解釋；釋字第623號對兒童及少年性交易防制條例也做了限縮解釋；釋字第666號則宣告社會秩序維護法第80條第1項第1款違憲。</p>
+<p>行政訴訟法第132條的內容是：民事訴訟法第一百九十五條至第一百九十七條、第二百條、第二百零一條、第二百零四條、第二百零六條至第二百零八條、第二百十條、第二百十一條、第二百十四條、第二百十五條、第二百十七條至第二百十九條、第二百六十五條至第二百六十八條之一、第二百六十八條之二、第二百七十條至第二百七十一條之一、第二百七十三條至第二百七十六條之規定，於本節準用之。</p>
+          </div>
+        </dd>
+      </dl>
+    </div>
+    <script>
+      document.querySelector("textarea").value = document.getElementById("content").textContent.trim();
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/kong-util/dist/all.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@065f37c/LER.back.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@065f37c/LER.front.js"></script>
+    <script>
+        LER.parseDocument({
+            articleNumberFormat: 'hyphen',
+            enablePopup: true,
+        });
+    </script>
+  </body>
+</html>
