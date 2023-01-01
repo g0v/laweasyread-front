@@ -4,7 +4,7 @@
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
 ## 2.0.0
-2023-01-xx
+2023-01-01
 * 重建專案結構。
 * Chrome 系列的改為 Manifest V3 ； Firefox 維持 Manifest V2 。
 * 更新引用的 Bootstrap 至 5.2 版。

@@ -25,11 +25,13 @@ popupTemplate: kongUtil.createElementFromJsonML(
         },
         ["div", {"class": "LER-popup-before"}],
         ["div", {"class": "LER-popup"},
-            ["input", {
-                "class": "LER-popup-pin",
-                "type": "checkbox",
-                "title": "固定"
-            }],
+            ["label", {
+                    "class": "LER-popup-pin",
+                    "title": "固定"
+                },
+                ["input", {"type": "checkbox"}], // checkbox 不能用 pseudo-element
+                ["i"],
+            ],
             ["header"],
             ["dl", {"class": "LER-popup-body"}]
         ],

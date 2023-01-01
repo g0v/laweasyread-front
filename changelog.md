@@ -4,9 +4,10 @@ Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
 ## 2.0.0
-2023-01-xx
+2023-01-01
 * 支援網站內嵌。
 * 取消支援右鍵選單及「列出本頁的法律資料」。
+* 例外清單的匹配邏輯變更。
 * 延後彈出式視窗的顯示時間，避免滑鼠單純滑過就彈出，造成使用者困擾。
 * 支援辨識憲法法庭裁判及嵌入彈出式視窗。
 * 司法院裁判書重新排版：將段落中用換行和空格排版的情形進行整理。
