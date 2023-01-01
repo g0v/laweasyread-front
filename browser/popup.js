@@ -43,7 +43,7 @@ listen($("#update"), "click", event => {
 browser.tabs.query({active: true, currentWindow: true})
 .then(([tab]) => {
     if(tab.url.startsWith("http") || tab.url.startsWith("file")) return;
-    $("#parseCurrentTab").remove();
+    $("#parseCurrentTab").disabled = true;
 });
 
 

@@ -2,7 +2,7 @@
 .htmlcontent > footer {
     white-space: pre;
     font-family: "細明體";
-    font-size: 14px;
+    font-size: 16px;
     font-weight: bold;
     line-height: 1.75em;
 }
@@ -24,6 +24,7 @@
     top: -1.375em;
     left: 0;
     font-size: smaller;
+    font-weight: normal;
     color: #ccc !important; /* to overwrite bootstrap setting */
     text-indent: 0;
 }

@@ -69,9 +69,10 @@ const listMarkerDetectors = [
     /^[子丑寅卯辰巳午未申酉戌亥]、/,
     /^\d+\.\s?/,
     /^[A-Z]\.\s?/,
-    /^[(（][一二三四五六七八九十]+[）)]/,
+    /^[(（][一二三四五六七八九十]+[）)]、?/,
     /^\(\d+\.\)\s?/,
     /^\([A-Z]\.\)\s?/,
+    /^[１２３４５６７８９０]+、/,
     /^[\u2460-\u249B]/,
     /^[\u3220-\u3229]/,
     /^[\u3280-\u3289]/,
@@ -135,8 +136,8 @@ lines.forEach((line, lineIndex) => {
         return;
     }
 
-    const plain = line.map(n => n?.textContent ?? n).join('').replaceAll(/\s/g, '');
-    isFoot = isFoot || /^中華民國[\d一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
+    const plain = line.map(n => (typeof n) === 'string' ? n : n[2]).join('').replaceAll(/\s/g, '');
+    isFoot = isFoot || /^中華民國[\d○一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
     if(isFoot) return footer.push(['div', {}, span]);
 
     if(typeof line[0] === 'string') span[2] = line[0].trimStart(); // 頭部跟尾部的行首空白不要拿掉
@@ -148,7 +149,7 @@ lines.forEach((line, lineIndex) => {
 
     // 判斷是否為新段落
     let isNewPara = true;
-    if(lineIndex && lastPara[1].class !== 'he-h3') {
+    if(lineIndex && lastPara[1]?.class !== 'he-h3') {
         const prev = lines[lineIndex - 1];
         const lastNode = prev[prev.length - 1];
         isNewPara = (typeof lastNode === 'string') && /[。：]$/.test(lastNode);
@@ -178,7 +179,7 @@ lines.forEach((line, lineIndex) => {
 
     // 某些情形下，推測為其實並非新段落。
     if(padding && !indent && lastPara
-        && lastPara[1].style?.includes(`padding-left: ${padding}em`)
+        && lastPara[1]?.style?.includes(`padding-left: ${padding}em`)
     ) isNewPara = false;
 
     if(isNewPara) main.push(

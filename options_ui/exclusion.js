@@ -59,7 +59,7 @@ function testRules() {
     const list = $('#exclude_matches').value.split('\n').filter(x => x);
     const matchedRule = list.find(rule => {
         const regexp = rule.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
-        return (new RegExp(`^${regexp}$`)).test(input);
+        return (new RegExp(regexp)).test(input);
     });
     setContent(testResult, matchedRule
         ? '這個網址符合路徑規則 ' + matchedRule

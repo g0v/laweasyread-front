@@ -3,7 +3,7 @@
     "autoParse": true,
     "autoUpdate": true,
     "enablePopup": true,
-    "exclude_matches": [],
+    "exclude_matches": "",
     "mojAddReferringArticles": true,
     "typesetDockets": true
 }
