@@ -45,23 +45,32 @@
 
 ## 手動安裝
 
-### Edge 擴充功能
+在[發布頁面](https://github.com/g0v/laweasyread-front/releases)下載所需版本，並解壓縮之。
 
-0. 在[發布頁面](https://github.com/g0v/laweasyread-front/releases)下載所需版本，並解壓縮之。
-1. 對網址列右方的拼圖圖示案右鍵，選擇「管理延伸模組」；或從網址列輸入 `edge://extensions/` 以進入「擴充功能」管理介面。
+### Microsoft Edge
+
+1. 點選網址列右方的拼圖圖示，選擇「管理擴充功能」；或從網址列輸入 `edge://extensions/` 以進入設定介面。
 2. 於左側選單開啟「開發人員模式」。
 3. 於上方點選「載入解壓縮」。
 4. 選擇解壓縮後的資料夾。
 
 
-### Firefox 附加元件
+### Google Chrome
 
-0. 在[發布頁面](https://github.com/g0v/laweasyread-front/releases)下載所需版本，並解壓縮之。
-1. 用下列方法「之一」開啟除錯設定介面：
+1. 點選網址列右方的拼圖圖示，選擇「管理擴充功能」；或從網址列輸入 `chrome://extensions/` 以進入設定介面。
+2. 於右上方開啟「開發人員模式」。
+3. 於左上方點選「載入未封裝項目」。
+4. 選擇解壓縮後的資料夾。
+
+
+### Mozilla Firefox
+
+1. 將解壓縮後的 `manifestV2.json` 改名為 `manifest.json` 。
+2. 用下列方法「之一」開啟除錯設定介面：
    * 從網址列輸入 `about:debugging#/setup` 。
    * 點選瀏覽器右上角的漢堡選單（三橫線），選擇「附加元件與佈景主題」，再點選「管理您的擴充套件」右方的齒輪圖示，選擇「對附加元件除錯」。
-2. 點選「載入暫用附加元件…」
-3. 選擇解壓縮後的資料夾之內的 `manifest.json` 檔案。
+3. 點選「載入暫用附加元件…」
+4. 選擇解壓縮後的資料夾之內的 `manifest.json` 檔案。
 
 
 ### 網站內嵌

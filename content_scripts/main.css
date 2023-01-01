@@ -100,6 +100,7 @@
     position: absolute;
     top: .3em;
     right: 1em;
+    cursor: pointer;
 }
 .LER-popup-pin [type=checkbox] {
     display: none;
