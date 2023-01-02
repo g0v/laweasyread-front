@@ -79,8 +79,8 @@
 
 ```html
   <script src="https://cdn.jsdelivr.net/npm/kong-util@0.6.2/dist/all.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@065f37c/LER.back.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@065f37c/LER.front.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@9793342/LER.back.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@9793342/LER.front.js"></script>
   <script>
     LER.parseDocument({
       articleNumberFormat: 'hyphen',
