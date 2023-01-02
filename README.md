@@ -65,7 +65,7 @@
 
 ### Mozilla Firefox
 
-1. 將解壓縮後的 `manifestV2.json` 改名為 `manifest.json` 。
+1. 將解壓縮後的 `manifestV2.json` 改名為 `manifest.json` 。（若有同名檔案，需先刪除或更名）
 2. 用下列方法「之一」開啟除錯設定介面：
    * 從網址列輸入 `about:debugging#/setup` 。
    * 點選瀏覽器右上角的漢堡選單（三橫線），選擇「附加元件與佈景主題」，再點選「管理您的擴充套件」右方的齒輪圖示，選擇「對附加元件除錯」。
