@@ -1,6 +1,6 @@
 /**
  * @module LER
- * @desc 於本專案被用為瀏覽器掛時，某些宣告於 `LER.back.js` 的函數會在此有同名的函數，用以呼叫之。
+ * @desc 於本專案被安裝為瀏覽器外掛時，用於 `LER.back.js` 的同名函數。
  */
 var LER = LER || (() => {
     const obj = {};

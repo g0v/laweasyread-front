@@ -1,10 +1,11 @@
 # 「法規亦毒氣」更新紀錄
 
-Developers may also see [`changelog-dev.md`](changelog-dev.md) to know more.
+Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
-## 2.0.0
-2023-01-01
+
+## 2.0.0 (230101)
+
 * 支援網站內嵌。
 * 取消支援右鍵選單及「列出本頁的法律資料」。
 * 例外清單的匹配邏輯變更。

@@ -1,7 +1,8 @@
-kongUtil.use('$', '$$', 'listen', 'fetchDOM', 'clearElement', 'createElementFromJsonML');
+kongUtil.use('$', '$$', 'listen', 'fetchDOM');
+const createElement = kongUtil.createElementFromJsonML;
 
 // 顯示專案版本
-setContent($("#version"), "v" + browser.runtime.getManifest().version);
+$("#version").append("v" + browser.runtime.getManifest().version);
 
 /**
  * 自己刻一個簡單的 router
@@ -17,7 +18,7 @@ const routes = [
 let activeTab;
 const main = $("main");
 routes.forEach((route, index) => {
-    const tab = createElementFromJsonML(
+    const tab = createElement(
         ['li', {class: 'nav-item me-2'},
             ['span', {class: 'nav-link btn'},
                 route.title
@@ -26,15 +27,14 @@ routes.forEach((route, index) => {
     );
     $("#navbar").appendChild(tab);
 
-    const container = createElementFromJsonML(
+    const container = createElement(
         ['div', {id: `name-${route.name}`}]
     );
     listen(tab, "click", () => {
         if(tab.classList.contains("active")) return;
         $$("header .nav-link").forEach(nl => nl.classList.remove("active"));
         tab.lastChild.classList.add("active");
-        clearElement(main);
-        main.append(container);
+        main.replaceChildren(container);
         history.replaceState(null, null, `#${route.name}`);
     });
 
@@ -42,7 +42,7 @@ routes.forEach((route, index) => {
         fetchDOM(`${route.name}.html`)
         .then(doc => {
             container.append(...doc.body.childNodes);
-            document.head.append(createElementFromJsonML(
+            document.head.append(createElement(
                 ['script', {src: `${route.name}.js`}]
             ));
         });
@@ -55,10 +55,5 @@ activeTab.dispatchEvent(new Event("click"));
 
 
 /**** functions ****/
-function hide(elem) { elem.style.display = "none"; }
-function show(elem) { elem.style.display = ""; }
-
-function setContent(elem, ...nodes) {
-    clearElement(elem);
-    elem.append(...nodes);
-}
+function hide(elem) { elem.classList.add("d-none"); }
+function show(elem) { elem.classList.remove("d-none"); }

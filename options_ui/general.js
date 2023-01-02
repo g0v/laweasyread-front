@@ -36,7 +36,7 @@ const artNumberParserOptions = [
     //     example: "§91-1 Ⅱ⑤"   // 羅馬數字：U+2160~216B ；圓圈數字：U+2460~2473
     // }
 ].map(option => {
-    return createElementFromJsonML(
+    return createElement(
         ['tr',
             ['td',
                 ['label',

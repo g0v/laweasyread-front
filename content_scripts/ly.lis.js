@@ -6,7 +6,8 @@
  * * 「異動條文及理由」頁面
  * * 「相關條文」頁面
  */
-kongUtil.use('$', '$$', 'createElementFromJsonML');
+kongUtil.use('$', '$$');
+const createElement = kongUtil.createElementFromJsonML;
 
 /**
  * 跟 lawtext2obj 像，但排版機制不太一樣，這邊要連同空格一起考量。
@@ -92,7 +93,7 @@ $$('td').forEach(td => {
         else paras.unshift(item);
     }
 
-    const newTd = createElementFromJsonML(
+    const newTd = createElement(
         ['td', {class: td.className},
             ['ol', ...paras],
             ...others

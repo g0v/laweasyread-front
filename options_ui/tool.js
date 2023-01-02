@@ -1,4 +1,4 @@
-document.head.append(createElementFromJsonML(
+document.head.append(createElement(
     ['script', {src: '../LER.front.js'}]
 ));
 
@@ -9,7 +9,7 @@ listen($('#toolInput'), 'input', async() => {
         method: 'parseString',
         string: $('#toolInput').value,
         articleNumberFormat
-    })).map(createElementFromJsonML);
+    })).map(createElement);
     objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
     $('#toolResult').append(...objects);
 });

@@ -34,7 +34,7 @@ async function fetchText({resource, ...options}) {
         new URL(resource);
     }
     catch(err) {
-        let browser = globalThis?.browser || globalThis?.chrome;
+        const browser = globalThis?.browser || globalThis?.chrome;
         let baseHref = browser?.runtime?.getURL('');
         if(!baseHref) baseHref = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/';
         // if(location.host.startsWith('localhost') || location.host.startsWith('127.')) baseHref = ''; // for debug
