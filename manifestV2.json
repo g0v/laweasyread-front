@@ -38,8 +38,9 @@
         "all_frames": true
     },
     {
-        "matches": ["https://law.moj.gov.tw/LawClass/*"],
+        "matches": ["https://law.moj.gov.tw/*"],
         "exclude_matches": [
+            "https://law.moj.gov.tw/Eng/*",
             "https://law.moj.gov.tw/*/LawAllPara.aspx*",
             "https://law.moj.gov.tw/*media=print*"
         ],

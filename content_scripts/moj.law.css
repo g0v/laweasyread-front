@@ -45,7 +45,6 @@
 
 /* 窄螢幕時，編章節標題置頂 */
 @media (width < 992px) {
-
     .law-reg.law-content .h3 {
         position: sticky;
         border-bottom: 1px dashed #ccc;
