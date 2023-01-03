@@ -11,8 +11,8 @@ const routes = [
     {title: "選項", name: "general"},
     {title: "例外", name: "exclusion"},
     {title: "更新", name: "update"},
-    {title: "關於", name: "docs"},
-    {title: "工具", name: "tool"}
+    {title: "工具", name: "tool"},
+    {title: "關於", name: "docs"}
 ];
 
 let activeTab;

@@ -1,7 +1,7 @@
 const booleanOptions = [
     "autoParse",
     "enablePopup",
-    "mojAddReferringArticles",
+    "typesetMoj",
     "typesetDockets",
     "autoUpdate"
 ];

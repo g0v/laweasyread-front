@@ -14,12 +14,11 @@
 /**
  * 編章節置頂 sticky
  */
-.law-content .h3 {
+.law-reg.law-content .h3 {
     background-color: #F9FBFB;
-    text-indent: 0 !important;
+    text-indent: 0;
     margin-left: 0 !important;
-    position: sticky;
-    border-bottom: 1px dashed #ccc;
+    padding-left: 0;
 }
 .char-1 {
     z-index: 6;
@@ -44,19 +43,33 @@
     line-height: inherit;
 }
 
-@media (max-width: 991px) {
-    .law-content section > .h3 {
-        margin-left: 0 !important;
+/* 窄螢幕時，編章節標題置頂 */
+@media (width < 992px) {
+
+    .law-reg.law-content .h3 {
+        position: sticky;
+        border-bottom: 1px dashed #ccc;
     }
 }
 
-/**
- * 列印時不需/不宜有 sticky 元件
- */
-@media print {
-    .law-content .h3,
-    .col-no {
-        position: static;
+/* 寬螢幕時，編章節標題直書並置左 */
+@media (width >= 992px) {
+    .law-reg-content section {
+        position: relative;
+        min-height: 10em; /* 不然某些只有一兩條的編章節，其標題會被吃掉 */
+    }
+    .law-reg-content section:not(:last-of-type) {
+        border-bottom: 1px dashed #ccc;
+    }
+    .law-reg.law-content .h3 {
+        position: absolute;
+        writing-mode: vertical-lr;
+        top: 0;
+        height: 100%;
+    }
+    .law-reg.law-content .h3 > span {
+        position: sticky;
+        top: 0;
     }
 }
 
@@ -122,14 +135,36 @@ details.LER-article-groups .law-reg.law-content {
     padding-bottom: 0;
 }
 
-@media print {
+
+/**
+ * 「（刪除）」
+ */
+div.LER-moj-deleted-article.row {
+    padding: 0;
+}
+.LER-moj-deleted-article a[href] {
+    color: gray;
+}
+.LER-moj-deleted-article .col-data {
+    font-size: smaller;
+    color: gray;
+}
+.LER-moj-deleted-article .line-0000 {
+    white-space: pre;
+}
+
+
+/**
+ * 列印介面專用。棄用中
+ */
+/* @media print {
     body,
     div.container {
         width: auto !important;
     }
 
     details.LER-article-groups:not([open]) {
-        display: none; /* 沒展開的就不要印出來了 */
+        display: none;
     }
 
     .law-reg-content div.row,
@@ -147,18 +182,4 @@ details.LER-article-groups .law-reg.law-content {
         clear: both;
         padding-left: 1em;
     }
-}
-
-/**
- * 「（刪除）」
- */
-div.LER-moj-deleted-article.row {
-    padding: 0;
-}
-.LER-moj-deleted-article a[href] {
-    color: gray;
-}
-.LER-moj-deleted-article .col-data {
-    font-size: smaller;
-    color: gray;
-}
+} */

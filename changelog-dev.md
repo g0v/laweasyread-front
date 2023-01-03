@@ -3,6 +3,10 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
+# 2.0.2 (230103)
+
+* `content_scripts/moj.law.css` 改成動態匯入。
+
 
 ## 2.0.0 (230101)
 

@@ -4,6 +4,15 @@ Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
 
+# 2.0.2 (230103)
+
+* 調整全國法規資料庫的頁面，使寬螢幕時能讓編章節標題黏著於左側而非上方。
+* 放棄部分全國法規資料庫的頁面調整：
+  * 「編章節」頁面 `LawAllPara.aspx`
+  * 英文介面 `/Eng/`
+  * 列印頁面 `*?media=print`
+
+
 ## 2.0.0 (230101)
 
 * 支援網站內嵌。
