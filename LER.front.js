@@ -74,7 +74,7 @@ async parseElement(
                     ? NodeFilter.FILTER_ACCEPT
                     : NodeFilter.FILTER_REJECT;
             }
-            if('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tegName)) return NodeFilter.FILTER_REJECT;
+            if('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tagName)) return NodeFilter.FILTER_REJECT;
             return node.classList.contains('LER-skip') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
         }
     );
@@ -88,7 +88,6 @@ async parseElement(
             const node = textNodes.shift();
             // console.debug('parseNextTextNode()');
             if(!node) {
-                // document.dispatchEvent(new CustomEvent("lerParseEnd", {detail: {target: element}}));
                 console.timeEnd("LawEasyRead" + currentCounter);
                 return resolve(element);
             }
@@ -103,9 +102,11 @@ async parseElement(
             // console.debug(objects);
             if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
             objects = objects.map(kongUtil.createElementFromJsonML);
+
+            const next = node.nextSibling;
             node.replaceWith(...objects);
             if(enablePopup) objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
-            if(!node.nextSibling) {
+            if(!next) {
                 const parent = objects[0].parentNode;
                 const event = new CustomEvent("lerParseEnd");
                 parent.dispatchEvent(event);
