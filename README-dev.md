@@ -31,15 +31,15 @@
 * `manifest.json`: 瀏覽器擴充元件設定
 
 
-### codes
+### codes for each modes
 
-* node_modules/[kong-util](https://github.com/kong0107/kong-util/): 專案發起人自己開發的工具包。
+* `lib/kong-util.js`: 專案發起人自己開發的工具包 [kong-util](https://github.com/kong0107/kong-util/) 。
 * `LER.back.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
 * `LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
 
 
-### only for browser extension
-* `lib.js`: 存取瀏覽器暫存資料的函數。
+### codes only for browser extension
+* `lib/storage.js`: 存取瀏覽器暫存資料的函數。
 * `data/`:
   * `data/options_default.json`: 預設的使用者設定。
   * `data/exclude_terms.txt`: 不要匹配的詞彙清單。

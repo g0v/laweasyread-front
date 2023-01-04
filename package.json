@@ -1,6 +1,6 @@
 {
   "name": "laweasyread",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "fullName": "法規亦毒氣",
   "author": "kong0107",
   "description": "an extension for browsers to view Taiwan's law articles/websites easier",
@@ -14,8 +14,5 @@
     "type": "git",
     "url": "https://github.com/g0v/laweasyread-front"
   },
-  "license": "SEE LICENSE IN `LICENSE.md`",
-  "dependencies": {
-    "kong-util": "*"
-  }
+  "license": "SEE LICENSE IN `LICENSE.md`"
 }

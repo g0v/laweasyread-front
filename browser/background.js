@@ -1,6 +1,6 @@
 if(typeof importScripts === 'function') importScripts(
-    '../node_modules/kong-util/dist/all.js',
-    '../lib.js',
+    '../lib/kong-util.js',
+    '../lib/storage.js',
     '../LER.back.js'
 );
 
