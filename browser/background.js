@@ -1,3 +1,11 @@
+/**
+ * 瀏覽器後台進入點
+ *
+ * 原本想用 module 模式，但因 content scripts 不能用 module ，為了盡量簡化，只好 background 也不用。亦注意：
+ * * `module.exports` 只有 Node.js 能用，瀏覽器不行。
+ * * `importScripts()` 只有 Chrome 系列的支援，且仍不能用在模組模式和 content scripts 中。
+ *   但由於 Manifest V3 的 `service_worker` 只允許一個進入點，而又不方便用 module （如前述），故在 Chrome 系列仍是使用 `importScripts()` 。
+ */
 if(typeof importScripts === 'function') importScripts(
     '../lib/kong-util.js',
     '../lib/storage.js',

@@ -10,6 +10,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.9.1/font/bootstrap-icons.css" crossorigin="anonymous">
     <style>
+        body {
+            min-width: 20em;
+        }
         menu {
             list-style-type: none;
             margin: 0;
@@ -27,7 +30,7 @@
         }
     </style>
 </head>
-<body class="p-2 bg-dark bg-gradient text-white">
+<body class="p-3 bg-dark bg-gradient text-white">
     <header class="d-flex">
         <h1 class="mx-auto text-center fs-6 text-nowrap">
             法規亦毒氣
@@ -88,7 +91,11 @@
                 <a href="https://www.judicial.gov.tw/tw/lp-1386-1.html">司法院公報</a>
                 <menu>
                     <li><a href="https://judgment.judicial.gov.tw/FJUD/default.aspx">裁判書查詢</a></li>
-                    <li><a href="https://cons.judicial.gov.tw/judcurrentNew1.aspx?fid=38">憲法法庭判決</a></li>
+                    <li>
+                        <a href="https://cons.judicial.gov.tw/judcurrentNew1.aspx?fid=38">憲法法庭判決</a>,
+                        <a href="https://cons.judicial.gov.tw/judcurrentNew2.aspx?fid=39">實體裁定</a>,
+                        <a href="https://cons.judicial.gov.tw/docdata.aspx?fid=40">程序裁定</a>
+                    </li>
                     <li class="d-flex">
                         <a href="https://cons.judicial.gov.tw/judcurrent.aspx?fid=2195" class="text-nowrap">大法官解釋</a>
                         <form method="get" action="https://cons.judicial.gov.tw/jcc/zh-tw/jep03/show" class="input-group input-group-sm ms-2" style="width: 10em">
