@@ -53,8 +53,7 @@
     },
     {
         "matches": [
-            "https://judgment.judicial.gov.tw/FJUD/default*.aspx*",
-            "https://judgment.judicial.gov.tw/FJUD/data.aspx?*"
+            "https://judgment.judicial.gov.tw/FJUD/*"
         ],
         "js": ["content_scripts/judicial.judgement.js"],
         "css": ["content_scripts/judicial.judgement.css"],

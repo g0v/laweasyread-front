@@ -4,7 +4,7 @@
 
 
 # 2.0.1
-
+2023-01-06
 * 舊函式庫 `./lib.js` 路徑改為 `./lib/storage.js` 。
 * 棄用 `npm install` 引用，改為手動複製 `kong-util` 的 `dist/all.js` 成為 `./lib/kong-util.js` 。（同機開發時，則改使用硬連結）
 * `content_scripts/moj.law.css` 改成動態匯入，以實作「讓使用者決定是否對該站重新排版」的功能。

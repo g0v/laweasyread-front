@@ -18,6 +18,11 @@
 "background": {
     "service_worker": "browser/background.js"
 },
+
+
+
+
+
 "action": {
     "default_popup": "browser/popup.html"
 },
