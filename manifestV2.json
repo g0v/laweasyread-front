@@ -2,7 +2,7 @@
 "manifest_version": 2,
 "name": "法規亦毒氣",
 "description": "將網頁中的法規與條號都轉變成連結，以利快速查閱指定條文。",
-"version": "2.0.1",
+"version": "2.0.2",
 "author": "kong0107",
 "homepage_url": "https://g0v.github.io/laweasyread-front/",
 "options_ui": {

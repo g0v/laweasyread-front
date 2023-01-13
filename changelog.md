@@ -3,6 +3,13 @@ Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
 
+# 2.0.2
+2023-01-13
+* 修正錯誤：文字 "235" 被轉換成整數 5，但應為整數 235 。
+* 修正錯誤：一次提及多個釋字時，各字號雖有連結，但沒有彈出式視窗。
+* 釋字號碼也套用「條號轉換」的設定，可以轉換為阿拉伯數字。
+
+
 # 2.0.1
 2023-01-06
 * 瀏覽器按鈕視窗增加憲法法庭裁定連結。

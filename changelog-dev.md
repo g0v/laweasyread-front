@@ -3,6 +3,11 @@
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
 
+# 2.0.2
+2023-01-13
+* `parseChineseNumber()` 的問題，實際是在 `kong-util` v0.6.7 修正。
+
+
 # 2.0.1
 2023-01-06
 * 舊函式庫 `./lib.js` 路徑改為 `./lib/storage.js` 。

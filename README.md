@@ -78,7 +78,7 @@
 在 HTML 原始碼中的 `</body>` 前加上：
 
 ```html
-  <script src="https://cdn.jsdelivr.net/npm/kong-util@0.6.6/dist/all.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kong-util@0.6.7/dist/all.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@2.0.1/LER.back.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@2.0.1/LER.front.min.js"></script>
   <script>

@@ -101,6 +101,14 @@ async parseElement(
             requestIdleCallback(parseNextTextNode);
             // console.debug(objects);
             if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
+            // 扁平化。但由於 JsonML 自身結構已是陣列，故不方便使用 `Array.flat()` 。
+            objects = objects.reduce((acc, cur) => {
+                if(typeof cur === 'string'
+                    || /[a-z]+/.test(cur[0]) && !(cur[1] instanceof Array)
+                ) acc.push(cur);
+                else acc.push(...cur);
+                return acc;
+            }, []);
             objects = objects.map(kongUtil.createElementFromJsonML);
 
             const next = node.nextSibling;

@@ -172,7 +172,7 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
                 // 條號格式
                 if(articleNumberFormat !== 'unchanged') {
                     jsonml[1].data.originText = cur.text;
-                    let formatted = cur.text.replace(/[零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
+                    let formatted = cur.text.replace(/[０零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
                     if(articleNumberFormat === 'hyphen') formatted = formatted
                         .replace(/第\s*(\d+)\s*條之\s*(\d+)\x20*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
                         .replace(/第\s*(\d+)\s*之\s*(\d+)\s*條*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
@@ -186,6 +186,10 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
             case "jyis": {
                 if(cur.jyis.length === 1) { // 若只提到一個釋字，則整個字串（包含「釋字」二字）都是連結。
                     const jsonml = ['span', {data: {jyi: cur.jyis[0].jyi}}, cur.text];
+                    if(articleNumberFormat !== 'unchanged') {
+                        jsonml[1].data.originText = cur.text;
+                        jsonml[2] = cur.text.replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
+                    }
                     if(allowLink) {
                         jsonml[0] = 'a';
                         jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${cur.jyis[0].jyi}`;
@@ -204,6 +208,10 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
                         {data: {jyi: jyi.jyi}},
                         cur.text.substring(jyi.start, jyi.end)
                     ];
+                    if(articleNumberFormat !== 'unchanged') {
+                        jsonml[1].data.originText = jsonml[2];
+                        jsonml[2] = jsonml[2].replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
+                    }
                     if(allowLink) {
                         jsonml[0] = 'a';
                         jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${jyi.jyi}`;
