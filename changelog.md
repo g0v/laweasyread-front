@@ -3,6 +3,12 @@ Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
 
+# 2.0.3
+2023-02-09
+* 修正錯誤：司法院裁判書前言在「判決如左」之後即換行、而冒號在下一行時，會分析錯誤。
+* 更新連結：更新立法院公報及考試院公報之網址。
+
+
 # 2.0.2
 2023-01-13
 * 修正錯誤：文字 "235" 被轉換成整數 5，但應為整數 235 。

@@ -124,7 +124,7 @@ lines.forEach((line, lineIndex) => {
     if(isHead) {
         header.push(['div', {}, span]);
         const lastLeaf = line[line.length - 1];
-        if(typeof lastLeaf === 'string' && /如[左下]：?$/.test(lastLeaf)) {
+        if(typeof lastLeaf === 'string' && /如[左下]：$/.test(lastLeaf)) {
             isHead = false;
         }
         else if(lineIndex && line.length === 1) {
