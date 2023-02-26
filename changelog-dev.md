@@ -3,6 +3,11 @@
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
 
+# 2.0.4
+2023-02-26
+* 本專案未修正，實際是 `kongUtilDom.createElementFromJsonML()` 在呼叫 `TokenList.add()` 時沒有給予引數的關係。
+
+
 # 2.0.2
 2023-01-13
 * `parseChineseNumber()` 的問題，實際是在 `kong-util` v0.6.7 修正。

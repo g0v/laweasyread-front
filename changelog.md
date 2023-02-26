@@ -3,6 +3,11 @@ Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
 
+# 2.0.4
+2023-02-26
+* 修正錯誤：於立法院法律系統，點入法規後的雙欄介面中，法條未能排版的問題。
+
+
 # 2.0.3
 2023-02-09
 * 修正錯誤：司法院裁判書前言在「判決如左」之後即換行、而冒號在下一行時，會分析錯誤。
