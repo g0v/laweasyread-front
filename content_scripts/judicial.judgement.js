@@ -233,6 +233,10 @@ if(target) {
                 if(s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
             });
 
+            $$('span[ref=style][style]', target).forEach(span =>
+                span.removeAttribute('style')
+            );
+
             // 字體放大後表格會引致水平卷軸，故把表格後的東西挪到另一個容器。
             const firstTable = $('[ref="tableWrapper"]');
             if(firstTable) {
