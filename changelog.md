@@ -2,9 +2,11 @@
 Developers may wanna see [`changelog-dev.md`](changelog-dev.md) to know more.
 另參[第一版之更新紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog.md)。
 
+
 # 2.0.5
 2024-05-06
 * 修正排版：於司法院裁判書新版格式（會自動換行的），將字形調整為一致。
+
 
 # 2.0.4
 2023-02-26
