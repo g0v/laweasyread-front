@@ -18,6 +18,7 @@ LER.pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
  */
 getData('typesetMoj').then(setting => {
     if(!setting) return;
+    const isEng = !! $('html[lang=en]');
 
     /**
      * 載入 CSS
@@ -92,9 +93,11 @@ getData('typesetMoj').then(setting => {
             section.lastChild.append(h3.nextElementSibling);
         h3.replaceWith(section);
 
-        const debris = h3.textContent.trim().split(' ');
-        const title = (debris.length === 1) ? debris[0] : (debris.slice(0, -1).join('') + '\u3000' + debris.slice(-1)[0]); // 拿掉多餘的空白，中間補為全形空白。
-        h3.replaceChildren(createElement(['span', title]));
+        if (! isEng) {
+            const debris = h3.textContent.trim().split(' ');
+            const title = (debris.length === 1) ? debris[0] : (debris.slice(0, -1).join('') + '\u3000' + debris.slice(-1)[0]); // 拿掉多餘的空白，中間補為全形空白。
+            h3.replaceChildren(createElement(['span', title]));
+        }
         section.insertBefore(h3, section.firstChild);
 
         const divDepth = section.dataset.lerDepth = h3.className.slice(-1);

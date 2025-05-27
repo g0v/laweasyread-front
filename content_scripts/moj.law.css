@@ -60,15 +60,17 @@
     .law-reg-content section:not(:last-of-type) {
         border-bottom: 1px dashed #ccc;
     }
-    .law-reg.law-content .h3 {
+    html[lang^=zh] .law-reg.law-content .h3 { /* 只有中文的要改成直行 */
         position: absolute;
         writing-mode: vertical-lr;
         top: 0;
         height: 100%;
     }
-    .law-reg.law-content .h3 > span {
+    html[lang^=zh] .law-reg.law-content .h3 > span {
         position: sticky;
         top: 0;
+        letter-spacing: 2px;
+        white-space: nowrap;
     }
 }
 
