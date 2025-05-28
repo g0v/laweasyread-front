@@ -1,44 +1,49 @@
 {
-  "author": "kong0107",
-  "status": "beta",
-  "thumbnail": "https://raw.github.com/g0v/laweasyread-front/master/icon.png",
-  "name": "LawEasyRead client",
-  "name_zh": "法規亦毒氣",
-  "description": "Parse the contents of webpage to view Taiwan's law articles/websites easier.",
-  "description_zh": "將網頁中的法規、條文、大法官解釋、判決字號均加上連結。",
-  "homepage": "http://g0v.github.io/laweasyread-front",
-  "document": "http://hack.g0v.tw/laweasyread",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/g0v/laweasyread-front"
-  },
-  "licenses": [
-    {
-      "type": "modified MIT",
-      "url": "https://github.com/g0v/laweasyread-front/blob/v1.x/README-dev.md#license"
-    }
-  ],
-  "keywords": [
-    "BrowserExtension",
-    "JavaScript",
-    "law"
-  ],
-  "audience": [
-    "public"
-  ],
-  "products": [
-    "browserext",
-    "script"
-  ],
-  "projects": [
-    "laweasyread"
-  ],
-  "contributors": [
-    "kong0107"
-  ],
-  "needs": [
-    "designer",
-    "programmer",
-    "writer"
-  ]
+"name_zh": "法規亦毒氣",
+"name": "LawEasyRead client",
+"description_zh": "將網頁中的法規、條號、大法官解釋均加上連結，以利快速查閱。",
+"description": "Parse the contents of webpage to view Taiwan's law articles/websites easier.",
+
+"g0v_json": "v2",
+"author": "kong0107",
+"status": "production",
+"homepage": "http://g0v.github.io/laweasyread-front",
+"group": "https://github.com/g0v/laweasyread",
+"repository": {
+	"type": "git",
+	"url": "https://github.com/g0v/laweasyread-front"
+},
+
+"thumbnail": ["https://raw.github.com/g0v/laweasyread-front/master/icon.png"],
+"licenses": [{
+	"type": "SEE LICENSE IN url",
+	"url": "https://raw.githubusercontent.com/g0v/laweasyread-front/master/LICENSE.md"
+}],
+"keywords": [
+	"browser extension",
+	"WebExtension",
+	"JavaScript",
+	"Taiwan law"
+],
+"audience": [
+	"public"
+],
+"products": [
+	{
+	  "type": "extension",
+	  "subtype": "chrome",
+	  "name": "法規亦毒氣",
+	  "url": "https://chrome.google.com/webstore/detail/iedodmlnmhobigohbkalkkjlbmdkjalj"
+	},
+	{
+	  "type": "extension",
+	  "subtype": "firefox",
+	  "name": "法規亦毒氣",
+	  "url": "https://addons.mozilla.org/firefox/addon/laweasyread/"
+	}
+],
+"dependencies": [
+	{"url": "https://github.com/kong0107/mojLawSplit"},
+	{"url": "https://github.com/kong0107/jyi"}
+]
 }

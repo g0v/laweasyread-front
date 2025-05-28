@@ -6,16 +6,20 @@
 
 1. 前端將第一個 `TextNode` 的 `textContent` 傳給後端。
 2. 後端依照 `ReplaceRule[]` 將前述字串拆為 `Fragment[]` 。此步驟只處理字串，每個被拆開的物件和字串彼此獨立。
-3. 後端將前述 `Fragment[]` 轉換為 JsonML 並傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
-4. 前端用 `createElementFromJsonML()` 將前述 JsonML 陣列轉為 `HTMLElement[]` 。
+3. 後端將前述 `Fragment[]` 轉換為 `JsonML[]` 傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
+4. 前端將前述 `JsonML[]` 轉為 `HTMLElement[]` 。
 5. 前端將步驟一的 `TextNode` 置換為前述 `HTMLElement[]` 。
 6. 回到步驟一，傳送下一個 `TextNode` 的資料。
 
-前述「後端」並非指伺服器，而是瀏覽器擴充功能的背景頁。
-原則是：盡量將可反覆進行的事情留在後端，只將「必須放在前端」的事情在前端做。以利用「後端只有一個實體」的機制節省資源。
-開發時須留意後端沒有 DOM ，也就是沒有 `Document` 類別、沒有 `document` 實體，且前後端間只能傳輸可序列化資料。
-
+前述「後端」非指伺服器，而是瀏覽器擴充功能的背景頁。
 網頁內嵌模式則沒有後端，而是在前端執行所有程式碼。
+
+原則是：盡量將可反覆進行的事情留在後端，只將「必須放在前端」的事情在前端做。
+以利用「後端只有一個實體」的機制節省資源，就不用每個分頁都存一份法規名稱清單。
+
+備忘：
+* 後端沒有 DOM ，也就是沒有 `Document` 類別、沒有 `document` 實體，且前後端間只能傳輸可序列化資料。
+* 為支援一般網站用網頁內嵌模式使用，工具函數語法糖（如 `$`）不宜宣告為全域。
 
 
 ## Files
@@ -27,34 +31,31 @@
 * `changelog.md`: 給一般人看的更新紀錄
 * `changelog-dev.md`: 給開發者看的開發紀錄
 * `g0v.json`: G0V 專案設定
-* `package.json`: Node.js 專案設定
 * `manifest.json`: 瀏覽器擴充元件設定
 
 
 ### codes for each modes
 
-* `lib/kong-util.js`: 專案發起人自己開發的工具包 [kong-util](https://github.com/kong0107/kong-util/) 。
 * `LER.back.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
 * `LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
 
 
 ### codes only for browser extension
-* `lib/storage.js`: 存取瀏覽器暫存資料的函數。
-* `data/`:
-  * `data/options_default.json`: 預設的使用者設定。
-  * `data/exclude_terms.txt`: 不要匹配的詞彙清單。
+* `lib.js`: 存取瀏覽器暫存資料的函數。
 * `content_scripts/`: 針對不同網站而設計的程式。
+* `options_ui/`: 瀏覽器設定頁面。
 * `browser/`:
   * `background.js`: 後台實體的進入點。
-  * `popup.*`: 按下外掛按鈕時會出現的浮動式窗。
-* `options_ui/`: 瀏覽器設定頁面。
+  * `popup.[html|js]`: 按下外掛按鈕時會出現的浮動式窗。
+* `data/`:
+  * `data/options_default.json`: 預設的設定值。
+  * `data/exclude_terms.txt`: 不要匹配的詞彙清單。
 
 
 ## Data Sources
 
 * [全國法規資料庫](https://github.com/kong0107/mojLawSplitJSON/tree/arranged)
 * [大法官解釋](https://github.com/kong0107/jyi)
-* [憲法裁判](https://github.com/kong0107/cons.judicial)
 
 
 ## Important Cases
@@ -74,6 +75,8 @@
 
 ## To-Do List
 
+* shadowRoot
+* 減少 content_scripts，盡量挪到 background
 * 立法院法律系統在所得稅法第14條的問題
 * 嘗試支援「前條」。
 * 整合 ronnywang 抓下來的立法院資料。
