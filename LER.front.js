@@ -18,7 +18,7 @@ var LER = LER || (() => {
 Object.assign(LER, {
 
 /** @type {Element} */
-popupTemplate: kongUtil.createElementFromJsonML(
+popupTemplate: createElement(
     ["div", {
         "class": "LER-popup-container",
         "style": "display: none;"
@@ -109,7 +109,7 @@ async parseElement(
                 else acc.push(...cur);
                 return acc;
             }, []);
-            objects = objects.map(kongUtil.createElementFromJsonML);
+            objects = objects.map(createElement);
 
             const next = node.nextSibling;
             node.replaceWith(...objects);
@@ -168,8 +168,8 @@ bindPopup(elem, articleNumberFormat) {
         popup = this.popupTemplate.cloneNode(true);
         popup.target = elem;
         popup.addEventListener('mouseleave', e => {
-            if(kongUtil.isEventInElement(e, elem)) return;
-            if(kongUtil.isEventInElement(e, popup)) return;
+            if(isEventInElement(e, elem)) return;
+            if(isEventInElement(e, popup)) return;
             if(popup.querySelector('[type=checkbox]').checked) return;
             popup.style.display = 'none';
         });
@@ -180,9 +180,9 @@ bindPopup(elem, articleNumberFormat) {
         // 異步載入資料。
         this.preparePopup(elem.dataset)
         .then(({headers, bodyParts, defaultLaw}) => {
-            popup.querySelector('header').append(...headers.map(kongUtil.createElementFromJsonML));
+            popup.querySelector('header').append(...headers.map(createElement));
             body.textContent = '';
-            body.append(...bodyParts.map(kongUtil.createElementFromJsonML));
+            body.append(...bodyParts.map(createElement));
             this.parseElement(body, {defaultLaw, articleNumberFormat});
             if(!popup.style.display) this.setPopupPosition(popup, fakeEvent); ///< 載入內容後高度可能有變化，要重新定位，但是只能依賴舊的滑鼠事件位置。
         });
@@ -200,7 +200,7 @@ bindPopup(elem, articleNumberFormat) {
         // console.debug('mouseleave', elem);
         clearTimeout(timeoutID);
 
-        if(kongUtil.isEventInElement(event, popup)) return;
+        if(isEventInElement(event, popup)) return;
         if(popup.querySelector('[type=checkbox]').checked) return;
         popup.style.display = 'none';
     });
@@ -254,9 +254,9 @@ setPopupPosition(popup, event) {
 },
 
 getShadowRoot() {
-    let host = kongUtil.$('#LER-shadow-host');
+    let host = $('#LER-shadow-host');
     if(!host) {
-        host = kongUtil.createElementFromJsonML([
+        host = createElement([
             'div', {
                 id: 'LER-shadow-host',
                 style: 'position: static; width: 0; height: 0;'
@@ -267,7 +267,7 @@ getShadowRoot() {
         const root = host.attachShadow({mode: 'open'});
         this.fetchText({resource: 'content_scripts/main.css'})
         .then(css => {
-            root.append(kongUtil.createElementFromJsonML(
+            root.append(createElement(
                 ['style', css]
             ));
         });

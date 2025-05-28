@@ -45,7 +45,7 @@ const artNumberParserOptions = [
                         name: 'articleNumberFormat',
                         id: `articleNumberFormat-${option.value}`,
                         value: option.value,
-                        onchange: () => setData({articleNumberFormat: option.value})
+                        onchange: () => storage.set({articleNumberFormat: option.value})
                     }],
                     option.title
                 ]
@@ -61,14 +61,14 @@ const artNumberParserOptions = [
 });
 $("#artNumberParserOptions").append(...artNumberParserOptions);
 
-getData(booleanOptions.concat("articleNumberFormat"))
+storage.get(booleanOptions.concat("articleNumberFormat"))
 .then(storage => {
     $("#articleNumberFormat-" + storage.articleNumberFormat).checked = true;
     booleanOptions.forEach(option => {
         const checkbox = document.getElementById(option);
         checkbox.checked = storage[option];
         listen(checkbox, "change",
-            () => setData({ [option]: checkbox.checked })
+            () => storage.set({ [option]: checkbox.checked })
         );
     });
 });

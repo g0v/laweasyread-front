@@ -5,7 +5,7 @@
 並對全國法規資料庫與立法院法律系統的網頁進行排版調整。
 
 亦可供網站內嵌程式碼（詳後述），而讓網頁中的法規條文變成連結。
-若新版（2.0）使用上有問題，欲改回使用舊版（1.8），請參閱後述「手動安裝」段落。
+若新版（2.x）使用上有問題，欲改回使用舊版（1.8），請參閱後述「手動安裝」段落。
 
 
 ## 瀏覽器外掛安裝
@@ -65,11 +65,9 @@
 
 ### Mozilla Firefox
 
-1. 將解壓縮後的 `manifestV2.json` 改名為 `manifest.json` 。（若有同名檔案，需先刪除或更名）
-2. 用下列方法「之一」開啟除錯設定介面：
-   * 從網址列輸入 `about:debugging#/setup` 。
-   * 點選瀏覽器右上角的漢堡選單（三橫線），選擇「附加元件與佈景主題」，再點選「管理您的擴充套件」右方的齒輪圖示，選擇「對附加元件除錯」。
-3. 點選「載入暫用附加元件…」
+1. 進入「設定」→「附加元件與佈景主題」，或由網址列進入 `about:addons`。
+2. 滑鼠左鍵點擊右方齒輪，選擇「對附加元件除錯」。或由網址列進入 `about:debugging#/runtime/this-firefox` 。
+3. 點選「載入暫用附加元件…」。
 4. 選擇解壓縮後的資料夾之內的 `manifest.json` 檔案。
 
 
@@ -78,7 +76,7 @@
 在 HTML 原始碼中的 `</body>` 前加上：
 
 ```html
-  <script src="https://cdn.jsdelivr.net/npm/kong-util@0.7/dist/all.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/kong-util@0.8/dist/all.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@2.0/LER.back.min.js"></script>
   <script src="https://cdn.jsdelivr.net/gh/g0v/laweasyread-front@2.0/LER.front.min.js"></script>
   <script>

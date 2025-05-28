@@ -2,6 +2,12 @@
 這是給程式設計師看的版本。一般使用者請參閱 [`changelog.md`](changelog.md) 。
 另參[第一版之開發紀錄](https://github.com/g0v/laweasyread-front/blob/v1.x/changelog-dev.md)。
 
+## todo
+* manifest V3
+* shadowRoot
+* 棄用或簡化使用 kongUtil
+* 減少 content_scripts，盡量挪到 background
+
 
 # 2.0.4
 2023-02-26

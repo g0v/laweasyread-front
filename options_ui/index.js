@@ -1,6 +1,3 @@
-kongUtil.use('$', '$$', 'listen', 'fetchDOM');
-const createElement = kongUtil.createElementFromJsonML;
-
 // 顯示專案版本
 $("#version").append("v" + browser.runtime.getManifest().version);
 
@@ -30,7 +27,7 @@ routes.forEach((route, index) => {
     const container = createElement(
         ['div', {id: `name-${route.name}`}]
     );
-    listen(tab, "click", () => {
+    tab.addEventListener('click', () => {
         if(tab.classList.contains("active")) return;
         $$("header .nav-link").forEach(nl => nl.classList.remove("active"));
         tab.lastChild.classList.add("active");
@@ -38,7 +35,7 @@ routes.forEach((route, index) => {
         history.replaceState(null, null, `#${route.name}`);
     });
 
-    listen(tab, "click", () => {
+    tab.addEventListener('click', () => {
         fetchDOM(`${route.name}.html`)
         .then(doc => {
             container.append(...doc.body.childNodes);

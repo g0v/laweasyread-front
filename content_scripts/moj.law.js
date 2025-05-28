@@ -1,5 +1,4 @@
-kongUtil.use('$', '$$', 'fetchDOM');
-const createElement = kongUtil.createElementFromJsonML;
+const createElement = createElement;
 
 /**
  * 排除首頁的「熱門法規瀏覽」（排版考量）
@@ -16,8 +15,8 @@ LER.pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
 /**
  * 有啟用「調整全國法規資料庫的排版」時才執行。
  */
-getData('typesetMoj').then(setting => {
-    if(!setting) return;
+storage.get(['typesetMoj']).then(({typesetMoj}) => {
+    if(!typesetMoj) return;
     const isEng = !! $('html[lang=en]');
 
     /**

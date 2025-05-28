@@ -1,4 +1,4 @@
-getData(["localDate", "remoteDate", "lastCheck"])
+storage.get(["localDate", "remoteDate", "lastCheck"])
 .then(({localDate, remoteDate, lastCheck}) => {
     if(localDate) $("#localDate").replaceChildren(localDate);
     else hide($("#localDateContainer"));

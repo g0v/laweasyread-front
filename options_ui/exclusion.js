@@ -1,8 +1,8 @@
 /**
  * 初始區
  */
-getData("exclude_matches")
-.then(em => $("#exclude_matches").value = em);
+storage.get(['exclude_matches'])
+.then(({exclude_matches: em}) => $("#exclude_matches").value = em);
 
 $("#exclude_matches").disabled = true;
 hide($("#saveButton"));
@@ -33,7 +33,7 @@ listen($("#saveButton"), "click", event => {
     em.disabled = true;
     self.replaceChildren("儲存中");
     const value = em.value.trim().replace(/\n+/g, "\n");
-    setData({exclude_matches: value})
+    storage.set({exclude_matches: value})
     .then(() => {
         self.replaceChildren("儲存");
         hide(self);

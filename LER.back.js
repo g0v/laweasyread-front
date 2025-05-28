@@ -6,7 +6,7 @@
  */
 var LER = (() => {
 
-const pcn = kongUtil.parseChineseNumber;
+const pcn = parseIntChinese;
 
 /**
  * @private
@@ -53,8 +53,8 @@ async function fetchText({resource, ...options}) {
 async function downloadLaws() {
     // console.debug('LER.downloadLaws()');
     const [map, aliases] = await Promise.all([
-        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
-        kongUtil.fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
+        fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
+        fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
     ]);
     return laws = Object.keys(map).map(pcode => {
         const law = {pcode, name: map[pcode]};
@@ -289,7 +289,7 @@ async function preparePopup({jyi, pcode, norge, year, word, number}) {
     // console.debug('LER.preparePopup() in `LER.back.js`');
     let headers = [], bodyParts = [], defaultLaw;
     if(jyi) {
-        jyi = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
+        jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
         headers = [
             `釋字第 ${jyi.number} 號 `,
             ['time', jyi.date]
@@ -318,7 +318,7 @@ async function preparePopup({jyi, pcode, norge, year, word, number}) {
         );
     }
     else if(pcode) {
-        const law = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
+        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
 
         headers = [
             law.name + ' ',
@@ -391,7 +391,7 @@ async function preparePopup({jyi, pcode, norge, year, word, number}) {
         defaultLaw = {pcode, name: law.name};
     }
     else if(year && word && number) {
-        const decision = await kongUtil.fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
+        const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
         headers = [
             `${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
             ['time', decision['判決日期']]

@@ -4,7 +4,7 @@ document.head.append(createElement(
 
 listen($('#toolInput'), 'input', async() => {
     $('#toolResult').textContent = '';
-    const articleNumberFormat = await getData('articleNumberFormat')
+    const {articleNumberFormat} = await storage.get(['articleNumberFormat'])
     const objects = (await browser.runtime.sendMessage({
         method: 'parseString',
         string: $('#toolInput').value,

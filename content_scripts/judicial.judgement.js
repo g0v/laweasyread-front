@@ -57,8 +57,6 @@
  *
  */
 
-kongUtil.use('$', '$$');
-
 /**
  * 常數
  */
@@ -194,14 +192,14 @@ lines.forEach((line, lineIndex) => {
 
 
 if(target) {
-    getData('typesetDockets').then(typesetDockets => {
+    storage.get(['typesetDockets']).then(({typesetDockets}) => {
         if(!typesetDockets) return;
         target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
         $('div.col-td.jud_content').replaceChildren(target);
 
         if(lines.length) { // 較舊的裁判書
             target.replaceChildren(
-                ...[header, main, footer].map(kongUtil.createElementFromJsonML)
+                ...[header, main, footer].map(createElement)
             );
 
             // 裁判易讀小幫手
@@ -213,7 +211,7 @@ if(target) {
                 const resource = `https://judgment.judicial.gov.tw/controls/GetJudTerms.ashx?TRMID=${term}&ty=${typeid}&name=${term}`;
                 elem.addEventListener('mouseover', async () => {
                     if(elem.title) return;
-                    const explainList = await kongUtil.fetchJSON(resource);
+                    const explainList = await fetchJSON(resource);
                     const title = explainList.map(obj => obj.TRMCONTENT).join('\n');
                     // console.debug(resource, title);
                     $$(`abbr[data-term="${term}"]`, target).forEach(same => same.title = title); // 把其他相同關鍵字的也一起設定。
