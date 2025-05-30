@@ -7,7 +7,7 @@
 1. 前端將第一個 `TextNode` 的 `textContent` 傳給後端。
 2. 後端依照 `ReplaceRule[]` 將前述字串拆為 `Fragment[]` 。此步驟只處理字串，每個被拆開的物件和字串彼此獨立。
 3. 後端將前述 `Fragment[]` 轉換為 `JsonML[]` 傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
-4. 前端將前述 `JsonML[]` 轉為 `HTMLElement[]` 。
+4. 前端將前述 `JsonML[]` 轉為 `HTMLElement[]`，並監聽事件。
 5. 前端將步驟一的 `TextNode` 置換為前述 `HTMLElement[]` 。
 6. 回到步驟一，傳送下一個 `TextNode` 的資料。
 
@@ -36,17 +36,24 @@
 
 ### codes for each modes
 
-* `LER.back.js`: 擷取資料、不須 DOM 操作的部分；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
-* `LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於前景執行（每個分頁一個實體）。
+|檔案|網站內嵌|background|popup|options_ui|content_scripts|
+|----|-------|-----------|----|----------|---|
+|LER.util.js|o|o|o|o|o|
+|LER.back.js|o|o|x|x|x|
+|LER.front.js|o|x|x|x|o|
+|browser/background.js|x|o|x|x|x|
+|browser/popup.*|x|x|o|x|x|
+|options_ui/*|x|x|x|o|x|
+|content_scripts/*|x|x|x|x|o|
 
 
-### codes only for browser extension
-* `lib.js`: 存取瀏覽器暫存資料的函數。
-* `content_scripts/`: 針對不同網站而設計的程式。
-* `options_ui/`: 瀏覽器設定頁面。
-* `browser/`:
-  * `background.js`: 後台實體的進入點。
-  * `popup.[html|js]`: 按下外掛按鈕時會出現的浮動式窗。
+* `LER.util.js`: 公用函示庫和語法糖
+* `LER.back.js`: 擷取資料、不須 DOM 操作的函數；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
+* `LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於各分頁執行（每個分頁一個實體）。
+* `browser/background.js`: 作為瀏覽器外掛時，於背景執行與監聽事件反應。
+
+
+### other files
 * `data/`:
   * `data/options_default.json`: 預設的設定值。
   * `data/exclude_terms.txt`: 不要匹配的詞彙清單。

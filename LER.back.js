@@ -1,12 +1,12 @@
 /**
- * @module LER
+ * @file LER
  * @desc
- *  各公有方法會直接在 `background.js` 被當成監聽器。
- *  欲作為監聽器的，其參數列應為 `request`, `sender`。
+ *  以網頁內嵌的需求撰寫，故要避免汙染其他全域變數；
+ *  部分方法會被 `browser/background.js` 複寫。
  */
-var LER = (() => {
+Object.assign(LER, (() => {
 
-const pcn = parseIntChinese;
+const pcn = LER.parseIntChinese;
 
 /**
  * @private
@@ -22,230 +22,6 @@ let laws = [];
  */
 let replaceRules = [];
 
-
-/**
- * @public
- * @desc 支援 content scripts 載入其他本外掛的檔案。
- * @param {Object} request
- * @returns {string}
- */
-async function fetchText({resource, ...options}) {
-    try {
-        new URL(resource);
-    }
-    catch(err) {
-        const browser = globalThis?.browser || globalThis?.chrome;
-        let baseHref = browser?.runtime?.getURL('');
-        if(!baseHref) baseHref = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/';
-        // if(location.host.startsWith('localhost') || location.host.startsWith('127.')) baseHref = ''; // for debug
-        resource = baseHref + resource;
-    }
-    const response = await fetch(resource, options);
-    return await response.text();
-}
-
-
-/**
- * @public
- * @func downloadLaws
- * @returns {Promise.<Law[]>}
- */
-async function downloadLaws() {
-    // console.debug('LER.downloadLaws()');
-    const [map, aliases] = await Promise.all([
-        fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', { cache: 'no-cache' }),
-        fetchJSON('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', { cache: 'no-cache' })
-    ]);
-    return laws = Object.keys(map).map(pcode => {
-        const law = {pcode, name: map[pcode]};
-        if(aliases[pcode]) law.aliases = aliases[pcode];
-        return law;
-    });
-}
-
-
-/**
- * @public
- * @func loadLaws
- * @returns {Promise.<Law[]>}
- * @desc overwritten in `browser/background.js` for WebExtension to cooperate with version control
- */
-function loadLaws() {
-    // console.debug('LER.loadLaws() in `LER.back.js`');
-    return downloadLaws();
-}
-
-
-/**
- * @func loadRules
- * @desc 讀取置換規則。
- * @param {Object[]} laws
- * @returns {Promise.<ReplaceRule[]>} 置換規則陣列。
- *
- * 法規名稱與排除名單必須混在一起排列，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
- */
-async function loadRules(laws) {
-    // console.debug('LER.loadRules()');
-    if(replaceRules.length) return replaceRules;
-    if(!(laws instanceof Array)) laws = await this.loadLaws();
-
-    let exTerms = await fetchText({resource: 'data/exclude_terms.txt'});
-    exTerms = exTerms.split(/\s+/).filter(s => s);
-
-    replaceRules = laws
-    .reduce((acc, {pcode, name, aliases}) => {
-        acc.push({
-            pattern: name,
-            replacer: {type: "law", text: name, pcode}
-        });
-        aliases?.forEach(alias => acc.push({
-            pattern: alias,
-            replacer: {type: "law", text: alias, pcode, title: name}
-        }));
-        return acc;
-    }, [])
-    .concat(exTerms.map(text => ({
-        pattern: text,
-        replacer: {type: "exclude", text}
-    })))
-    .sort((a, b) => b.pattern.length - a.pattern.length)
-
-    replaceRules =
-        dynamicRules.filter(dr => dr.position === "before")
-        .concat(replaceRules)
-        .concat(dynamicRules.filter(dr => dr.position === "after"))
-    ;
-    return replaceRules;
-}
-
-
-/**
- * @func parseString
- * @desc 將字串轉換成可建立成 HTML 元素的物件列表。
- * @param {Object} request
- * @param {string} request.string
- * @param {boolean} [request.allowLink=true]
- * @param {Object} [defaultLaw]
- * @returns {JsonML[]}
- */
-function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}) {
-    // console.debug('LER.parseString() in `LER.back.js`');
-    const result = replaceRules.reduce((acc, rule) =>
-        acc.flatMap(strOrObj => {
-            if(typeof strOrObj !== "string") return strOrObj;
-            if(strOrObj.length < rule.pattern.length ?? 3) return strOrObj;
-            return applyReplaceRule(strOrObj, rule).filter(x => x);
-        })
-    , [string]);
-
-    for(let index = 0; index < result.length; ++index) {
-        const cur = result[index];
-        if(typeof cur === "string") continue;
-        switch(cur.type) {
-            case "law": {
-                const jsonml = ['span', {data: {pcode: cur.pcode}}, cur.text];
-                if(allowLink) {
-                    jsonml[0] = 'a';
-                    jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=${cur.pcode}`;
-                }
-                if(cur.title) jsonml[1].title = cur.title;
-                result[index] = jsonml;
-                break;
-            }
-            case "articles": {
-                const jsonml = ['span', {data: {norge: cur.norge}}, cur.text];
-
-                // 確認所屬法規：若前一個元件是法規名，則使用之；若否，則看是否有預設法規。
-                let pcode = result[index - 1]?.[1]?.data?.pcode;
-                if(!pcode && defaultLaw) {
-                    if(typeof defaultLaw === 'object') pcode = defaultLaw.pcode;
-                    else if(/^[A-Z]/.test(defaultLaw)) pcode = defaultLaw;
-                    else pcode = laws.find(l => l.name === defaultLaw)?.pcode;
-                }
-
-                if(pcode) jsonml[1].data.pcode = pcode;
-                if(allowLink && pcode) {
-                    jsonml[0] = 'a';
-                    jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${pcode}&norge=${cur.norge}`;
-                }
-
-                // 條號格式
-                if(articleNumberFormat !== 'unchanged') {
-                    jsonml[1].data.originText = cur.text;
-                    let formatted = cur.text.replace(/[０零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
-                    if(articleNumberFormat === 'hyphen') formatted = formatted
-                        .replace(/第\s*(\d+)\s*條之\s*(\d+)\x20*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
-                        .replace(/第\s*(\d+)\s*之\s*(\d+)\s*條*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
-                    ;
-                    jsonml[2] = formatted;
-                }
-
-                result[index] = jsonml;
-                break;
-            }
-            case "jyis": {
-                if(cur.jyis.length === 1) { // 若只提到一個釋字，則整個字串（包含「釋字」二字）都是連結。
-                    const jsonml = ['span', {data: {jyi: cur.jyis[0].jyi}}, cur.text];
-                    if(articleNumberFormat !== 'unchanged') {
-                        jsonml[1].data.originText = cur.text;
-                        jsonml[2] = cur.text.replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
-                    }
-                    if(allowLink) {
-                        jsonml[0] = 'a';
-                        jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${cur.jyis[0].jyi}`;
-                    }
-                    result[index] = jsonml;
-                    break;
-                }
-                // 若提到多個釋字，則「釋字」二字不宜有連結，而是數字有各自的連結。
-                const nodes = cur.jyis.reduce((nodes, jyi, index) => {
-                    const pretext = cur.text.substring(
-                        index ? cur.jyis[index - 1].end : 0,
-                        jyi.start
-                    );
-                    if(pretext) nodes.push(pretext);
-                    const jsonml = ['span',
-                        {data: {jyi: jyi.jyi}},
-                        cur.text.substring(jyi.start, jyi.end)
-                    ];
-                    if(articleNumberFormat !== 'unchanged') {
-                        jsonml[1].data.originText = jsonml[2];
-                        jsonml[2] = jsonml[2].replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
-                    }
-                    if(allowLink) {
-                        jsonml[0] = 'a';
-                        jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${jyi.jyi}`;
-                    }
-                    nodes.push(jsonml);
-                    return nodes;
-                }, []);
-                const posttext = cur.text.substring(cur.jyis.pop().end);
-                if(posttext) nodes.push(posttext);
-                result[index] = nodes;
-                break;
-            }
-            case "consDecision": {
-                const {year, word, number} = cur;
-                const jsonml = ['span', {data: {year, word, number}}, cur.text];
-                if(allowLink) {
-                    jsonml[0] = 'a';
-                    jsonml[1].href = `https://cons.judicial.gov.tw/docredirect.aspx?type=2&year=${year}&word=${word}&no=${number}`;
-                }
-                result[index] = jsonml;
-                break;
-            }
-            case "exclude": {
-                result[index] = cur.text;
-                break;
-            }
-            default: throw TypeError("unknonw object", cur);
-        }
-    }
-
-    return result;
-}
-
-
 /**
  * @private
  * @func applyReplaceRule
@@ -258,7 +34,7 @@ function parseString({string, allowLink = true, articleNumberFormat, defaultLaw}
  */
 function applyReplaceRule(string, {pattern, replacer}) {
     // console.debug('LER.applyReplaceRule()');
-    if(pattern instanceof RegExp && replacer instanceof Function) {
+    if (pattern instanceof RegExp && replacer instanceof Function) {
         console.assert(pattern.global);
         const debris = [], rei = string.matchAll(pattern);
         let match, pos = 0;
@@ -276,150 +52,6 @@ function applyReplaceRule(string, {pattern, replacer}) {
     for(let i = debris.length - 1; i; --i)
         debris.splice(i, 0, replacer);
     return debris;
-}
-
-
-/**
- * @func preparePopup
- * @desc 讀取並整理資料，準備建立彈出式視窗。
- * @param {DOMStringMap} dataset
- * @returns {Promise.<Object>} {headers, bodyParts, defaultLaw}
- */
-async function preparePopup({jyi, pcode, norge, year, word, number}) {
-    // console.debug('LER.preparePopup() in `LER.back.js`');
-    let headers = [], bodyParts = [], defaultLaw;
-    if(jyi) {
-        jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
-        headers = [
-            `釋字第 ${jyi.number} 號 `,
-            ['time', jyi.date]
-        ];
-
-        if(jyi.title) bodyParts.push(['dd', jyi.title]);
-        if(jyi.issue) bodyParts.push(
-            ['dt', '爭點'],
-            ['dd', ...jyi.issue.split('\n').map(para => ['p', para])]
-        );
-        bodyParts.push(
-            ['dt', '解釋文'],
-            ['dd',
-                ['ol', {class: 'list-style-decimal'},
-                    ...jyi.holding.split('\n').map(para => ['li', para.trim()])
-                ]
-            ]
-        );
-        if(jyi.reasoning) bodyParts.push(
-            ['dt', '理由書'],
-            ['dd',
-                ['ol', {class: 'list-style-decimal'},
-                    ...jyi.reasoning.split('\n').map(para => ['li', para.trim()])
-                ]
-            ]
-        );
-    }
-    else if(pcode) {
-        const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
-
-        headers = [
-            law.name + ' ',
-            ['time', law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')]
-        ];
-        if(law.discarded) headers.splice(1, 0,
-            ['span', {class: 'LER-badge-discard'}, '已廢止']
-        );
-
-        if(norge) {
-            /// "3.1-5,7.1" => [[301, 500], [701]]
-            const ranges = norge.split(",").map(range => {
-                return range.split("-").map(articleNumber => {
-                    const numbers = articleNumber.split(".").map(s => parseInt(s));
-                    return numbers[0] * 100 + (numbers[1] || 0);
-                });
-            });
-            const articles = law.articles.filter(({number}) =>
-                ranges.some(([start, end]) => end
-                    ? (number >= start && number <= end)
-                    : (start === number)
-                )
-            );
-            articles.forEach(({number, content}) => {
-                const aug = number % 100;
-                number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : '');
-                bodyParts.push(
-                    ['dt', `第 ${number} 條`],
-                    ['dd',
-                        ['ol', {class: (content.length > 1) ? 'list-style-upper-roman' : 'list-style-circle'},
-                            ...prepareArticleDivision(content)
-                        ]
-                    ]
-                );
-            });
-        }
-        else {
-            const items = law.category.map(c =>
-                ['li', {style: 'margin-right: 1em;'}, c]
-            );
-            bodyParts.push(
-                ['dt', '類別'],
-                ['dd',
-                    ['ul', {class: 'list-style-none d-flex'}, ...items]
-                ]
-            );
-
-            if(law.foreword) bodyParts.push(
-                ['dt', '前言'],
-                ['dd', law.foreword]
-            );
-
-            const lastNumber = law.articles[law.articles.length - 1].number / 100;
-            const deletedAmount = law.articles.filter(a => a.content.length === 1 && a.content[0].text === "（刪除）").length;
-            bodyParts.push(
-                ['dt', '條文數'],
-                ['dd', `共 ${law.articles.length.toString()} 條；其中 ${deletedAmount} 條被刪除；最末條為第 ${lastNumber} 條。`]
-            );
-
-            if(law.LawEffectiveNote) bodyParts.push(
-                ['dt', '生效內容'],
-                ['dd', ...law.LawEffectiveNote.split('\r\n').map(n => ['p', n])]
-            );
-            if(law.histories) bodyParts.push(
-                ['dt', '沿革'],
-                ['dd', ...law.histories.map(his => ['p', his])]
-            );
-        }
-
-        defaultLaw = {pcode, name: law.name};
-    }
-    else if(year && word && number) {
-        const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
-        headers = [
-            `${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
-            ['time', decision['判決日期']]
-        ];
-
-        bodyParts.push(['dd', `原 ${decision['原分案號']}`]);
-        if(decision['標題']) bodyParts.push(['dd', decision['標題']]);
-
-        bodyParts.push(
-            ['dt', '案由'],
-            ['dd', decision['案由']],
-
-            ['dt', '主文'],
-            ['dd',
-                ['ol', {class: 'list-style-decimal'},
-                    ...decision['主文'].map(para => ['li', para])
-                ]
-            ],
-
-            ['dt', '理由'],
-            ['dd',
-                ['ol', {class: 'list-style-decimal'},
-                    ...decision['理由'].map(para => ['li', para])
-                ]
-            ]
-        );
-    }
-    return {headers, bodyParts, defaultLaw};
 }
 
 
@@ -582,42 +214,348 @@ const dynamicRules = [
 
 
 return {
-    fetchText,
-    downloadLaws,
-    loadLaws,
-    loadRules,
-    parseString,
-    preparePopup
+    /**
+     * @public
+     * @func downloadLaws
+     * @returns {Promise.<Law[]>}
+     */
+    async downloadLaws() {
+        // console.debug('LER.downloadLaws()');
+        const [map, aliases] = await Promise.all([
+            LER.fetch('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/index.json', 'json'),
+            LER.fetch('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/aliases.json', 'json')
+        ]);
+        return laws = Object.keys(map).map(pcode => {
+            const law = {pcode, name: map[pcode]};
+            if(aliases[pcode]) law.aliases = aliases[pcode];
+            return law;
+        });
+    },
+
+    /**
+     * @public
+     * @func loadLaws
+     * @returns {Promise.<Law[]>}
+     * @desc overwritten in `browser/background.js` for WebExtension to cooperate with version control
+     */
+    loadLaws() {
+        return this.downloadLaws();
+    },
+
+
+    /**
+     * @func loadRules
+     * @desc 讀取置換規則。
+     * @param {Object[]} laws
+     * @returns {Promise.<ReplaceRule[]>} 置換規則陣列。
+     *
+     * 法規名稱與排除名單必須混在一起排列，否則「國民法官法」和「國民法官法庭」至少其一會被錯判。
+     */
+    async loadRules(laws) {
+        // console.debug('LER.loadRules()');
+        if(replaceRules.length) return replaceRules;
+        if(!(laws instanceof Array)) laws = await this.loadLaws();
+
+        let exTerms = await this.fetch('data/exclude_terms.txt');
+        exTerms = exTerms.split(/\s+/).filter(s => s);
+
+        replaceRules = laws
+        .reduce((acc, {pcode, name, aliases}) => {
+            acc.push({
+                pattern: name,
+                replacer: {type: "law", text: name, pcode}
+            });
+            aliases?.forEach(alias => acc.push({
+                pattern: alias,
+                replacer: {type: "law", text: alias, pcode, title: name}
+            }));
+            return acc;
+        }, [])
+        .concat(exTerms.map(text => ({
+            pattern: text,
+            replacer: {type: "exclude", text}
+        })))
+        .sort((a, b) => b.pattern.length - a.pattern.length)
+
+        replaceRules =
+            dynamicRules.filter(dr => dr.position === "before")
+            .concat(replaceRules)
+            .concat(dynamicRules.filter(dr => dr.position === "after"))
+        ;
+        return replaceRules;
+    },
+
+    /**
+     * @func parseString
+     * @desc 將字串轉換成可建立成 HTML 元素的物件列表。
+     * @param {Object} request
+     * @param {string} request.string
+     * @param {boolean} [request.allowLink=true]
+     * @param {Object} [defaultLaw]
+     * @returns {JsonML[]}
+     */
+    parseString({string, allowLink = true, articleNumberFormat, defaultLaw}) {
+        // console.debug('LER.parseString() in `LER.back.js`');
+        const result = replaceRules.reduce((acc, rule) =>
+            acc.flatMap(strOrObj => {
+                if(typeof strOrObj !== "string") return strOrObj;
+                if(strOrObj.length < rule.pattern.length ?? 3) return strOrObj;
+                return applyReplaceRule(strOrObj, rule).filter(x => x);
+            })
+        , [string]);
+
+        for(let index = 0; index < result.length; ++index) {
+            const cur = result[index];
+            if(typeof cur === "string") continue;
+            switch(cur.type) {
+                case "law": {
+                    const jsonml = ['span', {data: {pcode: cur.pcode}}, cur.text];
+                    if(allowLink) {
+                        jsonml[0] = 'a';
+                        jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawAll.aspx?pcode=${cur.pcode}`;
+                    }
+                    if(cur.title) jsonml[1].title = cur.title;
+                    result[index] = jsonml;
+                    break;
+                }
+                case "articles": {
+                    const jsonml = ['span', {data: {norge: cur.norge}}, cur.text];
+
+                    // 確認所屬法規：若前一個元件是法規名，則使用之；若否，則看是否有預設法規。
+                    let pcode = result[index - 1]?.[1]?.data?.pcode;
+                    if(!pcode && defaultLaw) {
+                        if(typeof defaultLaw === 'object') pcode = defaultLaw.pcode;
+                        else if(/^[A-Z]/.test(defaultLaw)) pcode = defaultLaw;
+                        else pcode = laws.find(l => l.name === defaultLaw)?.pcode;
+                    }
+
+                    if(pcode) jsonml[1].data.pcode = pcode;
+                    if(allowLink && pcode) {
+                        jsonml[0] = 'a';
+                        jsonml[1].href = `https://law.moj.gov.tw/LawClass/LawSearchContent.aspx?pcode=${pcode}&norge=${cur.norge}`;
+                    }
+
+                    // 條號格式
+                    if(articleNumberFormat !== 'unchanged') {
+                        jsonml[1].data.originText = cur.text;
+                        let formatted = cur.text.replace(/[０零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
+                        if(articleNumberFormat === 'hyphen') formatted = formatted
+                            .replace(/第\s*(\d+)\s*條之\s*(\d+)\x20*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
+                            .replace(/第\s*(\d+)\s*之\s*(\d+)\s*條*/g, (m, m1, m2) => `第 ${m1}-${m2} 條`)
+                        ;
+                        jsonml[2] = formatted;
+                    }
+
+                    result[index] = jsonml;
+                    break;
+                }
+                case "jyis": {
+                    if(cur.jyis.length === 1) { // 若只提到一個釋字，則整個字串（包含「釋字」二字）都是連結。
+                        const jsonml = ['span', {data: {jyi: cur.jyis[0].jyi}}, cur.text];
+                        if(articleNumberFormat !== 'unchanged') {
+                            jsonml[1].data.originText = cur.text;
+                            jsonml[2] = cur.text.replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
+                        }
+                        if(allowLink) {
+                            jsonml[0] = 'a';
+                            jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${cur.jyis[0].jyi}`;
+                        }
+                        result[index] = jsonml;
+                        break;
+                    }
+                    // 若提到多個釋字，則「釋字」二字不宜有連結，而是數字有各自的連結。
+                    const nodes = cur.jyis.reduce((nodes, jyi, index) => {
+                        const pretext = cur.text.substring(
+                            index ? cur.jyis[index - 1].end : 0,
+                            jyi.start
+                        );
+                        if(pretext) nodes.push(pretext);
+                        const jsonml = ['span',
+                            {data: {jyi: jyi.jyi}},
+                            cur.text.substring(jyi.start, jyi.end)
+                        ];
+                        if(articleNumberFormat !== 'unchanged') {
+                            jsonml[1].data.originText = jsonml[2];
+                            jsonml[2] = jsonml[2].replace(/\s*[０零一二三四五六七八九十百千]+\s*/g, m => ` ${pcn(m)} `);
+                        }
+                        if(allowLink) {
+                            jsonml[0] = 'a';
+                            jsonml[1].href = `http://cons.judicial.gov.tw/jcc/zh-tw/jep03/show?expno=${jyi.jyi}`;
+                        }
+                        nodes.push(jsonml);
+                        return nodes;
+                    }, []);
+                    const posttext = cur.text.substring(cur.jyis.pop().end);
+                    if(posttext) nodes.push(posttext);
+                    result[index] = nodes;
+                    break;
+                }
+                case "consDecision": {
+                    const {year, word, number} = cur;
+                    const jsonml = ['span', {data: {year, word, number}}, cur.text];
+                    if(allowLink) {
+                        jsonml[0] = 'a';
+                        jsonml[1].href = `https://cons.judicial.gov.tw/docredirect.aspx?type=2&year=${year}&word=${word}&no=${number}`;
+                    }
+                    result[index] = jsonml;
+                    break;
+                }
+                case "exclude": {
+                    result[index] = cur.text;
+                    break;
+                }
+                default: throw TypeError("unknonw object", cur);
+            }
+        }
+
+        return result;
+    },
+
+
+    /**
+     * @func preparePopup
+     * @desc 讀取並整理資料，準備建立彈出式視窗。
+     * @param {DOMStringMap} dataset
+     * @returns {Promise.<Object>} {headers, bodyParts, defaultLaw}
+     */
+    async preparePopup({jyi, pcode, norge, year, word, number}) {
+        // console.debug('LER.preparePopup() in `LER.back.js`');
+        let headers = [], bodyParts = [], defaultLaw;
+        if(jyi) {
+            jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
+            headers = [
+                `釋字第 ${jyi.number} 號 `,
+                ['time', jyi.date]
+            ];
+
+            if(jyi.title) bodyParts.push(['dd', jyi.title]);
+            if(jyi.issue) bodyParts.push(
+                ['dt', '爭點'],
+                ['dd', ...jyi.issue.split('\n').map(para => ['p', para])]
+            );
+            bodyParts.push(
+                ['dt', '解釋文'],
+                ['dd',
+                    ['ol', {class: 'list-style-decimal'},
+                        ...jyi.holding.split('\n').map(para => ['li', para.trim()])
+                    ]
+                ]
+            );
+            if(jyi.reasoning) bodyParts.push(
+                ['dt', '理由書'],
+                ['dd',
+                    ['ol', {class: 'list-style-decimal'},
+                        ...jyi.reasoning.split('\n').map(para => ['li', para.trim()])
+                    ]
+                ]
+            );
+        }
+        else if(pcode) {
+            const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
+
+            headers = [
+                law.name + ' ',
+                ['time', law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')]
+            ];
+            if(law.discarded) headers.splice(1, 0,
+                ['span', {class: 'LER-badge-discard'}, '已廢止']
+            );
+
+            if(norge) {
+                /// "3.1-5,7.1" => [[301, 500], [701]]
+                const ranges = norge.split(",").map(range => {
+                    return range.split("-").map(articleNumber => {
+                        const numbers = articleNumber.split(".").map(s => parseInt(s));
+                        return numbers[0] * 100 + (numbers[1] || 0);
+                    });
+                });
+                const articles = law.articles.filter(({number}) =>
+                    ranges.some(([start, end]) => end
+                        ? (number >= start && number <= end)
+                        : (start === number)
+                    )
+                );
+                articles.forEach(({number, content}) => {
+                    const aug = number % 100;
+                    number = Math.floor(number / 100).toString() + (aug ? `-${aug}` : '');
+                    bodyParts.push(
+                        ['dt', `第 ${number} 條`],
+                        ['dd',
+                            ['ol', {class: (content.length > 1) ? 'list-style-upper-roman' : 'list-style-circle'},
+                                ...prepareArticleDivision(content)
+                            ]
+                        ]
+                    );
+                });
+            }
+            else {
+                const items = law.category.map(c =>
+                    ['li', {style: 'margin-right: 1em;'}, c]
+                );
+                bodyParts.push(
+                    ['dt', '類別'],
+                    ['dd',
+                        ['ul', {class: 'list-style-none d-flex'}, ...items]
+                    ]
+                );
+
+                if(law.foreword) bodyParts.push(
+                    ['dt', '前言'],
+                    ['dd', law.foreword]
+                );
+
+                const lastNumber = law.articles[law.articles.length - 1].number / 100;
+                const deletedAmount = law.articles.filter(a => a.content.length === 1 && a.content[0].text === "（刪除）").length;
+                bodyParts.push(
+                    ['dt', '條文數'],
+                    ['dd', `共 ${law.articles.length.toString()} 條；其中 ${deletedAmount} 條被刪除；最末條為第 ${lastNumber} 條。`]
+                );
+
+                if(law.LawEffectiveNote) bodyParts.push(
+                    ['dt', '生效內容'],
+                    ['dd', ...law.LawEffectiveNote.split('\r\n').map(n => ['p', n])]
+                );
+                if(law.histories) bodyParts.push(
+                    ['dt', '沿革'],
+                    ['dd', ...law.histories.map(his => ['p', his])]
+                );
+            }
+
+            defaultLaw = {pcode, name: law.name};
+        }
+        else if(year && word && number) {
+            const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
+            headers = [
+                `${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
+                ['time', decision['判決日期']]
+            ];
+
+            bodyParts.push(['dd', `原 ${decision['原分案號']}`]);
+            if(decision['標題']) bodyParts.push(['dd', decision['標題']]);
+
+            bodyParts.push(
+                ['dt', '案由'],
+                ['dd', decision['案由']],
+
+                ['dt', '主文'],
+                ['dd',
+                    ['ol', {class: 'list-style-decimal'},
+                        ...decision['主文'].map(para => ['li', para])
+                    ]
+                ],
+
+                ['dt', '理由'],
+                ['dd',
+                    ['ol', {class: 'list-style-decimal'},
+                        ...decision['理由'].map(para => ['li', para])
+                    ]
+                ]
+            );
+        }
+        return {headers, bodyParts, defaultLaw};
+    }
+
 };
 
-})();
+})());
 
-
-/**
- * @typedef {Object} ReplaceRule
- * @property {string | RegExp} pattern
- * @property {string} position - wheather this rule shall apply before or after static rules.
- * @property {function | Object} replacer
- */
-
-/**
- * @typedef {Object | string} Fragment
- * @property {string} [type = text]
- * @property {string} text - text to be shown to the user
- * @property {string} [*] - other values to be passed to next step.
- */
-
-/**
- * 條：article
- * 項：paragraph
- * 類：category
- * 款：subparagraph, subsection, sub-section
- * 目：item
- *
- * 編：part
- * 章：chapter
- * 節：section
- * 款：sub-section
- * 目：item
- *
- */

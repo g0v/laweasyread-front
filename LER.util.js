@@ -1,30 +1,83 @@
-globalThis.browser ??= globalThis.chrome;
-globalThis.storage = globalThis.browser?.storage?.local;
+/**
+ * @class LER
+ */
+const LER = {
 
 /**
  * @func $
  * @desc Shortcut to `querySelector`, but safe for methods such as `Array.prototype.map`.
- * @param {string|HTMLElement} selector
- * @param {Element} [base=document] the element to call `querySelector`, or `document` if without such method.
+ * @param {string|EventTarget} selector
+ * @param {Element|Document} [base=document] the element to call `querySelector`, or `document` if without such method.
  * @returns {HTMLElement|null}
  */
-function $(selector, base) {
-	if (selector instanceof HTMLElement) return selector;
+$(selector, base) {
+	if (selector instanceof EventTarget) return selector;
 	if (!base?.querySelector) base = document;
 	return base.querySelector(selector);
-}
+},
 
 
 /**
- * @func fetchJSON
- * @param {string} url
- * @returns {Promise<Object>}
+ * @func $$
+ * @desc Shortcut to `querySelectorAll`, but safe for `Array.prototype.map`.
+ * @param {string} selector
+ * @param {Element|Document} [base=document]
+ * @returns {NodeList}
  */
-async function fetchJSON(url) {
-    const res = await fetch(url, { cache: 'no-cache' });
-    if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
-	return await res.json();
-}
+$$(selector, base) {
+	if (!base?.querySelectorAll) base = document;
+	return base.querySelectorAll(selector);
+},
+
+
+/**
+ * @func hide
+ * @desc Hide an element by setting its class to `d-none` for Bootstrap
+ * @param {string|Element} target The Element (or selector to it) to hide.
+ */
+hide(target) {
+	this.$(target)?.classList.add("d-none");
+},
+
+/**
+ * @func show
+ * @desc Show an element which were hidden because of its `d-none` class.
+ * @param {string|Element} target The Element (or selector to it) to show.
+ */
+show(target) {
+	this.$(target)?.classList.remove("d-none");
+},
+
+
+/**
+ * @func listen
+ * @desc Shortcut to `document.querySelector().addEventListener()`
+ * @param {string|EventTarget} target string as selector to match an Element to be the EventTarget
+ * @param {string} eventType event type
+ * @param {function} listener
+ * @param {Object|boolean} [options]
+ */
+listen(target, eventType, listener, options) {
+	this.$(target)?.addEventListener(eventType, listener, options);
+},
+
+
+/**
+ * @func fetch
+ * @desc Request the resource even with fresh cache, then resolve to specified `returnType` or reject if the response is not OK.
+ * @param {string|URL|Request} resource same as `fetch()`
+ * @param {string} [returnType='text'] method name of `Response`
+ * @returns {Promise.<*>}
+ */
+async fetch(url, returnType = 'text') {
+	if (!url.startsWith('https://') && !browser?.runtime?.getURL('')) url = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/' + url;
+	const res = await globalThis.fetch(url, {
+		catch: 'no-cache',
+		referrerPolicy: 'no-referrer'
+	});
+	if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+	return await res[returnType]();
+},
 
 
 /**
@@ -33,7 +86,7 @@ async function fetchJSON(url) {
  * @param {Array|*} jsonML JSON Markup Language (JsonML) representation of an HTML element.
  * @returns {HTMLElement|Text}
  */
-function createElement(jsonML) {
+createElement(jsonML) {
 	if (!jsonML) jsonML = '';
 	if (typeof jsonML === 'string') return document.createTextNode(jsonML);
 	if (jsonML instanceof Node) return jsonML.cloneNode(true);
@@ -63,10 +116,10 @@ function createElement(jsonML) {
 				throw new TypeError(`Unsupported attribute: ${origKey}=${JSON.stringify(value)}`);
 		}
 	}
-	elem.append(...children.map(createElement));
+	elem.append(...children.map(LER.createElement));
 	elem.normalize();
 	return elem;
-}
+},
 
 
 /**
@@ -76,7 +129,7 @@ function createElement(jsonML) {
  * @param {Element|string} elem the Element or the query selector to it
  * @returns {boolean}
  */
-function isEventInElement(event, elem) {
+isEventInElement(event, elem) {
     const {clientX: x, clientY: y} = event;
     if (typeof elem === 'string') elem = $(elem);
     if (!elem) {
@@ -86,7 +139,7 @@ function isEventInElement(event, elem) {
     return [...elem.getClientRects()].some(r =>
         x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
     );
-}
+},
 
 
 /**
@@ -95,7 +148,7 @@ function isEventInElement(event, elem) {
  * @param {string} str
  * @returns {number|NaN}
  */
-function parseIntChinese(str) {
+parseIntChinese(str) {
 	if (!str) return NaN;
 
 	let result = parseInt(str);
@@ -128,4 +181,20 @@ function parseIntChinese(str) {
 	}
 
     return result;
+},
+
+
+/**
+ * @func initWebExtension
+ * @desc
+ *  Ensure `browser` is defined (for Chrome) and make methods in this file (except `fetch`) global.
+ *  This works only in WebExtension mode; don't call it in embedding mode.
+ */
+initWebExtension() {
+	globalThis.browser ??= globalThis.chrome;
+	globalThis.storage ??= globalThis.browser.storage.local;
+	['$', '$$', 'hide', 'show', 'listen', 'createElement', 'isEventInElement', 'parseIntChinese']
+	.forEach(method => globalThis[method] = this[method]);
 }
+
+};
