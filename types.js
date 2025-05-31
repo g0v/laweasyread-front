@@ -1,4 +1,11 @@
 /**
+ * @typedef {Object} Law
+ * @property {string} pcode
+ * @property {string} name
+ * @property {string[]} [aliases]
+ */
+
+/**
  * @typedef {Object} ReplaceRule
  * @property {string | RegExp} pattern
  * @property {string} position - wheather this rule shall apply before or after static rules.

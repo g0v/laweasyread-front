@@ -1,6 +1,3 @@
-/**
- * @class LER
- */
 const LER = {
 
 /**

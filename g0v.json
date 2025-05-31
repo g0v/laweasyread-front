@@ -44,6 +44,7 @@
 ],
 "dependencies": [
 	{"url": "https://github.com/kong0107/mojLawSplit"},
-	{"url": "https://github.com/kong0107/jyi"}
+	{"url": "https://github.com/kong0107/jyi"},
+	{"url": "https://github.com/kong0107/cons.judicial"}
 ]
 }

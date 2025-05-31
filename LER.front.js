@@ -1,20 +1,4 @@
-/**
- * @module LER
- * @desc 於本專案被安裝為瀏覽器外掛時，用於 `LER.back.js` 的同名函數。
- */
-// var LER = LER || (() => {
-//	 const obj = {};
-//	 const browser = globalThis?.browser || globalThis?.chrome;
-//	 ['fetchText', 'loadRules', 'parseString', 'preparePopup']
-//	 .forEach(method => {
-//		 obj[method] = function(options = {}) {
-//			 return browser?.runtime?.sendMessage({method, ...options});
-//		 };
-//	 });
-//	 return obj;
-// })();
-
-globalThis.LER = Object.assign(globalThis.LER || {}, {
+Object.assign(LER, {
 
 /**
  * @func parseDocument
@@ -55,25 +39,23 @@ async parseElement(
 		element,
 		NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
 		node => {
-			if(node.nodeType === Node.TEXT_NODE) {
+			if (node.nodeType === Node.TEXT_NODE) {
 				return /[\u4E00-\u9FFF]{2}/.test(node.textContent) // 有連續中日韓字元
 					? NodeFilter.FILTER_ACCEPT
 					: NodeFilter.FILTER_REJECT;
 			}
-			if('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tagName)) return NodeFilter.FILTER_REJECT;
+			if ('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tagName)) return NodeFilter.FILTER_REJECT;
 			return node.classList.contains('LER-skip') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
 		}
 	);
 	let node;
-	while(node = walker.nextNode()) textNodes.push(node);
+	while (node = walker.nextNode()) textNodes.push(node);
 
 	return new Promise(resolve => {
-		const LER = this;
 		const currentCounter = this.counter;
 		async function parseNextTextNode() {
 			const node = textNodes.shift();
-			// console.debug('parseNextTextNode()');
-			if(!node) {
+			if (!node) {
 				console.timeEnd("LawEasyRead" + currentCounter);
 				return resolve(element);
 			}
@@ -85,22 +67,21 @@ async parseElement(
 			});
 
 			requestIdleCallback(parseNextTextNode);
-			// console.debug(objects);
-			if(objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
+			if (objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
 			// 扁平化。但由於 JsonML 自身結構已是陣列，故不方便使用 `Array.flat()` 。
-			objects = objects.reduce((acc, cur) => {
-				if(typeof cur === 'string'
-					|| /[a-z]+/.test(cur[0]) && !(cur[1] instanceof Array)
-				) acc.push(cur);
-				else acc.push(...cur);
-				return acc;
-			}, []);
+			// objects = objects.reduce((acc, cur) => {
+			// 	if (typeof cur === 'string'
+			// 		|| /[a-z]+/.test(cur[0]) && !(cur[1] instanceof Array) // JsonML
+			// 	) acc.push(cur);
+			// 	else acc.push(...cur);
+			// 	return acc;
+			// }, []);
 			objects = objects.map(createElement);
 
 			const next = node.nextSibling;
 			node.replaceWith(...objects);
-			if(enablePopup) objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
-			if(!next) {
+			if (enablePopup) objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
+			if (!next) {
 				const parent = objects[0].parentNode;
 				const event = new CustomEvent("lerParseEnd");
 				parent.dispatchEvent(event);
@@ -199,7 +180,6 @@ createElement(jsonML) {
  *  * https://stackoverflow.com/questions/62181537/
  */
 bindPopup(elem, articleNumberFormat) {
-	// console.debug('LER.bindPopup()');
 	if(!(elem instanceof Element)) return;
 	const {jyi, pcode, word} = elem.dataset;
 	if(!jyi && !pcode && !word) return;

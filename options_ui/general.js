@@ -62,11 +62,11 @@ const artNumberParserOptions = [
 $("#artNumberParserOptions").append(...artNumberParserOptions);
 
 storage.get(booleanOptions.concat("articleNumberFormat"))
-.then(storage => {
-    $("#articleNumberFormat-" + storage.articleNumberFormat).checked = true;
+.then(result => {
+    $("#articleNumberFormat-" + result.articleNumberFormat).checked = true;
     booleanOptions.forEach(option => {
         const checkbox = document.getElementById(option);
-        checkbox.checked = storage[option];
+        checkbox.checked = result[option];
         listen(checkbox, "change",
             () => storage.set({ [option]: checkbox.checked })
         );
