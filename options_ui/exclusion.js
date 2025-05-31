@@ -12,35 +12,35 @@ hide($("#saveButton"));
  * 事件監聽
  */
 listen($("#editButton"), "click", () => {
-    hide($("#editButton"));
-    show($("#saveButton"));
-    $("#saveButton").disabled = true;
-    $("#exclude_matches").disabled = false;
+	hide($("#editButton"));
+	show($("#saveButton"));
+	$("#saveButton").disabled = true;
+	$("#exclude_matches").disabled = false;
 });
 
 listen($("#sandbox"), "input", testRules);
 
 listen($("#exclude_matches"), "input", () => {
-    $("#saveButtonContainer").style.visibility = "";
-    $("#saveButton").disabled = false;
-    testRules();
+	$("#saveButtonContainer").style.visibility = "";
+	$("#saveButton").disabled = false;
+	testRules();
 });
 
 listen($("#saveButton"), "click", event => {
-    const self = event.target;
-    const em = $("#exclude_matches");
-    self.disabled = true;
-    em.disabled = true;
-    self.replaceChildren("儲存中");
-    const value = em.value.trim().replace(/\n+/g, "\n");
-    storage.set({exclude_matches: value})
-    .then(() => {
-        self.replaceChildren("儲存");
-        hide(self);
-        show($("#editButton"));
-        $("#saveMessage").replaceChildren("已儲存於 " + (new Date).toLocaleString());
-        em.value = value;
-    });
+	const self = event.target;
+	const em = $("#exclude_matches");
+	self.disabled = true;
+	em.disabled = true;
+	self.replaceChildren("儲存中");
+	const value = em.value.trim().replace(/\n+/g, "\n");
+	storage.set({exclude_matches: value})
+	.then(() => {
+		self.replaceChildren("儲存");
+		hide(self);
+		show($("#editButton"));
+		$("#saveMessage").replaceChildren("已儲存於 " + (new Date).toLocaleString());
+		em.value = value;
+	});
 });
 
 
@@ -48,21 +48,21 @@ listen($("#saveButton"), "click", event => {
  * 函數宣告
  */
 function testRules() {
-    const input = $('#sandbox').value.trim();
-    const testResult = $('#testResult');
-    testResult.replaceChildren();
+	const input = $('#sandbox').value.trim();
+	const testResult = $('#testResult');
+	testResult.replaceChildren();
 
-    if(!input) return;
-    try { new URL(input); }
-    catch(err) { return testResult.append('測試網址的格式不正確'); }
+	if(!input) return;
+	try { new URL(input); }
+	catch(err) { return testResult.append('測試網址的格式不正確'); }
 
-    const list = $('#exclude_matches').value.split('\n').filter(x => x);
-    const matchedRule = list.find(rule => {
-        const regexp = rule.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
-        return (new RegExp(regexp)).test(input);
-    });
-    testResult.append(matchedRule
-        ? '這個網址符合路徑規則 ' + matchedRule
-        : '沒有比對到任何路徑規則，這個網址將套用「自動轉換」的設定。'
-    );
+	const list = $('#exclude_matches').value.split('\n').filter(x => x);
+	const matchedRule = list.find(rule => {
+		const regexp = rule.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
+		return (new RegExp(regexp)).test(input);
+	});
+	testResult.append(matchedRule
+		? '這個網址符合路徑規則 ' + matchedRule
+		: '沒有比對到任何路徑規則，這個網址將套用「自動轉換」的設定。'
+	);
 };

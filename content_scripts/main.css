@@ -3,51 +3,51 @@
  */
 .d-flex { display: flex; }
 .text-end {
-    text-align: right;
+	text-align: right;
 }
 .list-style-none {
-    list-style-type: none;
-    padding-left: 0;
+	list-style-type: none;
+	padding-left: 0;
 }
 .list-style-circle {
-    list-style-type: circle;
-    padding-left: 1.5em;
+	list-style-type: circle;
+	padding-left: 1.5em;
 }
 .list-style-decimal {
-    list-style-type: decimal;
-    padding-left: 1.75em; /* 須能顯示二位數 */
+	list-style-type: decimal;
+	padding-left: 1.75em; /* 須能顯示二位數 */
 }
 .list-style-upper-roman {
-    list-style-type: upper-roman;
-    padding-left: 1.5em;
+	list-style-type: upper-roman;
+	padding-left: 1.5em;
 }
 
 /**
  * 本專案通用
  */
 [class|=LER-badge] {
-    font-size: smaller;
-    padding: 0 .2em .1em;
-    border-radius: .25em;
+	font-size: smaller;
+	padding: 0 .2em .1em;
+	border-radius: .25em;
 }
 .LER-badge-discard {
-    background-color: #DC3545;
-    color: #fff;
+	background-color: #DC3545;
+	color: #fff;
 }
 .LER-badge-future {
-    background-color: #FFC107;
-    color: #000;
-    cursor: help;
+	background-color: #FFC107;
+	color: #000;
+	cursor: help;
 }
 .LER-popup ul,
 .LER-popup ol,
 .LER-popup dl,
 .LER-popup dt,
 .LER-popup dd {
-    margin: 0;
+	margin: 0;
 }
 .LER-popup p {
-    margin: .5em 0;
+	margin: .5em 0;
 }
 
 /**
@@ -60,91 +60,91 @@
  * * 大法官解釋的 nav 是 1030
  */
 .LER-popup-container {
-    position: absolute;
-    width: 30em;
-    font-size: 16px;
-    margin: 0;
-    padding: 0;
-    z-index: 1031;
-    color: #222;
+	position: absolute;
+	width: 30em;
+	font-size: 16px;
+	margin: 0;
+	padding: 0;
+	z-index: 1031;
+	color: #222;
 }
 .LER-popup-before,
 .LER-popup-after {
-    width: 0;
-    height: 0;
-    background: transparent;
-    border-style: solid;
-    border-color: #44444488 transparent;
-    border-width: .6em .4em;
-    margin: 0 auto;
+	width: 0;
+	height: 0;
+	background: transparent;
+	border-style: solid;
+	border-color: #44444488 transparent;
+	border-width: .6em .4em;
+	margin: 0 auto;
 }
 .LER-popup-before {
-    border-top-width: 0;
-    margin-left: .5em;
+	border-top-width: 0;
+	margin-left: .5em;
 }
 .LER-popup-after {
-    border-bottom-width: 0;
-    margin-right: .5em;
+	border-bottom-width: 0;
+	margin-right: .5em;
 }
 .LER-popup {
-    line-height: 1.5;
-    background: #eee;
-    min-height: 2em;
-    padding: .2em .5em .1em;
-    border: 1px solid #44444488;
-    border-radius: .5em;
-    position: relative;
-    box-shadow: .3em .3em .2em #00000040;
+	line-height: 1.5;
+	background: #eee;
+	min-height: 2em;
+	padding: .2em .5em .1em;
+	border: 1px solid #44444488;
+	border-radius: .5em;
+	position: relative;
+	box-shadow: .3em .3em .2em #00000040;
 }
 .LER-popup-pin {
-    position: absolute;
-    top: .3em;
-    right: 1em;
-    cursor: pointer;
+	position: absolute;
+	top: .3em;
+	right: 1em;
+	cursor: pointer;
 }
 .LER-popup-pin [type=checkbox] {
-    display: none;
+	display: none;
 }
 .LER-popup-pin [type=checkbox]:checked + i::before {
-    content: url('data:image/svg+xml;utf8,<svg class="bi bi-pin-fill" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>');
+	content: url('data:image/svg+xml;utf8,<svg class="bi bi-pin-fill" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4.146.146A.5.5 0 0 1 4.5 0h7a.5.5 0 0 1 .5.5c0 .68-.342 1.174-.646 1.479-.126.125-.25.224-.354.298v4.431l.078.048c.203.127.476.314.751.555C12.36 7.775 13 8.527 13 9.5a.5.5 0 0 1-.5.5h-4v4.5c0 .276-.224 1.5-.5 1.5s-.5-1.224-.5-1.5V10h-4a.5.5 0 0 1-.5-.5c0-.973.64-1.725 1.17-2.189A5.921 5.921 0 0 1 5 6.708V2.277a2.77 2.77 0 0 1-.354-.298C4.342 1.674 4 1.179 4 .5a.5.5 0 0 1 .146-.354z"/></svg>');
 }
 .LER-popup-pin [type=checkbox]:not(:checked) + i::before {
-    content: url('data:image/svg+xml;utf8,<svg class="bi bi-pin-angle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707-.195-.195.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146zm.122 2.112v-.002.002zm0-.002v.002a.5.5 0 0 1-.122.51L6.293 6.878a.5.5 0 0 1-.511.12H5.78l-.014-.004a4.507 4.507 0 0 0-.288-.076 4.922 4.922 0 0 0-.765-.116c-.422-.028-.836.008-1.175.15l5.51 5.509c.141-.34.177-.753.149-1.175a4.924 4.924 0 0 0-.192-1.054l-.004-.013v-.001a.5.5 0 0 1 .12-.512l3.536-3.535a.5.5 0 0 1 .532-.115l.096.022c.087.017.208.034.344.034.114 0 .23-.011.343-.04L9.927 2.028c-.029.113-.04.23-.04.343a1.779 1.779 0 0 0 .062.46z"/></svg>');
+	content: url('data:image/svg+xml;utf8,<svg class="bi bi-pin-angle" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M9.828.722a.5.5 0 0 1 .354.146l4.95 4.95a.5.5 0 0 1 0 .707c-.48.48-1.072.588-1.503.588-.177 0-.335-.018-.46-.039l-3.134 3.134a5.927 5.927 0 0 1 .16 1.013c.046.702-.032 1.687-.72 2.375a.5.5 0 0 1-.707 0l-2.829-2.828-3.182 3.182c-.195.195-1.219.902-1.414.707-.195-.195.512-1.22.707-1.414l3.182-3.182-2.828-2.829a.5.5 0 0 1 0-.707c.688-.688 1.673-.767 2.375-.72a5.922 5.922 0 0 1 1.013.16l3.134-3.133a2.772 2.772 0 0 1-.04-.461c0-.43.108-1.022.589-1.503a.5.5 0 0 1 .353-.146zm.122 2.112v-.002.002zm0-.002v.002a.5.5 0 0 1-.122.51L6.293 6.878a.5.5 0 0 1-.511.12H5.78l-.014-.004a4.507 4.507 0 0 0-.288-.076 4.922 4.922 0 0 0-.765-.116c-.422-.028-.836.008-1.175.15l5.51 5.509c.141-.34.177-.753.149-1.175a4.924 4.924 0 0 0-.192-1.054l-.004-.013v-.001a.5.5 0 0 1 .12-.512l3.536-3.535a.5.5 0 0 1 .532-.115l.096.022c.087.017.208.034.344.034.114 0 .23-.011.343-.04L9.927 2.028c-.029.113-.04.23-.04.343a1.779 1.779 0 0 0 .062.46z"/></svg>');
 }
 .LER-popup > header:not(:empty) {
-    border-bottom: 1px dashed #888;
-    padding-right: 1em;
+	border-bottom: 1px dashed #888;
+	padding-right: 1em;
 }
 .LER-popup > header time {
-    font-size: smaller;
-    color: #666;
+	font-size: smaller;
+	color: #666;
 }
 .LER-popup > header time::before {
-    content: " (";
+	content: " (";
 }
 .LER-popup > header time::after {
-    content: ")";
+	content: ")";
 }
 .LER-popup-body {
-    overflow-y: auto;
-    max-height: 20em;
+	overflow-y: auto;
+	max-height: 20em;
 }
 .LER-popup-body a[href] {
-    color: #0072bb;
+	color: #0072bb;
 }
 .LER-popup-body a[href]:hover {
-    text-decoration: underline;
+	text-decoration: underline;
 }
 .LER-popup-body dt {
-    position: sticky;
-    top: 0;
-    background: linear-gradient(to right, #eeeeeeff, #eeeeeeff, 10em, #eeeeee00);
-    font-weight: bold;
+	position: sticky;
+	top: 0;
+	background: linear-gradient(to right, #eeeeeeff, #eeeeeeff, 10em, #eeeeee00);
+	font-weight: bold;
 }
 .LER-popup-body dt:not(:first-child) {
-    margin-top: .6em;
+	margin-top: .6em;
 }
 .LER-popup-body p,
 .LER-popup-body li {
-    margin-bottom: .5em;
+	margin-bottom: .5em;
 }

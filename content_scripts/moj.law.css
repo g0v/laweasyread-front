@@ -2,76 +2,76 @@
  * 將條號改為 sticky
  */
 .law-content .row {
-    overflow: visible !important;
+	overflow: visible !important;
 }
 .col-no {
-    position: sticky;
-    background-color: #F9FBFB;
-    z-index: 1;
-    top: 0;
+	position: sticky;
+	background-color: #F9FBFB;
+	z-index: 1;
+	top: 0;
 }
 
 /**
  * 編章節置頂 sticky
  */
 .law-reg.law-content .h3 {
-    background-color: #F9FBFB;
-    text-indent: 0;
-    margin-left: 0 !important;
-    padding-left: 0;
+	background-color: #F9FBFB;
+	text-indent: 0;
+	margin-left: 0 !important;
+	padding-left: 0;
 }
 .char-1 {
-    z-index: 6;
+	z-index: 6;
 }
 .char-2 {
-    z-index: 5;
+	z-index: 5;
 }
 .char-3 {
-    z-index: 4;
+	z-index: 4;
 }
 .char-4 {
-    z-index: 3;
+	z-index: 3;
 }
 .char-5 {
-    z-index: 2;
+	z-index: 2;
 }
 .char-6 {
-    z-index: 1;
+	z-index: 1;
 }
 
 [class^=line-] p {
-    line-height: inherit;
+	line-height: inherit;
 }
 
 /* 窄螢幕時，編章節標題置頂 */
 @media (width < 992px) {
-    .law-reg.law-content .h3 {
-        position: sticky;
-        border-bottom: 1px dashed #ccc;
-    }
+	.law-reg.law-content .h3 {
+		position: sticky;
+		border-bottom: 1px dashed #ccc;
+	}
 }
 
 /* 寬螢幕時，編章節標題直書並置左 */
 @media (width >= 992px) {
-    .law-reg-content section {
-        position: relative;
-        min-height: 10em; /* 不然某些只有一兩條的編章節，其標題會被吃掉 */
-    }
-    .law-reg-content section:not(:last-of-type) {
-        border-bottom: 1px dashed #ccc;
-    }
-    html[lang^=zh] .law-reg.law-content .h3 { /* 只有中文的要改成直行 */
-        position: absolute;
-        writing-mode: vertical-lr;
-        top: 0;
-        height: 100%;
-    }
-    html[lang^=zh] .law-reg.law-content .h3 > span {
-        position: sticky;
-        top: 0;
-        letter-spacing: 2px;
-        white-space: nowrap;
-    }
+	.law-reg-content section {
+		position: relative;
+		min-height: 10em; /* 不然某些只有一兩條的編章節，其標題會被吃掉 */
+	}
+	.law-reg-content section:not(:last-of-type) {
+		border-bottom: 1px dashed #ccc;
+	}
+	html[lang^=zh] .law-reg.law-content .h3 { /* 只有中文的要改成直行 */
+		position: absolute;
+		writing-mode: vertical-lr;
+		top: 0;
+		height: 100%;
+	}
+	html[lang^=zh] .law-reg.law-content .h3 > span {
+		position: sticky;
+		top: 0;
+		letter-spacing: 2px;
+		white-space: nowrap;
+	}
 }
 
 
@@ -79,61 +79,61 @@
  * 提及條文
  */
 details.LER-article-groups {
-    text-indent: 0; /* 覆寫網站設定，不然款、目裡的情形會亂掉 */
+	text-indent: 0; /* 覆寫網站設定，不然款、目裡的情形會亂掉 */
 }
 
 details.LER-article-groups > summary {
-    font-size: small;
-    color: gray;
-    display: list-item; /* 只有這個值會有預設的三角形 */
-    cursor: pointer;
+	font-size: small;
+	color: gray;
+	display: list-item; /* 只有這個值會有預設的三角形 */
+	cursor: pointer;
 }
 
 details.LER-article-groups > summary::before {
-    content: "提及條文"; /* 為了讓使用者複製條文時不會複製到提示文字 */
+	content: "提及條文"; /* 為了讓使用者複製條文時不會複製到提示文字 */
 }
 
 details.LER-article-groups section {
-    padding: 0 .5em;
-    margin-bottom: .5em;
+	padding: 0 .5em;
+	margin-bottom: .5em;
 }
 
 details.LER-article-groups dd {
-    padding-left: 1em;
+	padding-left: 1em;
 }
 
 details.LER-article-groups .law-reg.law-content {
-    padding: 0 .5em;
+	padding: 0 .5em;
 }
 
 .law-reg-content .law-reg-content {
-    margin-left: 0;
+	margin-left: 0;
 }
 
 .law-reg-content .law-reg-content div.col-no {
-    text-align: left;
+	text-align: left;
 }
 
 .law-reg-content .law-reg-content .col-data {
-    clear: both;
-    padding-left: 1em;
+	clear: both;
+	padding-left: 1em;
 }
 
 .law-reg-content .law-reg-content .law-article {
-    width: auto;
+	width: auto;
 }
 
 .law-reg-content header.table-title {
-    margin: 0;
+	margin: 0;
 }
 
 .law-reg-content .law-reg-content .clearfix {
-    display: none;
+	display: none;
 }
 
 .law-reg-content .well {
-    padding-top: 0;
-    padding-bottom: 0;
+	padding-top: 0;
+	padding-bottom: 0;
 }
 
 
@@ -141,17 +141,17 @@ details.LER-article-groups .law-reg.law-content {
  * 「（刪除）」
  */
 div.LER-moj-deleted-article.row {
-    padding: 0;
+	padding: 0;
 }
 .LER-moj-deleted-article a[href] {
-    color: gray;
+	color: gray;
 }
 .LER-moj-deleted-article .col-data {
-    font-size: smaller;
-    color: gray;
+	font-size: smaller;
+	color: gray;
 }
 .LER-moj-deleted-article .line-0000 {
-    white-space: pre;
+	white-space: pre;
 }
 
 
@@ -159,28 +159,28 @@ div.LER-moj-deleted-article.row {
  * 列印介面專用。棄用中
  */
 /* @media print {
-    body,
-    div.container {
-        width: auto !important;
-    }
+	body,
+	div.container {
+		width: auto !important;
+	}
 
-    details.LER-article-groups:not([open]) {
-        display: none;
-    }
+	details.LER-article-groups:not([open]) {
+		display: none;
+	}
 
-    .law-reg-content div.row,
-    .law-reg-content .row > div.col-no,
-    .law-reg-content .row > div.col-data {
-        display: block;
-        text-align: left;
-    }
+	.law-reg-content div.row,
+	.law-reg-content .row > div.col-no,
+	.law-reg-content .row > div.col-data {
+		display: block;
+		text-align: left;
+	}
 
-    .law-reg-content .col-no {
-        font-weight: bold;
-    }
+	.law-reg-content .col-no {
+		font-weight: bold;
+	}
 
-    .law-reg-content .col-data {
-        clear: both;
-        padding-left: 1em;
-    }
+	.law-reg-content .col-data {
+		clear: both;
+		padding-left: 1em;
+	}
 } */

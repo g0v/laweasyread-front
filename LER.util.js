@@ -127,15 +127,15 @@ createElement(jsonML) {
  * @returns {boolean}
  */
 isEventInElement(event, elem) {
-    const {clientX: x, clientY: y} = event;
-    if (typeof elem === 'string') elem = $(elem);
-    if (!elem) {
-        console.warn('isEventInElement: Element not found for selector: ' + elem);
-        return false;
-    }
-    return [...elem.getClientRects()].some(r =>
-        x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
-    );
+	const {clientX: x, clientY: y} = event;
+	if (typeof elem === 'string') elem = $(elem);
+	if (!elem) {
+		console.warn('isEventInElement: Element not found for selector: ' + elem);
+		return false;
+	}
+	return [...elem.getClientRects()].some(r =>
+		x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
+	);
 },
 
 
@@ -177,7 +177,7 @@ parseIntChinese(str) {
 		result += digit;
 	}
 
-    return result;
+	return result;
 },
 
 

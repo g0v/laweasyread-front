@@ -1,9 +1,9 @@
 {
-    "articleNumberFormat": "hyphen",
-    "autoParse": true,
-    "autoUpdate": true,
-    "enablePopup": true,
-    "exclude_matches": "",
-    "typesetDockets": true,
-    "typesetMoj": true
+	"articleNumberFormat": "hyphen",
+	"autoParse": true,
+	"autoUpdate": true,
+	"enablePopup": true,
+	"exclude_matches": "",
+	"typesetDockets": true,
+	"typesetMoj": true
 }

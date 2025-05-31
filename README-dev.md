@@ -4,6 +4,7 @@
 
 對所有文字節點的內容進行比對，若內容包含法規名稱，則置換成新的 HTML 元素。
 
+0. 對所有「包含中文字（U+4E00～U+9FFF）」的文字節點（text node）進行遞迴。
 1. 前端將第一個 `TextNode` 的 `textContent` 傳給後端。
 2. 後端依照 `ReplaceRule[]` 將前述字串拆為 `Fragment[]` 。此步驟只處理字串，每個被拆開的物件和字串彼此獨立。
 3. 後端將前述 `Fragment[]` 轉換為 `JsonML[]` 傳給前端。此步驟涉及陣列中個物件之間的前後關係，並參考原始文字節點的 *某些特徵* 。
@@ -40,7 +41,7 @@
 |----|-------|-----------|----|----------|---|
 |LER.util.js|o|o|o|o|o|
 |LER.back.js|o|o|x|x|x|
-|LER.front.js|o|x|x|x|o|
+|LER.front.js|o|x|o|x|o|
 |browser/background.js|x|o|x|x|x|
 |browser/popup.*|x|x|o|x|x|
 |options_ui/*|x|x|x|o|x|

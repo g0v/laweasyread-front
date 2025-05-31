@@ -1,32 +1,32 @@
 .htmlcontent > header,
 .htmlcontent > footer {
-    white-space: pre;
-    font-family: "細明體";
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 1.75em;
+	white-space: pre;
+	font-family: "細明體";
+	font-size: 16px;
+	font-weight: bold;
+	line-height: 1.75em;
 }
 .htmlcontent .he-h3 {
-    font-size: 20px;
-    font-weight: bold;
+	font-size: 20px;
+	font-weight: bold;
 }
 .htmlcontent > main > div {
-    margin: 1em 0;
+	margin: 1em 0;
 }
 
 
 [data-line-number] {
-    position: relative;
+	position: relative;
 }
 [data-line-number]::before {
-    content: attr(data-line-number);
-    position: absolute;
-    top: -1.375em;
-    left: 0;
-    font-size: smaller;
-    font-weight: normal;
-    color: #ccc !important; /* to overwrite bootstrap setting */
-    text-indent: 0;
+	content: attr(data-line-number);
+	position: absolute;
+	top: -1.375em;
+	left: 0;
+	font-size: smaller;
+	font-weight: normal;
+	color: #ccc !important; /* to overwrite bootstrap setting */
+	text-indent: 0;
 }
 
 
@@ -42,24 +42,24 @@
  * 除第一個部分只能用 JavaScript 解決外，其他於此覆寫。
  */
 div.htmlcontent {
-    width: auto;
-    font-size: 18px;
-    font-family: Helvetica, sans-serif;
-    line-height: 2em;
-    margin: 0 .6em;
-    padding: 0 .6em;
-    transform: none;
-    -ms-transform: none;
-    -webkit-transform: none;
-    -moz-transform: none;
-    -o-transform: none;
+	width: auto;
+	font-size: 18px;
+	font-family: Helvetica, sans-serif;
+	line-height: 2em;
+	margin: 0 .6em;
+	padding: 0 .6em;
+	transform: none;
+	-ms-transform: none;
+	-webkit-transform: none;
+	-moz-transform: none;
+	-o-transform: none;
 }
 
 div.jud_content {
-    overflow-x: auto;
-    max-width: none;
+	overflow-x: auto;
+	max-width: none;
 }
 
 div.row {
-    margin: 0; /* 官方給了左右負值，造成頁面會有橫向卷軸 */
+	margin: 0; /* 官方給了左右負值，造成頁面會有橫向卷軸 */
 }

@@ -1,59 +1,59 @@
 <div>
-    <h2>一般設定</h2>
-    <dl class="d-flex">
-        <dt><input type="checkbox" id="autoParse"></dt>
-        <dd>
-            <label for="autoParse">開啟自動轉換</label>
-            <p class="text-muted">即使關閉自動轉換，仍會對<em>全國法規資料庫</em>與<em>立法院法律系統</em>的頁面進行排版。</p>
-            <p class="text-muted">此功能在動態讀取的網頁（如臉書）上未必有作用。</p>
-        </dd>
-    </dl>
-    <dl class="d-flex">
-        <dt><input type="checkbox" id="enablePopup"></dt>
-        <dd>
-            <label for="enablePopup">啟用內嵌彈出式視窗</label>
-            <p class="text-muted">滑鼠移過條號或憲法裁判字號時，在網頁內嵌入彈出式視窗以顯示內容</p>
-            <p class="text-muted">需開啟自動轉換，或是手動點選右上角外掛符號→轉換此頁面後，才能夠顯示。</p>
-            <p class="text-muted">條文、大法官解釋、憲法判決是從網路抓取資料，可能會因網路狀況而有延遲或未能顯示。</p>
-        </dd>
-    </dl>
-    <dl class="d-flex">
-        <dt><input type="checkbox" id="typesetMoj"></dt>
-        <dd>
-            <label for="typesetMoj">調整<em>全國法規資料庫</em>的排版</label>
-            <p class="text-muted">提及條文：若法條有提及其他條文，可嵌入於該項/款/目的下方。</p>
-            <p class="text-muted">編章節標題置頂：瀏覽法規全文時，章節標題會黏著於視窗左上或正上，方便理解法規結構。（瀏覽單一條文或指定少數條文時不適用）</p>
-        </dd>
-    </dl>
-    <dl class="d-flex">
-        <dt><input type="checkbox" id="typesetDockets"></dt>
-        <dd>
-            <label for="typesetDockets">調整<em>裁判書系統</em>的排版</label>
-            <p class="text-muted">對<a href="https://judgment.judicial.gov.tw/FJUD/default.aspx">司法院裁判書系統</a>中，較舊的裁判書調整排版，以方便閱讀與複製。</p>
-        </dd>
-    </dl>
-    <dl class="d-flex">
-        <dt><input type="checkbox" id="autoUpdate"></dt>
-        <dd>
-            <label for="autoUpdate">自動更新法規清單</label>
-            <p class="text-muted">每週最多一次，約 1.5MB 。</p>
-        </dd>
-    </dl>
+	<h2>一般設定</h2>
+	<dl class="d-flex">
+		<dt><input type="checkbox" id="autoParse"></dt>
+		<dd>
+			<label for="autoParse">開啟自動轉換</label>
+			<p class="text-muted">即使關閉自動轉換，仍會對<em>全國法規資料庫</em>與<em>立法院法律系統</em>的頁面進行排版。</p>
+			<p class="text-muted">此功能在動態讀取的網頁（如臉書）上未必有作用。</p>
+		</dd>
+	</dl>
+	<dl class="d-flex">
+		<dt><input type="checkbox" id="enablePopup"></dt>
+		<dd>
+			<label for="enablePopup">啟用內嵌彈出式視窗</label>
+			<p class="text-muted">滑鼠移過條號或憲法裁判字號時，在網頁內嵌入彈出式視窗以顯示內容</p>
+			<p class="text-muted">需開啟自動轉換，或是手動點選右上角外掛符號→轉換此頁面後，才能夠顯示。</p>
+			<p class="text-muted">條文、大法官解釋、憲法判決是從網路抓取資料，可能會因網路狀況而有延遲或未能顯示。</p>
+		</dd>
+	</dl>
+	<dl class="d-flex">
+		<dt><input type="checkbox" id="typesetMoj"></dt>
+		<dd>
+			<label for="typesetMoj">調整<em>全國法規資料庫</em>的排版</label>
+			<p class="text-muted">提及條文：若法條有提及其他條文，可嵌入於該項/款/目的下方。</p>
+			<p class="text-muted">編章節標題置頂：瀏覽法規全文時，章節標題會黏著於視窗左上或正上，方便理解法規結構。（瀏覽單一條文或指定少數條文時不適用）</p>
+		</dd>
+	</dl>
+	<dl class="d-flex">
+		<dt><input type="checkbox" id="typesetDockets"></dt>
+		<dd>
+			<label for="typesetDockets">調整<em>裁判書系統</em>的排版</label>
+			<p class="text-muted">對<a href="https://judgment.judicial.gov.tw/FJUD/default.aspx">司法院裁判書系統</a>中，較舊的裁判書調整排版，以方便閱讀與複製。</p>
+		</dd>
+	</dl>
+	<dl class="d-flex">
+		<dt><input type="checkbox" id="autoUpdate"></dt>
+		<dd>
+			<label for="autoUpdate">自動更新法規清單</label>
+			<p class="text-muted">每週最多一次，約 1.5MB 。</p>
+		</dd>
+	</dl>
 </div>
 
 <div>
-    <h3>將條號轉為阿拉伯數字</h3>
-    <p class="text-muted">
-        大法官釋字編號也同樣適用。
-        但為避免您在閱讀與法律無關的文章時受到干擾，只有在網頁中偵測到<em>法規名稱</em>或<em>釋字</em>的情形，才會進行數字轉換。
-    </p>
-    <table class="table table-sm col-lg-8 col-xl-6">
-        <thead>
-            <tr>
-                <th scope="col">轉換方式</th>
-                <th scope="col">範例</th>
-            </tr>
-        </thead>
-        <tbody id="artNumberParserOptions"></tbody>
-    </table>
+	<h3>將條號轉為阿拉伯數字</h3>
+	<p class="text-muted">
+		大法官釋字編號也同樣適用。
+		但為避免您在閱讀與法律無關的文章時受到干擾，只有在網頁中偵測到<em>法規名稱</em>或<em>釋字</em>的情形，才會進行數字轉換。
+	</p>
+	<table class="table table-sm col-lg-8 col-xl-6">
+		<thead>
+			<tr>
+				<th scope="col">轉換方式</th>
+				<th scope="col">範例</th>
+			</tr>
+		</thead>
+		<tbody id="artNumberParserOptions"></tbody>
+	</table>
 </div>
