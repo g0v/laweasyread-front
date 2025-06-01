@@ -42,7 +42,8 @@
 			"https://law.moj.gov.tw/*/LawAllPara.aspx*",
 			"https://law.moj.gov.tw/*media=print*"
 		],
-		"js": ["content_scripts/moj.law.js"]
+		"js": ["content_scripts/moj.law.js"],
+		"css": ["content_scripts/moj.law.css"]
 	},
 	{
 		"matches": ["https://lis.ly.gov.tw/lglawc/lawsingle?*"],

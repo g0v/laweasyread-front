@@ -51,6 +51,18 @@ browser.tabs.query({active: true, currentWindow: true})
 });
 
 
+function parseCurrentTab() {
+	if (!currentTab) return false;
+	const url = currentTab.url;
+	if (!url.startsWith('http') && !url.startsWith('file')) return false;
+
+	return storage.get(['articleNumberFormat', 'enablePopup'])
+	.then(options =>
+		browser.tabs.sendMessage(currentTab.id, {method: 'parseDocument', ...options})
+	);
+}
+
+
 
 /**
  * @func sendMessageToCurrentTab

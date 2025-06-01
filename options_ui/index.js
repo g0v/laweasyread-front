@@ -30,7 +30,7 @@ routes.forEach((route, index) => {
 		['div', {id: `name-${route.name}`}]
 	);
 	tab.addEventListener('click', () => {
-		if(tab.classList.contains('active')) return;
+		if (tab.classList.contains('active')) return;
 		$$('header .nav-link').forEach(nl => nl.classList.remove('active'));
 		tab.lastChild.classList.add('active');
 		main.replaceChildren(container);
@@ -48,7 +48,7 @@ routes.forEach((route, index) => {
 		});
 	}, {once: true});
 
-	if(!index || route.name === location.hash.substring(1)) activeTab = tab;
+	if (!index || route.name === location.hash.substring(1)) activeTab = tab;
 });
 
 activeTab.dispatchEvent(new Event('click'));

@@ -91,7 +91,7 @@ const lines =
 	.reduce((lines, node) => {
 		// 每個 node 以換行字元切開後，第一個碎片（包含空字串）塞進前一行的結尾，其他的碎片各成一行（包含最後一份）。
 		let debris = node.textContent.split('\n');
-		switch(node.nodeType) {
+		switch (node.nodeType) {
 			case Node.ELEMENT_NODE: {
 				// 若非純文字，則拆解成多個相同元件，只有內文不同。
 				debris = debris.map(d =>
@@ -112,23 +112,23 @@ const lines =
 		return lines;
 	}, [[]])
 ;
-while(lines.length && !lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
+while (lines.length && !lines[lines.length - 1].some(x => x)) lines.pop(); // 拿掉最後面的多個空白行
 // console.debug(lines);
 
 let isHead = true, isFoot = false;
 lines.forEach((line, lineIndex) => {
 	const span = ['span', {'data-line-number': lineIndex + 1}, ...line];
 
-	if(isHead) {
+	if (isHead) {
 		header.push(['div', {}, span]);
 		const lastLeaf = line[line.length - 1];
-		if(typeof lastLeaf === 'string' && /如[左下]：$/.test(lastLeaf)) {
+		if (typeof lastLeaf === 'string' && /如[左下]：$/.test(lastLeaf)) {
 			isHead = false;
 		}
-		else if(lineIndex && line.length === 1) {
+		else if (lineIndex && line.length === 1) {
 			const prev = lines[lineIndex - 1];
 			const lastNode = prev[prev.length - 1];
-			if(typeof lastNode === 'string')
+			if (typeof lastNode === 'string')
 				isHead = !/如[左下]：$/.test(lastNode + line[0]);
 		}
 		return;
@@ -136,10 +136,10 @@ lines.forEach((line, lineIndex) => {
 
 	const plain = line.map(n => (typeof n) === 'string' ? n : n[2]).join('').replaceAll(/\s/g, '');
 	isFoot = isFoot || /^中華民國[\d○一二三四五六七八九十百]+年[\d一二三四五六七八九十]+月[\d一二三四五六七八九十]+日$/.test(plain);
-	if(isFoot) return footer.push(['div', {}, span]);
+	if (isFoot) return footer.push(['div', {}, span]);
 
-	if(typeof line[0] === 'string') span[2] = line[0].trimStart(); // 頭部跟尾部的行首空白不要拿掉
-	if(['主文', '事實', '犯罪事實', '理由', '事實及理由'].includes(plain))
+	if (typeof line[0] === 'string') span[2] = line[0].trimStart(); // 頭部跟尾部的行首空白不要拿掉
+	if (['主文', '事實', '犯罪事實', '理由', '事實及理由'].includes(plain))
 		return main.push(['div', {class: 'he-h3'}, span]);
 
 	// 用於後續各判斷
@@ -147,7 +147,7 @@ lines.forEach((line, lineIndex) => {
 
 	// 判斷是否為新段落
 	let isNewPara = true;
-	if(lineIndex && lastPara[1]?.class !== 'he-h3') {
+	if (lineIndex && lastPara[1]?.class !== 'he-h3') {
 		const prev = lines[lineIndex - 1];
 		const lastNode = prev[prev.length - 1];
 		isNewPara = (typeof lastNode === 'string') && /[。：]$/.test(lastNode);
@@ -155,18 +155,18 @@ lines.forEach((line, lineIndex) => {
 
 	// 偵測縮排
 	let padding = 0, indent = 0;
-	if(isNewPara) {
-		for(let i = 0; i < line[0].length; ++i) {
+	if (isNewPara) {
+		for (let i = 0; i < line[0].length; ++i) {
 			const c = line[0].charCodeAt(i);
-			if(c === 0x20) padding += .5;
-			else if(c === 0x3000) padding += 1;
+			if (c === 0x20) padding += .5;
+			else if (c === 0x3000) padding += 1;
 			else break;
 		}
 
-		for(let d of listMarkerDetectors) {
+		for (let d of listMarkerDetectors) {
 			const match = plain.match(d);
-			if(match) {
-				for(let i = 0; i < match[0].length; ++i) {
+			if (match) {
+				for (let i = 0; i < match[0].length; ++i) {
 					const c = match[0].charCodeAt(i);
 					indent += (c < 0x100) ? .5 : 1;
 				}
@@ -176,11 +176,11 @@ lines.forEach((line, lineIndex) => {
 	}
 
 	// 某些情形下，推測為其實並非新段落。
-	if(padding && !indent && lastPara
+	if (padding && !indent && lastPara
 		&& lastPara[1]?.style?.includes(`padding-left: ${padding}em`)
 	) isNewPara = false;
 
-	if(isNewPara) main.push(
+	if (isNewPara) main.push(
 		['div',
 			{style: `padding-left: ${padding+indent}em; text-indent: -${indent}em;`},
 			span
@@ -191,13 +191,13 @@ lines.forEach((line, lineIndex) => {
 // console.debug(header, main, footer);
 
 
-if(target) {
+if (target) {
 	storage.get(['typesetDockets']).then(({typesetDockets}) => {
-		if(!typesetDockets) return;
+		if (!typesetDockets) return;
 		target.style.cssText = ''; // 緣由參閱 CSS 檔內註解
 		$('div.col-td.jud_content').replaceChildren(target);
 
-		if(lines.length) { // 較舊的裁判書
+		if (lines.length) { // 較舊的裁判書
 			target.replaceChildren(
 				...[header, main, footer].map(createElement)
 			);
@@ -206,11 +206,11 @@ if(target) {
 			$$('abbr.termhover[rel]', target).forEach(elem => {
 				const term = elem.dataset.term;
 				const typeid = elem.getAttribute('rel');
-				if(!term || !typeid) return;
+				if (!term || !typeid) return;
 
 				const resource = `https://judgment.judicial.gov.tw/controls/GetJudTerms.ashx?TRMID=${term}&ty=${typeid}&name=${term}`;
 				elem.addEventListener('mouseover', async () => {
-					if(elem.title) return;
+					if (elem.title) return;
 					const explainList = await fetchJSON(resource);
 					const title = explainList.map(obj => obj.TRMCONTENT).join('\n');
 					// console.debug(resource, title);
@@ -227,8 +227,8 @@ if(target) {
 			// 調整縮排，因官方是設定 'font-size: 24px' ，但我改成 18px 。
 			$$('[id*=_paragraph_]', target).forEach(div => {
 				const s = div.style;
-				if(s.textIndent) s.textIndent = parseInt(s.textIndent) * 18 / 24 + 'px';
-				if(s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
+				if (s.textIndent) s.textIndent = parseInt(s.textIndent) * 18 / 24 + 'px';
+				if (s.paddingLeft) s.paddingLeft = parseInt(s.paddingLeft) * 18 / 24 + 'px';
 			});
 
 			$$('span[ref=style][style]', target).forEach(span =>
@@ -237,9 +237,9 @@ if(target) {
 
 			// 字體放大後表格會引致水平卷軸，故把表格後的東西挪到另一個容器。
 			const firstTable = $('[ref="tableWrapper"]');
-			if(firstTable) {
+			if (firstTable) {
 				const movees = [];
-				for(let cur = firstTable; cur; cur = cur.nextSibling) movees.push(cur);
+				for (let cur = firstTable; cur; cur = cur.nextSibling) movees.push(cur);
 
 				const row = target.closest('.row');
 				const container = row.cloneNode(true);
@@ -257,7 +257,7 @@ if(target) {
 
 // 針對搜尋結果的內嵌判決書，要重新設定調整 iframe 的高度。
 const iframe = $('iframe');
-if(iframe) {
+if (iframe) {
 	iframe.addEventListener('load', () => requestIdleCallback(() => {
 		iframe.style.height = iframe.contentDocument.body.offsetHeight + 'px';
 		// console.debug(iframe.contentDocument.body.offsetHeight);

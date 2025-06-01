@@ -52,7 +52,7 @@ function testRules() {
 	const testResult = $('#testResult');
 	testResult.replaceChildren();
 
-	if(!input) return;
+	if (!input) return;
 	try { new URL(input); }
 	catch(err) { return testResult.append('測試網址的格式不正確'); }
 

@@ -21,8 +21,8 @@ const stratumRE = [
 	/^\n?　+[子丑寅卯辰巳午未申酉戌亥]、/
 ];
 const getStratum = text => {
-	for(let i = stratumRE.length - 1; i >= 0; --i)
-		if(stratumRE[i].test(text)) return i;
+	for (let i = stratumRE.length - 1; i >= 0; --i)
+		if (stratumRE[i].test(text)) return i;
 	return -1;
 };
 
@@ -31,7 +31,7 @@ const getStratum = text => {
  * 主程式
  */
 $$('td').forEach(td => {
-	if(!td.hasChildNodes() || !/^\n?　　/.test(td.firstChild.textContent)) return;
+	if (!td.hasChildNodes() || !/^\n?　　/.test(td.firstChild.textContent)) return;
 
 	const lines = []; // 每一行文字，即各項款目，未分層
 	const paras = []; // 最底層的項目們的 JsonML ，已分層
@@ -41,7 +41,7 @@ $$('td').forEach(td => {
 	let keyword = '';
 
 	// 先把包住關鍵字的 `<font />` 換成純文字，最後再替換回來。
-	if(keyword = $('font', td)) {
+	if (keyword = $('font', td)) {
 		keyword = keyword.textContent;
 		specimen = td.cloneNode(true);
 		$$('font', specimen).forEach(fe => fe.replaceWith(keyword));
@@ -49,12 +49,12 @@ $$('td').forEach(td => {
 	}
 
 	specimen.childNodes.forEach(child => {
-		switch(child.nodeName) {
+		switch (child.nodeName) {
 			case "#text": {
 				const text = child.textContent.trim();
-				if(!text) break;
+				if (!text) break;
 				const stratum = getStratum(child.textContent);
-				if(stratum < 0) {
+				if (stratum < 0) {
 					lines[lines.length - 1].text += "\n" + text;
 					break;
 				}
@@ -72,21 +72,21 @@ $$('td').forEach(td => {
 		}
 	});
 
-	for(let i = lines.length - 1; i >= 0; --i) {
+	for (let i = lines.length - 1; i >= 0; --i) {
 		const item = ['li', {data: {stratum: lines[i].stratum}}, lines[i].text];
-		if(lines[i].children.length) item.push(
+		if (lines[i].children.length) item.push(
 			['ol', ...lines[i].children]
 		);
 
-		if(lines[i].stratum) {
+		if (lines[i].stratum) {
 			let j = -1;
-			for(j = i - 1; j >= 0; --j) {
-				if(lines[j].stratum < lines[i].stratum) {
+			for (j = i - 1; j >= 0; --j) {
+				if (lines[j].stratum < lines[i].stratum) {
 					lines[j].children.unshift(item);
 					break;
 				}
 			}
-			if(j < 0) paras.unshift(item);
+			if (j < 0) paras.unshift(item);
 		}
 		else paras.unshift(item);
 	}

@@ -39,7 +39,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
 		console.assert(pattern.global);
 		const debris = [], rei = string.matchAll(pattern);
 		let match, pos = 0;
-		while(match = rei.next().value) {
+		while (match = rei.next().value) {
 			debris.push(string.substring(pos, match.index));
 			debris.push(replacer(match));
 			pos = match.index + match[0].length;
@@ -48,9 +48,9 @@ function applyReplaceRule(string, {pattern, replacer}) {
 		return debris;
 	}
 	console.assert(typeof pattern === "string" || typeof replacer !== "function");
-	if(replacer instanceof Function) replacer = replacer(pattern);
+	if (replacer instanceof Function) replacer = replacer(pattern);
 	const debris = string.split(pattern);
-	for(let i = debris.length - 1; i; --i)
+	for (let i = debris.length - 1; i; --i)
 		debris.splice(i, 0, replacer);
 	return debris;
 }
@@ -63,30 +63,30 @@ function applyReplaceRule(string, {pattern, replacer}) {
  */
 function prepareArticleDivision(divArr) {
 	return divArr.map(div => {
-		if(div.table) return [li, {class: 'pre'}, div.table];
+		if (div.table) return [li, {class: 'pre'}, div.table];
 		const item = ['li', {}, ...div.text.split('\n').map(line => ['p', line])];
 
 		// 計算縮排： ASCII 的話就半格，其他的就一格。
 		let match;
-		for(let re of articleDivisionDetectors) {
-			if(match = div.text.match(re)) break;
+		for (let re of articleDivisionDetectors) {
+			if (match = div.text.match(re)) break;
 		}
-		if(match) {
+		if (match) {
 			let indent = 0;
 			const ordinal = match[0];
-			for(let i = 0; i < ordinal.length; ++i)
+			for (let i = 0; i < ordinal.length; ++i)
 				indent += (ordinal.charCodeAt(i) > 0xff) ? 1 : .5;
 			item[1].style = `margin-left: ${indent}em; text-indent: -${indent}em`;
 		}
 
-		if(div.children) {
+		if (div.children) {
 			item.push(
 				['ol', {class: 'list-style-none'},
 					...prepareArticleDivision(div.children)
 				]
 			);
 		}
-		if(div.postText) item.push(['p', div.postText]);
+		if (div.postText) item.push(['p', div.postText]);
 		return item;
 	});
 }
@@ -134,10 +134,10 @@ const regexps = {
 	consDecision: "憲法法庭\\s*number\\s*(年度?)?\\s*([\\u4E00-\\u5b56\\u5b58-\\u9FFF]+)字?第?number號?(裁定|判決)?"
 };
 Object.keys(regexps).forEach((key, i, keys) => {
-	for(let j = i - 1; j >= 0; --j)
+	for (let j = i - 1; j >= 0; --j)
 		regexps[key] = regexps[key].replace(new RegExp(keys[j], "g"), regexps[keys[j]]);
 });
-for(let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
+for (let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
 
 
 /**
@@ -172,20 +172,20 @@ const dynamicRules = [
 			const andList = match[0].split(/[,、及或和與]/g);
 			r.norge = andList.reduce((acc, and) => {
 				const articles = [...and.matchAll(regexps.artMain)];
-				switch(articles.length) {
+				switch (articles.length) {
 					case 0: return acc;
 					case 1: {
 						let number = pcn(articles[0][1]);
-						if(articles[0][2]) number += "." + pcn(articles[0][3]);
-						if(articles[0][4]) number += "." + pcn(articles[0][5]);
+						if (articles[0][2]) number += "." + pcn(articles[0][3]);
+						if (articles[0][4]) number += "." + pcn(articles[0][5]);
 						acc.push(number);
 						return acc;
 					}
 					case 2: {
 						const range = articles.map(a => {
 							let number = pcn(a[1]);
-							if(a[2]) number += "." + pcn(a[3]);
-							if(a[4]) number += "." + pcn(a[5]);
+							if (a[2]) number += "." + pcn(a[3]);
+							if (a[4]) number += "." + pcn(a[5]);
 							return number;
 						});
 						acc.push(range.join("-"));
@@ -338,7 +338,7 @@ return {
 						}
 					}
 					// 條號格式
-					if(articleNumberFormat !== 'unchanged') {
+					if (articleNumberFormat !== 'unchanged') {
 						jsml[1].data.originText = cur.text;
 						let formatted = cur.text.replace(/[０零一二三四五六七八九十百千]+/g, m => ` ${pcn(m)} `);
 						if (articleNumberFormat === 'hyphen') formatted = formatted
@@ -415,15 +415,15 @@ return {
 	 */
 	async preparePopup({jyi, pcode, norge, year, word, number}) {
 		let headers = [], bodyParts = [], defaultLaw;
-		if(jyi) {
+		if (jyi) {
 			jyi = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/jyi/json/${jyi}.json`);
 			headers = [
 				`釋字第 ${jyi.number} 號 `,
 				['time', jyi.date]
 			];
 
-			if(jyi.title) bodyParts.push(['dd', jyi.title]);
-			if(jyi.issue) bodyParts.push(
+			if (jyi.title) bodyParts.push(['dd', jyi.title]);
+			if (jyi.issue) bodyParts.push(
 				['dt', '爭點'],
 				['dd', ...jyi.issue.split('\n').map(para => ['p', para])]
 			);
@@ -435,7 +435,7 @@ return {
 					]
 				]
 			);
-			if(jyi.reasoning) bodyParts.push(
+			if (jyi.reasoning) bodyParts.push(
 				['dt', '理由書'],
 				['dd',
 					['ol', {class: 'list-style-decimal'},
@@ -444,18 +444,18 @@ return {
 				]
 			);
 		}
-		else if(pcode) {
+		else if (pcode) {
 			const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
 
 			headers = [
 				law.name + ' ',
 				['time', law.LawModifiedDate.replace(/(\d{4})(\d{2})(\d{2})/, '$1-$2-$3')]
 			];
-			if(law.discarded) headers.splice(1, 0,
+			if (law.discarded) headers.splice(1, 0,
 				['span', {class: 'LER-badge-discard'}, '已廢止']
 			);
 
-			if(norge) {
+			if (norge) {
 				/// "3.1-5,7.1" => [[301, 500], [701]]
 				const ranges = norge.split(",").map(range => {
 					return range.split("-").map(articleNumber => {
@@ -493,7 +493,7 @@ return {
 					]
 				);
 
-				if(law.foreword) bodyParts.push(
+				if (law.foreword) bodyParts.push(
 					['dt', '前言'],
 					['dd', law.foreword]
 				);
@@ -505,11 +505,11 @@ return {
 					['dd', `共 ${law.articles.length.toString()} 條；其中 ${deletedAmount} 條被刪除；最末條為第 ${lastNumber} 條。`]
 				);
 
-				if(law.LawEffectiveNote) bodyParts.push(
+				if (law.LawEffectiveNote) bodyParts.push(
 					['dt', '生效內容'],
 					['dd', ...law.LawEffectiveNote.split('\r\n').map(n => ['p', n])]
 				);
-				if(law.histories) bodyParts.push(
+				if (law.histories) bodyParts.push(
 					['dt', '沿革'],
 					['dd', ...law.histories.map(his => ['p', his])]
 				);
@@ -517,7 +517,7 @@ return {
 
 			defaultLaw = {pcode, name: law.name};
 		}
-		else if(year && word && number) {
+		else if (year && word && number) {
 			const decision = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/cons.judicial/docket/${year}/${word}/${number}.json`);
 			headers = [
 				`${year}年 ${word}字 第${number}號 ${decision['類型'].slice(-2)}`,
@@ -525,7 +525,7 @@ return {
 			];
 
 			bodyParts.push(['dd', `原 ${decision['原分案號']}`]);
-			if(decision['標題']) bodyParts.push(['dd', decision['標題']]);
+			if (decision['標題']) bodyParts.push(['dd', decision['標題']]);
 
 			bodyParts.push(
 				['dt', '案由'],

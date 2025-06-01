@@ -16,17 +16,8 @@ LER.pageDefaultLaw = (new URLSearchParams(location.search)).get('pcode');
  * 有啟用「調整全國法規資料庫的排版」時才執行。
  */
 storage.get(['typesetMoj']).then(({typesetMoj}) => {
-	if(!typesetMoj) return;
+	if (!typesetMoj) return;
 	const isEng = !! $('html[lang=en]');
-
-	/**
-	 * 載入 CSS
-	 */
-	LER.fetchText({resource: 'content_scripts/moj.law.css'})
-	.then(css => document.head.append(createElement(
-		['style', css]
-	)));
-
 
 	/**
 	 * 加上「提及條文」區塊。
@@ -42,8 +33,8 @@ storage.get(['typesetMoj']).then(({typesetMoj}) => {
 	 * 將「（刪除）」加上 class 以便用 CSS 使之不明顯。
 	 */
 	$$('.line-0000').forEach(line => {
-		if(line.lastChild.textContent !== "（刪除）") return;
-		line.closest(".row").classList.add("LER-moj-deleted-article");
+		if (line.lastChild.textContent !== '（刪除）') return;
+		line.closest('.row').classList.add('LER-moj-deleted-article');
 	});
 
 
@@ -88,11 +79,11 @@ storage.get(['typesetMoj']).then(({typesetMoj}) => {
 	const depths = []; // 本頁最多有幾層
 	$$('.law-reg-content .h3').forEach((h3, index, list) => {
 		const section = createElement(['section', ['div', {class: 'LER-moj-div-body'}]]);
-		while(h3.nextElementSibling?.classList.contains("row"))
+		while (h3.nextElementSibling?.classList.contains('row'))
 			section.lastChild.append(h3.nextElementSibling);
 		h3.replaceWith(section);
 
-		if (! isEng) {
+		if (!isEng) {
 			const debris = h3.textContent.trim().split(' ');
 			const title = (debris.length === 1) ? debris[0] : (debris.slice(0, -1).join('') + '\u3000' + debris.slice(-1)[0]); // 拿掉多餘的空白，中間補為全形空白。
 			h3.replaceChildren(createElement(['span', title]));
@@ -100,14 +91,14 @@ storage.get(['typesetMoj']).then(({typesetMoj}) => {
 		section.insertBefore(h3, section.firstChild);
 
 		const divDepth = section.dataset.lerDepth = h3.className.slice(-1);
-		for(let j = index - 1; j >= 0; --j) {
+		for (let j = index - 1; j >= 0; --j) {
 			const parentSection = list[j].parentNode;
-			if(parentSection.dataset.lerDepth < divDepth) {
+			if (parentSection.dataset.lerDepth < divDepth) {
 				parentSection.lastChild.append(section);
 				break;
 			}
 		}
-		if(!depths.includes(divDepth)) depths.push(divDepth);
+		if (!depths.includes(divDepth)) depths.push(divDepth);
 	});
 	const css = depths.map((depth, index) => {
 		return `
@@ -119,7 +110,7 @@ storage.get(['typesetMoj']).then(({typesetMoj}) => {
 				.char-${depth} { left: ${(index - depths.length) * 1.2}em; }
 			}
 		`;
-	}).join("\n");
+	}).join('\n');
 	document.head.appendChild(createElement(['style', css]));
 });
 
@@ -134,7 +125,7 @@ storage.get(['typesetMoj']).then(({typesetMoj}) => {
  */
 function addDetails(line) {
 	line.addEventListener('lerParseEnd', () => {
-		if(!$('[data-norge][href]', line)) return;
+		if (!$('[data-norge][href]', line)) return;
 		const details = createElement(
 			['details', {class: 'LER-article-groups'},
 				['summary']
@@ -155,12 +146,12 @@ function embedArticles(event) {
 		const loadingNode = createElement(['p', '讀取中…']);
 		details.append(loadingNode);
 		fetchDOM(anchor.href).then(doc => {
-			const body = $(".law-reg", doc);
-			if(!body) body = "找不到法條。";
+			const body = $('.law-reg', doc);
+			if (!body) body = '找不到法條。';
 			const section = createElement(
 				['section',
 					['header', {class: 'table-title'},
-						...$$(".table-title td > *:not(.law-vaildMemo)", doc)
+						...$$('.table-title td > *:not(.law-vaildMemo)', doc)
 					],
 					body
 				]
@@ -168,7 +159,7 @@ function embedArticles(event) {
 			$$('div[class|=line]', section).forEach(addDetails);
 			LER.parseElement(section.lastChild, {defaultLaw: anchor.dataset.pcode});
 
-			$$('[id]', section).forEach(elem => elem.removeAttribute("id"));
+			$$('[id]', section).forEach(elem => elem.removeAttribute('id'));
 			loadingNode.replaceWith(section);
 		});
 	});

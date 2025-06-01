@@ -69,17 +69,20 @@ browser.alarms.onAlarm.addListener(async (alarm) => {
 
 /**
  * @func onMessageListener
- * @desc 整個後台 LER 物件就是監聽對象
- * @param {Object} request
- * @param {string} request.method - 後台 LER 物件的成員方法名
+ * @param {Object} message
+ * @param {string} message.method
  * @param {runtime.MessageSender} sender
  * @param {function} sendResponse - 回呼函數
  * @returns {boolean} Firefox 可接受 Promise，但 Chrome 只接受 boolean。
  */
-browser.runtime.onMessage.addListener((request, sender, sendResponse) => {
-	console.debug('onMessage', request, sender)
-	const {method, ...options} = request;
-	const result = LER[method]?.(options, sender);
+browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	console.debug('onMessage', message, sender);
+	const {method, ...options} = message;
+	let result;
+	if (method === 'update') result = update();
+	// else result = LER[method]?.(options, sender);
+	else throw new Error('unknown method: ' + method);
+
 	if (result instanceof Promise)
 		return !!result.then(sendResponse); // return true for sendResponse to be called async
 	sendResponse(result);
