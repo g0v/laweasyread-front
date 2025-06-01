@@ -81,6 +81,8 @@
 
 ## To-Do List
 
+* 整理 preparePopup, bindPopup, popupTemplate，盡量弄成後端生成 JsonML 附 dataset ，前端是 createElement 和 addEventListener 。
+* popup 的「讀取中」可以更快：滑鼠移上時就發動 fetch ，跟 375毫秒的等待分開處理。但若375ms內發生 mouseleave，也要記得把fetch給 abort 。
 * shadowRoot
 * 減少 content_scripts，盡量挪到 background
 * 立法院法律系統在所得稅法第14條的問題

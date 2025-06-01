@@ -34,7 +34,7 @@ $$(selector, base) {
  * @param {string|Element} target The Element (or selector to it) to hide.
  */
 hide(target) {
-	this.$(target)?.classList.add("d-none");
+	LER.$(target)?.classList.add("d-none");
 },
 
 /**
@@ -43,7 +43,7 @@ hide(target) {
  * @param {string|Element} target The Element (or selector to it) to show.
  */
 show(target) {
-	this.$(target)?.classList.remove("d-none");
+	LER.$(target)?.classList.remove("d-none");
 },
 
 
@@ -56,7 +56,7 @@ show(target) {
  * @param {Object|boolean} [options]
  */
 listen(target, eventType, listener, options) {
-	this.$(target)?.addEventListener(eventType, listener, options);
+	LER.$(target)?.addEventListener(eventType, listener, options);
 },
 
 
@@ -140,10 +140,10 @@ globalizeUtility() {
  */
 parseDocument(options) {
 	console.debug('LER.parseDocument()');
-	this.articleNumberFormat = options.articleNumberFormat || 'unchanged';
-	return this.parseElement(
+	options.articleNumberFormat ||= 'unchanged';
+	return LER.parseElement(
 		document.body,
-		Object.assign({defaultLaw: this.pageDefaultLaw}, options)
+		Object.assign({defaultLaw: LER.pageDefaultLaw}, options)
 	);
 },
 
@@ -154,73 +154,41 @@ parseDocument(options) {
  * @param {Object} [options]
  * @returns {Promise.<Element>}
  */
-async parseElement(
-	element, {
-		defaultLaw,
-		articleNumberFormat = this.articleNumberFormat,
-		enablePopup = true
-	}
-) {
+async parseElement(element, options = {}) {
 	console.debug('LER.parseElement', element);
 	const exeID = crypto.randomUUID();
 	console.time('LawEasyRead: ' + exeID);
-	await this.loadRules(); // todo ??
+	// await LER.loadRules(); // todo: repeat check until LER.replaceRules ready
 
-	// 取得所有要處理的文字節點
-	const textNodes = [];
-	const walker = document.createTreeWalker(
+	const iter = document.createNodeIterator(
 		element,
-		NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT,
+		NodeFilter.SHOW_TEXT,
 		node => {
-			if (node.nodeType === Node.TEXT_NODE) {
-				return /[\u4E00-\u9FFF]{2}/.test(node.textContent) // 有連續中日韓字元
-					? NodeFilter.FILTER_ACCEPT
-					: NodeFilter.FILTER_REJECT;
-			}
-			if ('A,BUTTON,CODE,SCRIPT,SELECT,STYLE,TEMPLATE,TEXTAREA'.split(',').includes(node.tagName)) return NodeFilter.FILTER_REJECT;
-			return node.classList.contains('LER-skip') ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_SKIP;
+			const parent = node.parentNode?.nodeName;
+			return (parent
+				&& !'OPTION,SCRIPT,SELECT,STYLE,SVG,TEMPLATE,TEXTAREA'.split(',').includes(parent)
+				&& /[\u4E00-\u9FFF]{2}/.test(node.textContent)
+			) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
 		}
 	);
+
 	let node;
-	while (node = walker.nextNode()) textNodes.push(node);
-
-	return new Promise(resolve => {
-		async function parseNextTextNode() {
-			const node = textNodes.shift();
-			if (!node) {
-				console.timeEnd('LawEasyRead: ' + exeID);
-				return resolve(element);
-			}
-			let objects = await LER.parseString({
-				string: node.textContent,
-				allowLink: !node.parentNode?.closest?.('a'),
-				articleNumberFormat,
-				defaultLaw
-			});
-
-			requestIdleCallback(parseNextTextNode);
-			if (objects.length === 1 && objects[0] === node.textContent) return; // 沒變的話就不替換
-			// 扁平化。但由於 JsonML 自身結構已是陣列，故不方便使用 `Array.flat()` 。
-			// objects = objects.reduce((acc, cur) => {
-			// 	if (typeof cur === 'string'
-			// 		|| /[a-z]+/.test(cur[0]) && !(cur[1] instanceof Array) // JsonML
-			// 	) acc.push(cur);
-			// 	else acc.push(...cur);
-			// 	return acc;
-			// }, []);
-			objects = objects.map(createElement);
-
-			const next = node.nextSibling;
-			node.replaceWith(...objects);
-			if (enablePopup) objects.forEach(o => LER.bindPopup(o, articleNumberFormat));
-			if (!next) {
-				const parent = objects[0].parentNode;
-				const event = new CustomEvent('lerParseEnd');
-				parent.dispatchEvent(event);
-			}
-		}
-		requestIdleCallback(parseNextTextNode);
-	});
+	while (node = iter.nextNode()) {
+		const jsmlArr = await LER.parseString({
+			string: node.textContent,
+			allowLink: !node.parentNode?.closest?.('a[href], button, label, summary'),
+			...options
+		});
+		if (jsmlArr[0] === node.textContent) continue;
+		const nodeArr = jsmlArr.map(LER.createElement);
+		if (options.enablePopup) nodeArr.forEach(n => {
+			if (n instanceof Element) LER.bindPopup(n, options.articleNumberFormat);
+		});
+		node.replaceWith(...nodeArr);
+	}
+	console.timeEnd('LawEasyRead: ' + exeID);
+	element.dispatchEvent(new CustomeEvent('lerParseEnd'));
+	return element;
 },
 
 /** @type {JsonML} */
@@ -307,7 +275,7 @@ createElement(jsonML) {
  *  * https://stackoverflow.com/questions/57963312/
  *  * https://stackoverflow.com/questions/62181537/
  */
-bindPopup(elem, articleNumberFormat) {
+bindPopup(elem, articleNumberFormat = 'unchanged') {
 	if (!(elem instanceof Element)) return;
 	const {jyi, pcode, word} = elem.dataset;
 	if (!jyi && !pcode && !word) return;

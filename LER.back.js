@@ -303,13 +303,13 @@ return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁
 
 	/**
 	 * @public
-	 * @func getLaws
-	 * @returns {Promise.<Law[]>}
+	 * @func getMain
+	 * @returns {Promise.<Object>}
 	 * @desc overwritten in `browser/background.js` for WebExtension to cooperate with version control
 	 */
-	getLaws() {
+	async getMain() {
 		if (laws.length) return {laws, excludeTerms};
-		return this.downloadLaws();
+		return LER.downloadMain();
 	},
 
 

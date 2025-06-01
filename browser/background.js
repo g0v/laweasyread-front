@@ -1,17 +1,16 @@
-// LER.initWebExtension();
-
 /**
- * @func getLaws
- * @returns {Promise.<Law[]>}
+ * @func getMain
+ * @returns {Promise.<Object>}
  * @desc
  *  Overrides the method defined in `LER.back.js`.
  * 	Keep check until there's data in storage.
  */
-LER.getLaws = async function() {
-	for (let data; !data.localDate; ) {
+LER.getMain = async function() {
+	let data;
+	do {
+		if (!data) await new Promise(r => setTimeout(r, 100));
 		data = await storage.get();
-		await new Promise(r => setTimeout(r, 100));
-	}
+	} while (!data.localDate);
 	return data;
 };
 
