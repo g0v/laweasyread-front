@@ -1,4 +1,13 @@
 /**
+ * @typedef {Array} JsonML
+ * @property {string} 0 - HTML tag
+ * @property {object} 1 - Attributes
+ * @property {string|JsonML} [2] - First child
+ * @property {string|JsonML} [3] - Second child
+ * ...
+ */
+
+/**
  * @typedef {Object} Law
  * @property {string} pcode
  * @property {string} name

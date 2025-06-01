@@ -53,4 +53,4 @@ routes.forEach((route, index) => {
 	if (!index || route.name === location.hash.substring(1)) activeTab = tab;
 });
 
-activeTab.dispatchEvent(new Event('click'));
+activeTab.dispatchEvent(new MouseEvent('click'));

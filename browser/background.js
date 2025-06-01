@@ -32,9 +32,18 @@ browser.runtime.onInstalled.addListener(details => {
 	console.debug('onInstalled', details);
 
 	// 讀取資料庫的選項，補上預設的後就再存進去。
+	/**
+	 * 讀取資料庫的選項，補上預設的後就再存進去。
+	 * v2.0.x 及之前的版本是把選項存在根目錄，但 v2.1 之後是存在 `options` 這個 key 裡面。
+	 * 為了相容於是就這樣了：雖然寫 {newOptions, ...oldOptions} ，但兩個都會是物件。
+	 */
 	LER.fetch('/data/options_default.json', 'json')
-	.then(storage.get)
-	.then(storage.set);
+	.then(async (defaultOptions) => {
+		const {newOptions, ...oldOptions} = await storage.get(['options', ...Object.keys(defaultOptions)])
+		const options = Object.assign(defaultOptions, oldOptions, newOptions);
+		await storage.set({options});
+	});
+
 
 	// 若無 localDate ，直接下載全部並存起來
 	storage.get(['localDate'])
@@ -56,12 +65,11 @@ browser.alarms.onAlarm.addListener(alarm => {
 });
 
 
-addMessageListener('parseString', async ({string}) => {
-	const {laws, ...options} = await storage.get();
-	return LER.parseString(string, options);
-});
+addMessageListener('parseString', ({string}) =>
+	getOptions().then(options => LER.parseString(string, options))
+);
 
-addMessageListener('update', options => update(options.remoteDate));
+addMessageListener('update', ({remoteDate}) => update(remoteDate));
 
 
 /**
@@ -78,4 +86,3 @@ async function update(knownDate) {
 	console.debug(`Updated to ${data.remoteDate}`);
 	return data.remoteDate;
 }
-

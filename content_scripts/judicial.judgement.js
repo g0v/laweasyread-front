@@ -277,15 +277,15 @@ if (iframe) {
 
 /** @const main */
 ["main", {},
-	["div", {"class": "he-h3"},
+	["div", {class: "he-h3"},
 		["span", {"data-line-number": 10}, "事實及理由"]
 	],
-	["div", {"style": "padding-left: 2em; text-indent: -2em;"},
+	["div", {style: "padding-left: 2em; text-indent: -2em;"},
 		["span", {"data-line-number": 11}, "一、第十一行第十一行第十一行"],
 		["span", {"data-line-number": 12}, "第十二行第十二行第十二行"],
 		["span", {"data-line-number": 13}, "第十三行第十三行第十三行"]
 	],
-	["div", {"style": "padding-left: 2em; text-indent: -2em;"},
+	["div", {style: "padding-left: 2em; text-indent: -2em;"},
 		["span", {"data-line-number": 14}, "二、第十四行第十四行第十四行"],
 		["span", {"data-line-number": 15}, "第十五行第十五行第十五行"],
 		["span", {"data-line-number": 16}, "第十六行第十六行第十六行"]

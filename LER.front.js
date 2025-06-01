@@ -35,7 +35,7 @@ $$(selector, base) {
  * @param {string|Element} target The Element (or selector to it) to hide.
  */
 hide(target) {
-	LER.$(target)?.classList.add("d-none");
+	LER.$(target)?.classList.add('d-none');
 },
 
 /**
@@ -44,27 +44,25 @@ hide(target) {
  * @param {string|Element} target The Element (or selector to it) to show.
  */
 show(target) {
-	LER.$(target)?.classList.remove("d-none");
+	LER.$(target)?.classList.remove('d-none');
 },
 
 
 /**
  * @func listen
- * @desc Shortcut to `document.querySelector().addEventListener()`
- * @param {string|EventTarget} target string as selector to match an Element to be the EventTarget
- * @param {string} eventType event type
- * @param {function} listener
- * @param {Object|boolean} [options]
+ * @desc Shortcut to `document.querySelector().addEventListener()` but safe even it does not exist.
+ * @param {string|EventTarget} target - String as selector to match an Element to be the EventTarget.
+ * @param {...*} args - Same as `addEventListener()`
  */
-listen(target, eventType, listener, options) {
-	LER.$(target)?.addEventListener(eventType, listener, options);
+listen(target, ...args) {
+	LER.$(target)?.addEventListener(...args);
 },
 
 
 /**
  * @func createElement
  * @desc Create an HTML element from a JSON Markup Language (JsonML) representation recrursively.
- * @param {Array|*} jsonML JSON Markup Language (JsonML) representation of an HTML element.
+ * @param {JsonML} jsonML - JsonML structure of an HTML element.
  * @returns {HTMLElement|Text}
  */
 createElement(jsonML) {
@@ -331,7 +329,7 @@ bindPopup(elem, articleNumberFormat = 'unchanged') {
  * 設定彈出式視窗位置。
  * @param {Element} popup
  * @param {MouseEvent} event
- * @returns {undefined}
+ * @returns {void}
  */
 setPopupPosition(popup, event) {
 	// console.debug('LER.setPopupPosition()', event);

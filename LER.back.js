@@ -90,7 +90,7 @@ function applyReplaceRule(string, {pattern, replacer}) {
 		debris.push(string.substring(pos));
 		return debris;
 	}
-	console.assert(typeof pattern === "string" || typeof replacer !== "function");
+	console.assert(typeof pattern === 'string' || typeof replacer !== 'function');
 	if (replacer instanceof Function) replacer = replacer(pattern);
 	const debris = string.split(pattern);
 	for (let i = debris.length - 1; i; --i)
@@ -155,32 +155,32 @@ const articleDivisionDetectors = [
  * @desc 動態規則的比對用表達式，需注意括號的順序。
  */
 const regexps = {
-	number: "([〇\\d零一二三四五六七八九０１２３４５６７８９十百千]+)",
+	number: '([〇\\d零一二三四五六七八九０１２３４５６７８９十百千]+)',
 
 	/// 「第5-3條」、「第5條之3」
-	artMain: "第\\s*number(\\s*[之\-]\\s*number)?\\s*條(\\s*之\\s*number)?(\\s*[前後]段|\\s*但書)?",
+	artMain: '第\\s*number(\\s*[之\-]\\s*number)?\\s*條(\\s*之\\s*number)?(\\s*[前後]段|\\s*但書)?',
 
 	// 土地法第2條第1項、所得稅法第14條第1項有「類」。
-	paraCat: "\\s*第\\s*number\\s*項(\\s*[前後]段|\\s*但書|\\s*第\\s*number\\s*類)?",
+	paraCat: '\\s*第\\s*number\\s*項(\\s*[前後]段|\\s*但書|\\s*第\\s*number\\s*類)?',
 
 	// 所得稅法§17-3提到「第三目第三小目」，§17-4提到「第二目之一」
-	// secItem: "\\s*第\\s*number\\s*款(\\s*[前後]段|\\s*但書)?(\\s*第\\s*number\\s*目)?",
-	secItem: "\\s*第\\s*number\\s*款(\\s*[前後]段|\\s*但書)?(\\s*第\\s*number\\s*目(\\s*[前後]段|\\s*但書|\\s*之\\s*number|\\s*第\\s*number\\s*小目)?)?",
+	// secItem: '\\s*第\\s*number\\s*款(\\s*[前後]段|\\s*但書)?(\\s*第\\s*number\\s*目)?',
+	secItem: '\\s*第\\s*number\\s*款(\\s*[前後]段|\\s*但書)?(\\s*第\\s*number\\s*目(\\s*[前後]段|\\s*但書|\\s*之\\s*number|\\s*第\\s*number\\s*小目)?)?',
 
 	// 有項才能有類，無項亦能有款，有款才能有目。
-	article: "artMain(paraCat)?(secItem)?",
-	articles: "article(\\s*[至到,、及或和與]\\s*(article|(第\\s*number\\s*[項款目])+))*",
+	article: 'artMain(paraCat)?(secItem)?',
+	articles: 'article(\\s*[至到,、及或和與]\\s*(article|(第\\s*number\\s*[項款目])+))*',
 
-	jyi: "第?number號?",
-	jyis: "((司法院)?(大法官)?釋字)jyi([,、及]jyi)*",
+	jyi: '第?number號?',
+	jyis: '((司法院)?(大法官)?釋字)jyi([,、及]jyi)*',
 
-	consDecision: "憲法法庭\\s*number\\s*(年度?)?\\s*([\\u4E00-\\u5b56\\u5b58-\\u9FFF]+)字?第?number號?(裁定|判決)?"
+	consDecision: '憲法法庭\\s*number\\s*(年度?)?\\s*([\\u4E00-\\u5b56\\u5b58-\\u9FFF]+)字?第?number號?(裁定|判決)?'
 };
 Object.keys(regexps).forEach((key, i, keys) => {
 	for (let j = i - 1; j >= 0; --j)
-		regexps[key] = regexps[key].replace(new RegExp(keys[j], "g"), regexps[keys[j]]);
+		regexps[key] = regexps[key].replace(new RegExp(keys[j], 'g'), regexps[keys[j]]);
 });
-for (let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
+for (let key in regexps) regexps[key] = new RegExp(regexps[key], 'g');
 
 
 /**
@@ -191,9 +191,9 @@ for (let key in regexps) regexps[key] = new RegExp(regexps[key], "g");
 const dynamicRules = [
 	{
 		pattern: regexps.jyis,
-		position: "after",
+		position: 'after',
 		replacer: match => {
-			const r = {type: "jyis", text: match[0]};
+			const r = {type: 'jyis', text: match[0]};
 			r.jyis = [...match[0].matchAll(regexps.jyi)]
 				.map(mJYI => ({
 					number: pcn(mJYI[1]),
@@ -206,10 +206,10 @@ const dynamicRules = [
 	},
 	{
 		pattern: regexps.articles,
-		position: "after",
+		position: 'after',
 		replacer: match => {
 			const r = {
-				type: "articles",
+				type: 'articles',
 				text: match[0]
 			}
 			const andList = match[0].split(/[,、及或和與]/g);
@@ -219,34 +219,34 @@ const dynamicRules = [
 					case 0: return acc;
 					case 1: {
 						let number = pcn(articles[0][1]);
-						if (articles[0][2]) number += "." + pcn(articles[0][3]);
-						if (articles[0][4]) number += "." + pcn(articles[0][5]);
+						if (articles[0][2]) number += '.' + pcn(articles[0][3]);
+						if (articles[0][4]) number += '.' + pcn(articles[0][5]);
 						acc.push(number);
 						return acc;
 					}
 					case 2: {
 						const range = articles.map(a => {
 							let number = pcn(a[1]);
-							if (a[2]) number += "." + pcn(a[3]);
-							if (a[4]) number += "." + pcn(a[5]);
+							if (a[2]) number += '.' + pcn(a[3]);
+							if (a[4]) number += '.' + pcn(a[5]);
 							return number;
 						});
-						acc.push(range.join("-"));
+						acc.push(range.join('-'));
 						return acc;
 					}
 					default:
 						console.error(articles); // too many articles
 				}
-			}, []).join(",");
+			}, []).join(',');
 			return r;
 		}
 	},
 	{
 		pattern: regexps.consDecision,
-		position: "before",
+		position: 'before',
 		replacer: match => {
 			return {
-				type: "consDecision",
+				type: 'consDecision',
 				text: match[0],
 				year: match[1],
 				word: match[3],
@@ -327,24 +327,24 @@ return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁
 		.reduce((acc, {pcode, name, aliases}) => {
 			acc.push({
 				pattern: name,
-				replacer: {type: "law", text: name, pcode}
+				replacer: {type: 'law', text: name, pcode}
 			});
 			aliases?.forEach(alias => acc.push({
 				pattern: alias,
-				replacer: {type: "law", text: alias, pcode, title: name}
+				replacer: {type: 'law', text: alias, pcode, title: name}
 			}));
 			return acc;
 		}, [])
 		.concat(exTerms.map(text => ({
 			pattern: text,
-			replacer: {type: "exclude", text}
+			replacer: {type: 'exclude', text}
 		})))
 		.sort((a, b) => b.pattern.length - a.pattern.length)
 
 		replaceRules =
-			dynamicRules.filter(dr => dr.position === "before")
+			dynamicRules.filter(dr => dr.position === 'before')
 			.concat(replaceRules)
-			.concat(dynamicRules.filter(dr => dr.position === "after"))
+			.concat(dynamicRules.filter(dr => dr.position === 'after'))
 		;
 		return replaceRules;
 	},
@@ -504,7 +504,7 @@ return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁
 			);
 		}
 		else if (pcode) {
-			const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: "no-cache"});
+			const law = await fetchJSON(`https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/ch/${pcode}.json`, {cache: 'no-cache'});
 
 			headers = [
 				law.name + ' ',
@@ -515,10 +515,10 @@ return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁
 			);
 
 			if (norge) {
-				/// "3.1-5,7.1" => [[301, 500], [701]]
-				const ranges = norge.split(",").map(range => {
-					return range.split("-").map(articleNumber => {
-						const numbers = articleNumber.split(".").map(s => parseInt(s));
+				/// '3.1-5,7.1' => [[301, 500], [701]]
+				const ranges = norge.split(',').map(range => {
+					return range.split('-').map(articleNumber => {
+						const numbers = articleNumber.split('.').map(s => parseInt(s));
 						return numbers[0] * 100 + (numbers[1] || 0);
 					});
 				});
@@ -558,7 +558,7 @@ return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁
 				);
 
 				const lastNumber = law.articles[law.articles.length - 1].number / 100;
-				const deletedAmount = law.articles.filter(a => a.content.length === 1 && a.content[0].text === "（刪除）").length;
+				const deletedAmount = law.articles.filter(a => a.content.length === 1 && a.content[0].text === '（刪除）').length;
 				bodyParts.push(
 					['dt', '條文數'],
 					['dd', `共 ${law.articles.length.toString()} 條；其中 ${deletedAmount} 條被刪除；最末條為第 ${lastNumber} 條。`]

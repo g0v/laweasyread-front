@@ -12,7 +12,10 @@
 		<dt><input type="checkbox" id="enablePopup"></dt>
 		<dd>
 			<label for="enablePopup">啟用內嵌彈出式視窗</label>
-			<p class="text-muted">滑鼠移過條號或憲法裁判字號時，在網頁內嵌入彈出式視窗以顯示內容</p>
+			<div id="popupDelayContainer" class="d-flex align-items-center">
+				滑鼠停留 <input type="number" id="popupDelay" min="0" step="25" class="form-control form-control-sm text-end mx-1" style="width: 4rem;"> 毫秒後顯示。
+			</div>
+			<p class="text-muted">滑鼠移過條號或憲法裁判字號時，在網頁內嵌入彈出式視窗以顯示內容。</p>
 			<p class="text-muted">需開啟自動轉換，或是手動點選右上角外掛符號→轉換此頁面後，才能夠顯示。</p>
 			<p class="text-muted">條文、大法官解釋、憲法判決是從網路抓取資料，可能會因網路狀況而有延遲或未能顯示。</p>
 		</dd>

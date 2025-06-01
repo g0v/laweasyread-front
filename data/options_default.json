@@ -3,7 +3,8 @@
 	"autoParse": true,
 	"autoUpdate": true,
 	"enablePopup": true,
-	"exclude_matches": "",
+	"popupDelay": 375,
+	"excludeMatches": "",
 	"typesetDockets": true,
 	"typesetMoj": true
 }

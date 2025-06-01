@@ -2,7 +2,7 @@ console.debug('options_ui/tool.js');
 listen('#toolInput', 'input', async() => {
 	$('#toolResult').textContent = '';
 	const {articleNumberFormat} = await storage.get(['articleNumberFormat'])
-	const objects = (await browser.runtime.sendMessage({
+	const objects = (await sendMessage({
 		method: 'parseString',
 		string: $('#toolInput').value,
 		articleNumberFormat

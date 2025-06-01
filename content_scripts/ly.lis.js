@@ -51,12 +51,12 @@ $$('td').forEach(td => {
 
 	specimen.childNodes.forEach(child => {
 		switch (child.nodeName) {
-			case "#text": {
+			case '#text': {
 				const text = child.textContent.trim();
 				if (!text) break;
 				const stratum = getStratum(child.textContent);
 				if (stratum < 0) {
-					lines[lines.length - 1].text += "\n" + text;
+					lines[lines.length - 1].text += '\n' + text;
 					break;
 				}
 				lines.push({
@@ -66,7 +66,7 @@ $$('td').forEach(td => {
 				});
 				break;
 			}
-			case "BR":
+			case 'BR':
 				break;
 			default:
 				others.push(child);

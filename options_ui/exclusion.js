@@ -2,10 +2,10 @@ console.debug('options_ui/exclusion.js');
 /**
  * 初始區
  */
-storage.get(['exclude_matches'])
-.then(({exclude_matches: em}) => $('#exclude_matches').value = em);
+storage.get(['excludeMatches'])
+.then(({excludeMatches: em}) => $('#excludeMatches').value = em);
 
-$('#exclude_matches').disabled = true;
+$('#excludeMatches').disabled = true;
 hide('#saveButton');
 
 
@@ -16,12 +16,12 @@ listen('#editButton', 'click', () => {
 	hide('#editButton');
 	show('#saveButton');
 	$('#saveButton').disabled = true;
-	$('#exclude_matches').disabled = false;
+	$('#excludeMatches').disabled = false;
 });
 
 listen('#sandbox', 'input', testPatterns);
 
-listen('#exclude_matches', 'input', () => {
+listen('#excludeMatches', 'input', () => {
 	$('#saveButtonContainer').style.visibility = '';
 	$('#saveButton').disabled = false;
 	testPatterns();
@@ -29,12 +29,12 @@ listen('#exclude_matches', 'input', () => {
 
 listen('#saveButton', 'click', event => {
 	const self = event.target;
-	const em = $('#exclude_matches');
+	const em = $('#excludeMatches');
 	self.disabled = true;
 	em.disabled = true;
 	self.replaceChildren('儲存中');
 	const value = em.value.trim().replace(/\n+/g, '\n');
-	storage.set({exclude_matches: value})
+	storage.set({excludeMatches: value})
 	.then(() => {
 		self.replaceChildren('儲存');
 		hide(self);
@@ -57,7 +57,7 @@ function testPatterns() {
 	try { new URL(input); }
 	catch(err) { return testResult.append('測試網址的格式不正確'); }
 
-	const list = $('#exclude_matches').value.split('\n').filter(x => x);
+	const list = $('#excludeMatches').value.split('\n').filter(x => x);
 	const matchedPattern = list.find(pattern => testExcludePattern(pattern, input));
 	testResult.append(matchedPattern
 		? '這個網址符合路徑規則 ' + matchedPattern
