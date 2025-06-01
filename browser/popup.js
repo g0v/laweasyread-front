@@ -1,5 +1,4 @@
-globalThis.browser ??= globalThis.chrome;
-globalThis.storage = browser.storage.local;
+console.debug('browser/popup.js');
 LER.globalizeUtility();
 
 /**

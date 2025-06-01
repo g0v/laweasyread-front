@@ -1,3 +1,4 @@
+console.debug('content_scripts/judicial.judgement.js');
 /**
  * 處理「以換行排版的裁判書」
  *

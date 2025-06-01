@@ -1,3 +1,4 @@
+console.debug('options_ui/exclusion.js');
 /**
  * 初始區
  */
@@ -18,12 +19,12 @@ listen('#editButton', 'click', () => {
 	$('#exclude_matches').disabled = false;
 });
 
-listen('#sandbox', 'input', testRules);
+listen('#sandbox', 'input', testPatterns);
 
 listen('#exclude_matches', 'input', () => {
 	$('#saveButtonContainer').style.visibility = '';
 	$('#saveButton').disabled = false;
-	testRules();
+	testPatterns();
 });
 
 listen('#saveButton', 'click', event => {
@@ -47,7 +48,7 @@ listen('#saveButton', 'click', event => {
 /**
  * 函數宣告
  */
-function testRules() {
+function testPatterns() {
 	const input = $('#sandbox').value.trim();
 	const testResult = $('#testResult');
 	testResult.replaceChildren();
@@ -57,12 +58,9 @@ function testRules() {
 	catch(err) { return testResult.append('測試網址的格式不正確'); }
 
 	const list = $('#exclude_matches').value.split('\n').filter(x => x);
-	const matchedRule = list.find(rule => {
-		const regexp = rule.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
-		return (new RegExp(regexp)).test(input);
-	});
-	testResult.append(matchedRule
-		? '這個網址符合路徑規則 ' + matchedRule
+	const matchedPattern = list.find(pattern => testExcludePattern(pattern, input));
+	testResult.append(matchedPattern
+		? '這個網址符合路徑規則 ' + matchedPattern
 		: '沒有比對到任何路徑規則，這個網址將套用「自動轉換」的設定。'
 	);
 };

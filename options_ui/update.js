@@ -1,3 +1,4 @@
+console.debug('options_ui/update.js');
 storage.get(['localDate', 'remoteDate', 'lastCheck'])
 .then(({localDate, remoteDate, lastCheck}) => {
 	if (localDate) $('#localDate').replaceChildren(localDate);

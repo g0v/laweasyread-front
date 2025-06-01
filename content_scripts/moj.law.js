@@ -1,4 +1,4 @@
-const createElement = createElement;
+console.debug('content_scripts/moj.law.js');
 
 /**
  * 排除首頁的「熱門法規瀏覽」（排版考量）

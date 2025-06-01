@@ -1,3 +1,4 @@
+console.debug('options_ui/index.js');
 LER.globalizeUtility();
 
 // 顯示專案版本
@@ -38,7 +39,8 @@ routes.forEach((route, index) => {
 	});
 
 	tab.addEventListener('click', () => {
-		LER.fetch(`${route.name}.html`)
+		fetch(`${route.name}.html`)
+		.then(res => res.text())
 		.then(html => {
 			const doc = new DOMParser().parseFromString(html, 'text/html');
 			container.append(...doc.body.childNodes);

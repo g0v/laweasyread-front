@@ -39,6 +39,7 @@
 
 |檔案|網站內嵌|background|popup|options_ui|content_scripts|
 |----|-------|-----------|----|----------|---|
+|browser/general.js|x|o|o|o|o|
 |LER.back.js|o|o|x|x|x|
 |LER.front.js|o|x|x|o|o|
 |browser/background.js|x|o|x|x|x|

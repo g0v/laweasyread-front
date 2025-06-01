@@ -27,7 +27,7 @@
 },
 "content_scripts": [
 	{
-		"matches": ["<all_urls>"],
+		"matches": ["*://*/*", "file:///*"],
 		"js": [
 			"browser/general.js",
 			"LER.front.js"
@@ -59,7 +59,7 @@
 		"all_frames": true
 	},
 	{
-		"matches": ["<all_urls>"],
+		"matches": ["*://*/*", "file:///*"],
 		"js": ["content_scripts/main.js"],
 		"all_frames": true
 	}

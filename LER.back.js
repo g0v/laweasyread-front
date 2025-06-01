@@ -1,3 +1,4 @@
+console.debug('LER.back.js');
 globalThis.LER ||= {};
 Object.assign(LER, (() => {
 

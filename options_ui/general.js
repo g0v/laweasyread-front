@@ -1,3 +1,4 @@
+console.debug('options_ui/general.js');
 const booleanOptions = [
 	"autoParse",
 	"enablePopup",

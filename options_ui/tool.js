@@ -1,3 +1,4 @@
+console.debug('options_ui/tool.js');
 listen('#toolInput', 'input', async() => {
 	$('#toolResult').textContent = '';
 	const {articleNumberFormat} = await storage.get(['articleNumberFormat'])

@@ -1,3 +1,4 @@
+console.debug('content_scripts/ly.lis.js');
 /**
  * 適用於 `https://lis.ly.gov.tw/lglawc/lawsingle?*`
  * 目前僅發現四種頁面：

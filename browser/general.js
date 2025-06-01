@@ -1,34 +1,23 @@
+console.debug('browser/general.js');
 globalThis.browser ??= globalThis.chrome;
 globalThis.storage = browser.storage.local;
 
-/**
- * @type {Object.<string,function>}
- */
-const messageListeners = {};
 
 /**
- * @func listenMessage
- * @param {Object} message
- * @param {string} message.method
- * @param {runtime.MessageSender} sender
- * @param {function} sendResponse - 回呼函數
- * @returns {boolean} Firefox 可接受 Promise，但 Chrome 只接受 boolean。
+ * @func addMessageListener
+ * @param {string} methodName
+ * @param {function} callback
+ * @returns {undefined}
  */
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.debug('onMessage', message, sender);
-	const {method, ...options} = message;
-    if (!messageListeners[method]) {
-        const error = 'no listener for method ' + method;
-        console.error(error);
-        sendResponse(new Error(error));
-        return false;
-    }
-    const result = messageListeners[method](options);
-	if (result instanceof Promise)
-		return !!result.then(sendResponse); // return true for sendResponse to be called async
-	sendResponse(result);
-	return false;
-});
+function addMessageListener(methodName, callback) {
+    browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        const {method, ...options} = message;
+        if (method !== methodName) return false;
+        const result = callback(options);
+        if (result instanceof Promise) return !!result.then(sendResponse);
+        return false || sendResponse(result);
+    });
+}
 
 
 /**
@@ -51,4 +40,16 @@ async function checkUpdate(forceUpdate = false) {
         else await browser.runtime.sendMessage({method: 'update', remoteDate});
     }
     return remoteDate;
+}
+
+
+/**
+ * @func testExcludePattern
+ * @param {string} pattern
+ * @param {string} url
+ * @returns {boolean}
+ */
+function testExcludePattern(pattern, url) {
+    const regexp = pattern.replace(/([.+?\\()\[\]{}])/g, '\\$1').replace(/\*/g, '.*');
+    return new RegExp(regexp).test(url);
 }

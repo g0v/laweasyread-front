@@ -1,3 +1,4 @@
+console.debug('browser/background.js');
 /**
  * @func getMain
  * @returns {Promise.<Object>}
@@ -45,15 +46,22 @@ browser.runtime.onInstalled.addListener(details => {
 });
 
 /**
- * @async
  * @func onAlarmListener
  * @desc Periodically check whether there's newer version, and update if allowed.
  * @param {Object} alarm
  */
-browser.alarms.onAlarm.addListener(async (alarm) => {
+browser.alarms.onAlarm.addListener(alarm => {
 	console.debug('onAlarm', alarm);
 	checkUpdate();
 });
+
+
+addMessageListener('parseString', async ({string}) => {
+	const {laws, ...options} = await storage.get();
+	return LER.parseString(string, options);
+});
+
+addMessageListener('update', options => update(options.remoteDate));
 
 
 /**
@@ -71,8 +79,3 @@ async function update(knownDate) {
 	return data.remoteDate;
 }
 
-Object.assign(messageListeners, {
-	update: options => update(options.remoteDate),
-	parseString: LER.parseString,
-	loadRules: LER.loadRules
-});

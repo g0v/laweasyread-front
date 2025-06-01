@@ -1,3 +1,4 @@
+console.debug('LER.front.js');
 globalThis.LER ||= {};
 Object.assign(LER, {
 
@@ -135,10 +136,10 @@ globalizeUtility() {
 /**
  * @func parseDocument
  * @desc 轉換整個頁面
- * @param {Object} options
+ * @param {Object} [options]
  * @returns {Promise.<HTMLBodyElement>}
  */
-parseDocument(options) {
+parseDocument(options = {}) {
 	console.debug('LER.parseDocument()');
 	options.articleNumberFormat ||= 'unchanged';
 	return LER.parseElement(
@@ -187,7 +188,7 @@ async parseElement(element, options = {}) {
 		node.replaceWith(...nodeArr);
 	}
 	console.timeEnd('LawEasyRead: ' + exeID);
-	element.dispatchEvent(new CustomeEvent('lerParseEnd'));
+	element.dispatchEvent(new CustomEvent('lerParseEnd'));
 	return element;
 },
 
