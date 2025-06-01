@@ -1,4 +1,6 @@
-LER.initWebExtension();
+globalThis.browser ??= globalThis.chrome;
+globalThis.storage = browser.storage.local;
+LER.globalizeUtility();
 
 /**
  * @var {Tab}
@@ -25,7 +27,7 @@ storage.get(['autoParse', 'localDate', 'remoteDate'])
 		listen(btnUpdate, 'click', () => {
 			btnUpdate.lastChild.replaceWith('更新中…');
 			btnUpdate.disabled = true;
-			browser.runtime.sendMessage({method: 'update'})
+			browser.runtime.sendMessage({method: 'update', remoteDate})
 			.then(
 				() => btnUpdate.remove(),
 				() => btnUpdate.replaceWith('更新失敗')
@@ -51,6 +53,10 @@ browser.tabs.query({active: true, currentWindow: true})
 });
 
 
+/**
+ * @func parseCurrentTab
+ * @returns {Promise|false}
+ */
 function parseCurrentTab() {
 	if (!currentTab) return false;
 	const url = currentTab.url;
@@ -61,7 +67,6 @@ function parseCurrentTab() {
 		browser.tabs.sendMessage(currentTab.id, {method: 'parseDocument', ...options})
 	);
 }
-
 
 
 /**

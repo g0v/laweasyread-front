@@ -1,4 +1,4 @@
-LER.initWebExtension();
+// LER.initWebExtension();
 
 /**
  * @func getLaws
@@ -50,43 +50,10 @@ browser.runtime.onInstalled.addListener(details => {
  * @func onAlarmListener
  * @desc Periodically check whether there's newer version, and update if allowed.
  * @param {Object} alarm
- * @param {string} alarm.name - the name that was passed into the `alarms.create()` call that created this alarm.
- * @param {double} alarm.scheduledTime - Time at which the alarm is scheduled to fire next, in milliseconds since the epoch.
- * @param {double|null} [alarm.periodInMinutes] - If this is not null, then the alarm is periodic, and this represents its period in minutes.
  */
 browser.alarms.onAlarm.addListener(async (alarm) => {
 	console.debug('onAlarm', alarm);
-	const {autoUpdate, localDate} = await storage.get(['autoUpdate', 'localDate']);
-	const remoteDate = await LER.fetch('https://cdn.jsdelivr.net/gh/kong0107/mojLawSplitJSON@arranged/UpdateDate.txt', 'text');
-	storage.set({
-		remoteDate,
-		lastCheck: Date.now()
-	});
-
-	if (autoUpdate && (localDate !== remoteDate)) update(remoteDate);
-});
-
-
-/**
- * @func onMessageListener
- * @param {Object} message
- * @param {string} message.method
- * @param {runtime.MessageSender} sender
- * @param {function} sendResponse - 回呼函數
- * @returns {boolean} Firefox 可接受 Promise，但 Chrome 只接受 boolean。
- */
-browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-	console.debug('onMessage', message, sender);
-	const {method, ...options} = message;
-	let result;
-	if (method === 'update') result = update();
-	// else result = LER[method]?.(options, sender);
-	else throw new Error('unknown method: ' + method);
-
-	if (result instanceof Promise)
-		return !!result.then(sendResponse); // return true for sendResponse to be called async
-	sendResponse(result);
-	return false;
+	checkUpdate();
 });
 
 
@@ -94,7 +61,7 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
  * @func update
  * @desc Save downloaded data into storage.
  * @param {string} [knownDate] - Used to skip checking `remoteDate` when already known.
- * @returns {Promise.<Law[]>}
+ * @returns {Promise.<string>}
  */
 async function update(knownDate) {
 	const data = await LER.downloadMain(knownDate);
@@ -102,4 +69,11 @@ async function update(knownDate) {
 	if (!knownDate)  data.lastCheck = Date.now();
 	await storage.set(data);
 	console.debug(`Updated to ${data.remoteDate}`);
+	return data.remoteDate;
 }
+
+Object.assign(messageListeners, {
+	update: options => update(options.remoteDate),
+	parseString: LER.parseString,
+	loadRules: LER.loadRules
+});

@@ -1,8 +1,4 @@
-document.head.append(createElement(
-	['script', {src: '../LER.front.js'}]
-));
-
-listen($('#toolInput'), 'input', async() => {
+listen('#toolInput', 'input', async() => {
 	$('#toolResult').textContent = '';
 	const {articleNumberFormat} = await storage.get(['articleNumberFormat'])
 	const objects = (await browser.runtime.sendMessage({

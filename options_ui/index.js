@@ -1,4 +1,4 @@
-LER.initWebExtension();
+LER.globalizeUtility();
 
 // 顯示專案版本
 $('#version').append('v' + browser.runtime.getManifest().version);

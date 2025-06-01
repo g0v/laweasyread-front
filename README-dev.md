@@ -39,16 +39,14 @@
 
 |檔案|網站內嵌|background|popup|options_ui|content_scripts|
 |----|-------|-----------|----|----------|---|
-|LER.util.js|o|o|o|o|o|
 |LER.back.js|o|o|x|x|x|
-|LER.front.js|o|x|o|x|o|
+|LER.front.js|o|x|x|o|o|
 |browser/background.js|x|o|x|x|x|
 |browser/popup.*|x|x|o|x|x|
 |options_ui/*|x|x|x|o|x|
 |content_scripts/*|x|x|x|x|o|
 
 
-* `LER.util.js`: 公用函示庫和語法糖
 * `LER.back.js`: 擷取資料、不須 DOM 操作的函數；在瀏覽器外掛模式中，於背景執行（只有一個實體）。
 * `LER.front.js`: 呼叫後端程式碼並處理 DOM 的部分；在瀏覽器外掛模式中，於各分頁執行（每個分頁一個實體）。
 * `browser/background.js`: 作為瀏覽器外掛時，於背景執行與監聽事件反應。

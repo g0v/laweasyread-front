@@ -2,43 +2,43 @@
  * 初始區
  */
 storage.get(['exclude_matches'])
-.then(({exclude_matches: em}) => $("#exclude_matches").value = em);
+.then(({exclude_matches: em}) => $('#exclude_matches').value = em);
 
-$("#exclude_matches").disabled = true;
-hide($("#saveButton"));
+$('#exclude_matches').disabled = true;
+hide('#saveButton');
 
 
 /**
  * 事件監聽
  */
-listen($("#editButton"), "click", () => {
-	hide($("#editButton"));
-	show($("#saveButton"));
-	$("#saveButton").disabled = true;
-	$("#exclude_matches").disabled = false;
+listen('#editButton', 'click', () => {
+	hide('#editButton');
+	show('#saveButton');
+	$('#saveButton').disabled = true;
+	$('#exclude_matches').disabled = false;
 });
 
-listen($("#sandbox"), "input", testRules);
+listen('#sandbox', 'input', testRules);
 
-listen($("#exclude_matches"), "input", () => {
-	$("#saveButtonContainer").style.visibility = "";
-	$("#saveButton").disabled = false;
+listen('#exclude_matches', 'input', () => {
+	$('#saveButtonContainer').style.visibility = '';
+	$('#saveButton').disabled = false;
 	testRules();
 });
 
-listen($("#saveButton"), "click", event => {
+listen('#saveButton', 'click', event => {
 	const self = event.target;
-	const em = $("#exclude_matches");
+	const em = $('#exclude_matches');
 	self.disabled = true;
 	em.disabled = true;
-	self.replaceChildren("儲存中");
-	const value = em.value.trim().replace(/\n+/g, "\n");
+	self.replaceChildren('儲存中');
+	const value = em.value.trim().replace(/\n+/g, '\n');
 	storage.set({exclude_matches: value})
 	.then(() => {
-		self.replaceChildren("儲存");
+		self.replaceChildren('儲存');
 		hide(self);
-		show($("#editButton"));
-		$("#saveMessage").replaceChildren("已儲存於 " + (new Date).toLocaleString());
+		show('#editButton');
+		$('#saveMessage').replaceChildren('已儲存於 ' + (new Date).toLocaleString());
 		em.value = value;
 	});
 });

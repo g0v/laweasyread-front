@@ -1,4 +1,136 @@
+globalThis.LER ||= {};
 Object.assign(LER, {
+
+/**
+ * @func $
+ * @desc Shortcut to `querySelector`, but safe for methods such as `Array.prototype.map`.
+ * @param {string|EventTarget} selector
+ * @param {Element|Document} [base=document] the element to call `querySelector`, or `document` if without such method.
+ * @returns {HTMLElement|null}
+ */
+$(selector, base) {
+	if (selector instanceof EventTarget) return selector;
+	if (!base?.querySelector) base = document;
+	return base.querySelector(selector);
+},
+
+
+/**
+ * @func $$
+ * @desc Shortcut to `querySelectorAll`, but safe for `Array.prototype.map`.
+ * @param {string} selector
+ * @param {Element|Document} [base=document]
+ * @returns {NodeList}
+ */
+$$(selector, base) {
+	if (!base?.querySelectorAll) base = document;
+	return base.querySelectorAll(selector);
+},
+
+
+/**
+ * @func hide
+ * @desc Hide an element by setting its class to `d-none` for Bootstrap
+ * @param {string|Element} target The Element (or selector to it) to hide.
+ */
+hide(target) {
+	this.$(target)?.classList.add("d-none");
+},
+
+/**
+ * @func show
+ * @desc Show an element which were hidden because of its `d-none` class.
+ * @param {string|Element} target The Element (or selector to it) to show.
+ */
+show(target) {
+	this.$(target)?.classList.remove("d-none");
+},
+
+
+/**
+ * @func listen
+ * @desc Shortcut to `document.querySelector().addEventListener()`
+ * @param {string|EventTarget} target string as selector to match an Element to be the EventTarget
+ * @param {string} eventType event type
+ * @param {function} listener
+ * @param {Object|boolean} [options]
+ */
+listen(target, eventType, listener, options) {
+	this.$(target)?.addEventListener(eventType, listener, options);
+},
+
+
+/**
+ * @func createElement
+ * @desc Create an HTML element from a JSON Markup Language (JsonML) representation recrursively.
+ * @param {Array|*} jsonML JSON Markup Language (JsonML) representation of an HTML element.
+ * @returns {HTMLElement|Text}
+ */
+createElement(jsonML) {
+	if (!jsonML) jsonML = '';
+	if (typeof jsonML === 'string') return document.createTextNode(jsonML);
+	if (jsonML instanceof Node) return jsonML.cloneNode(true);
+	if (jsonML.constructor !== Array)
+		throw new TypeError('Invalid JsonML constructor: ' + jsonML.constructor.name);
+
+	const [tag, ...children] = jsonML;
+	const attr = (children?.[0]?.constructor === Object) ? children.shift() : {};
+	const elem = document.createElement(tag);
+	for (const [origKey, value] of Object.entries(attr)) {
+		const key = origKey.toLowerCase();
+		if (key.startsWith('on')) elem.addEventListener(key.slice(2), value);
+		else if (key === 'class') elem.className = value;
+		else if (!value) elem.removeAttribute(key);
+		else if (value === true) elem.setAttribute(key, '');
+		else if (value.constructor !== Object) elem.setAttribute(key, value);
+		else switch (key) {
+			case 'style':
+			case 'css':
+				for (const [k, v] of Object.entries(value)) elem.style[k] = v;
+				break;
+			case 'data':
+			case 'dataset':
+				for (const [k, v] of Object.entries(value)) elem.dataset[k] = v;
+				break;
+			default:
+				throw new TypeError(`Unsupported attribute: ${origKey}=${JSON.stringify(value)}`);
+		}
+	}
+	elem.append(...children.map(LER.createElement));
+	elem.normalize();
+	return elem;
+},
+
+
+/**
+ * @func isEventInElement
+ * @desc Check wheather a mouse event happens inside an element, even its target is not the element.
+ * @param {MouseEvent} event
+ * @param {Element|string} elem the Element or the query selector to it
+ * @returns {boolean}
+ */
+isEventInElement(event, elem) {
+	const {clientX: x, clientY: y} = event;
+	if (typeof elem === 'string') elem = $(elem);
+	if (!elem) {
+		console.warn('isEventInElement: Element not found for selector: ' + elem);
+		return false;
+	}
+	return [...elem.getClientRects()].some(r =>
+		x >= r.left && x <= r.right && y >= r.top && y <= r.bottom
+	);
+},
+
+
+/**
+ * @func globalizeUtility
+ * @desc Make above functions global.
+ */
+globalizeUtility() {
+	['$', '$$', 'hide', 'show', 'listen', 'createElement', 'isEventInElement']
+	.forEach(method => globalThis[method] = this[method]);
+},
+
 
 /**
  * @func parseDocument
@@ -32,7 +164,7 @@ async parseElement(
 	console.debug('LER.parseElement', element);
 	const exeID = crypto.randomUUID();
 	console.time('LawEasyRead: ' + exeID);
-	await this.loadRules();
+	await this.loadRules(); // todo ??
 
 	// 取得所有要處理的文字節點
 	const textNodes = [];
@@ -157,7 +289,6 @@ createElement(jsonML) {
 	elem.normalize();
 	return elem;
 },
-
 
 
 /**

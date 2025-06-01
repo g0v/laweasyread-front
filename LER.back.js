@@ -1,6 +1,5 @@
+globalThis.LER ||= {};
 Object.assign(LER, (() => {
-
-const pcn = LER.parseIntChinese;
 
 /**
  * @private
@@ -22,6 +21,49 @@ let excludeTerms = [];
  * @desc 置換規則們，動態建置。法規更新時會整個被替換掉，故用 let 宣告。
  */
 let replaceRules = [];
+
+
+/**
+ * @func pcn
+ * @desc Parse a Chinese numeral string into an integer.
+ * @param {string} str
+ * @returns {number|NaN}
+ */
+function pcn(str) {
+	if (!str) return NaN;
+
+	let result = parseInt(str);
+	if (!isNaN(result)) return result;
+
+	result = 0;
+	const digits = '零一二三四五六七八九';
+	const match = str.match(/^([一二三四五六七八九]\s*千)?\s*([一二三四五六七八九]\s*百|零)?\s*([一二三四五六七八九]?\s*十|零)?\s*([一二三四五六七八九])?$/);
+	if (!match) return NaN;
+	const [_, thousands, hundreds, tens, ones] = match;
+	if (thousands) {
+		const digit = digits.indexOf(thousands.charAt(0));
+		if (digit < 0) return NaN;
+		result += digit * 1000;
+	}
+	if (hundreds && hundreds !== '零') {
+		const digit = digits.indexOf(hundreds.charAt(0));
+		if (digit < 0) return NaN;
+		result += digit * 100;
+	}
+	if (tens && tens !== '零') {
+		const digit = (tens === '十') ? 1 : digits.indexOf(tens.charAt(0));
+		if (digit < 0) return NaN;
+		result += digit * 10;
+	}
+	if (ones) {
+		const digit = digits.indexOf(ones.charAt(0));
+		if (digit < 0) return NaN;
+		result += digit;
+	}
+
+	return result;
+}
+
 
 /**
  * @private
@@ -214,9 +256,24 @@ const dynamicRules = [
 ];
 
 
-return {
+return { /// todo: 「更新規則」是 LER.back.js 的事，跟下載全部綁在一起好了。這邊完全不用管 storage
 
-/// 「更新規則」是 LER.back.js 的事，跟下載全部綁在一起好了。這邊完全不用管 storage
+	/**
+	 * @func fetch
+	 * @desc Request the resource even with fresh cache, then resolve to specified `returnType` or reject if the response is not OK.
+	 * @param {string|URL|Request} resource same as `fetch()`
+	 * @param {string} [returnType='text'] method name of `Response`
+	 * @returns {Promise.<*>}
+	 */
+	async fetch(url, returnType = 'text') {
+		if (!url.startsWith('https://') && !browser?.runtime?.getURL('')) url = 'https://cdn.jsdelivr.net/gh/g0v/laweasyread-front/' + url;
+		const res = await globalThis.fetch(url, {
+			catch: 'no-cache',
+			referrerPolicy: 'no-referrer'
+		});
+		if (!res.ok) throw new Error(`HTTP ${res.status} - ${res.statusText}`);
+		return await res[returnType]();
+	},
 
 
 	/**
@@ -242,6 +299,7 @@ return {
 		excludeTerms = terms.split('\n').filter(x => x);
 		return {remoteDate, laws, excludeTerms};
 	},
+
 
 	/**
 	 * @public

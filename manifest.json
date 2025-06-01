@@ -17,7 +17,7 @@
 ],
 "background": {
 	"scripts": [
-		"LER.util.js",
+		"browser/general.js",
 		"LER.back.js",
 		"browser/background.js"
 	]
@@ -29,7 +29,7 @@
 	{
 		"matches": ["<all_urls>"],
 		"js": [
-			"LER.util.js",
+			"browser/general.js",
 			"LER.front.js"
 		],
 		"run_at": "document_end",

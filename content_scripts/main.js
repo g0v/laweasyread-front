@@ -1,24 +1,30 @@
-LER.initWebExtension();
+LER.globalizeUtility();
 
 /// 作為瀏覽器外掛時，前端 LER 物件還缺這些方法。以呼叫後端的方式實作。
-['fetchText', 'loadRules', 'parseString', 'preparePopup'].forEach(method =>
+['loadRules', 'parseString', 'preparePopup'].forEach(method =>
 	LER[method] = options => browser.runtime.sendMessage({method, ...options})
 );
 
+Object.assign(messageListeners, {
+	parseDocument: LER.parseDocument,
+	// parseString: LER.parseString,
+	// loadRules: LER.loadRules // todo: why?
+});
+
 requestIdleCallback(() => {
 	// browser.runtime.onMessage.addListener(LER.parseDocument.bind(LER));
-	browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-		console.debug('onMessage', request, sender);
-		const {method, ...options} = message;
-		let result;
-		if (method === 'parseDocument') result = LER.parseDocument(options);
-		else throw new Error('unknown method: ' + method);
+	// browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
+	// 	console.debug('onMessage', request, sender);
+	// 	const {method, ...options} = message;
+	// 	let result;
+	// 	if (method === 'parseDocument') result = LER.parseDocument(options);
+	// 	else throw new Error('unknown method: ' + method);
 
-		if (result instanceof Promise)
-			return !!result.then(sendResponse);
-		sendResponse(result);
-		return false;
-	});
+	// 	if (result instanceof Promise)
+	// 		return !!result.then(sendResponse);
+	// 	sendResponse(result);
+	// 	return false;
+	// });
 	storage.get(['autoParse', 'exclude_matches', 'articleNumberFormat', 'enablePopup'])
 	.then(({autoParse, exclude_matches, ...options}) => {
 		if (!autoParse) return;
